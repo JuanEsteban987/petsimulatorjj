@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mini Pet Simulator</title>
+
+<style>
+body{
+    font-family: Arial;
+    background: linear-gradient(135deg,#1e1e2f,#2b2b45);
+    color:white;
+    text-align:center;
+    overflow-x:hidden;
+}
+button{
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.menu{
+    display:none;
+    background:#222;
+    padding:15px;
+    border-radius:15px;
+    margin:10px auto;
+    width:300px;
+}
+.common{color:white}
+.rare{color:#4da6ff}
+.epic{color:#c44dff}
+.legendary{color:gold}
+#animation{
+    font-size:40px;
+    height:50px;
+}
+#pets{
+    margin-top:15px;
+}
+</style>
+</head>
+<body>
+
+<h1>🐾 Mini Pet Simulator</h1>
+<p>💰 Monedas: <span id="coins">0</span></p>
+<p>🏆 Rebirths: <span id="rebirths">0</span></p>
+<p>🌍 Mapa: <span id="map">Granja</span></p>
+<p>⚡ Dinero/segundo: <span id="incomePerSec">0</span></p>
+
+<button onclick="toggleMenu('eggsMenu')">🥚 Huevos</button>
+<button onclick="toggleMenu('encyclopediaMenu')">📖 Enciclopedia</button>
+<button onclick="toggleMenu('mapsMenu')">🌍 Mapas</button>
+<button onclick="toggleMenu('shopMenu')">🏪 Tienda</button>
+<button onclick="rebirth()">🏆 Rebirth</button>
+
+<div id="animation"></div>
+
+<h2>🐶 Tus Mascotas</h2>
+<div id="pets"></div>
+
+<div id="eggsMenu" class="menu">
+<h3>🥚 Huevo Básico (100 monedas)</h3>
+<p>Common 60% | Rare 25% | Epic 10% | Legendary 5%</p>
+<button onclick="buyEgg()">Abrir</button>
+</div>
+
+<div id="encyclopediaMenu" class="menu">
+<h3>📖 Todas las Mascotas</h3>
+<div id="encyclopedia"></div>
+</div>
+
+<div id="mapsMenu" class="menu">
+<h3>🌍 Mapas</h3>
+<button onclick="unlockMap('Desierto',1000)">Desierto (x2) - 1000</button>
+<button onclick="unlockMap('Espacio',5000)">Espacio (x4) - 5000</button>
+</div>
+
+<div id="shopMenu" class="menu">
+<h3>🏪 Mejoras Permanentes</h3>
+<button onclick="buyUpgrade()">Mejorar Ingresos</button>
+</div>
+
+<script>
+
+let coins = 0;
+let rebirths = 0;
+let pets = [];
+let map = "Granja";
+let currentMenu = null;
+let upgrades = { incomeBoost: 1 };
+
+const mapMultipliers = {
+    "Granja": 1,
+    "Desierto": 2,
+    "Espacio": 4
+};
+
+/* 64 MASCOTAS TOTALES (4 originales + 60 nuevas) */
+const eggPets = [
+
+    /* Originales */
+    {name:"Perro",rarity:"common",basePower:1},
+    {name:"Gato",rarity:"rare",basePower:3},
+    {name:"Dragón",rarity:"epic",basePower:6},
+    {name:"Fénix",rarity:"legendary",basePower:10},
+
+    /* 60 nuevas */
+    {name:"Conejo",rarity:"common",basePower:1},
+    {name:"Ratón",rarity:"common",basePower:1},
+    {name:"Gallina",rarity:"common",basePower:1},
+    {name:"Cerdo",rarity:"common",basePower:1},
+    {name:"Vaca",rarity:"common",basePower:1},
+    {name:"Oveja",rarity:"common",basePower:1},
+    {name:"Cabra",rarity:"common",basePower:1},
+    {name:"Tortuga",rarity:"common",basePower:1},
+    {name:"Pato",rarity:"common",basePower:1},
+    {name:"Ardilla",rarity:"common",basePower:1},
+
+    {name:"Lobo",rarity:"rare",basePower:3},
+    {name:"Zorro",rarity:"rare",basePower:3},
+    {name:"Águila",rarity:"rare",basePower:3},
+    {name:"Pantera",rarity:"rare",basePower:3},
+    {name:"Tigre",rarity:"rare",basePower:3},
+    {name:"Leopardo",rarity:"rare",basePower:3},
+    {name:"Búho",rarity:"rare",basePower:3},
+    {name:"Delfín",rarity:"rare",basePower:3},
+    {name:"Canguro",rarity:"rare",basePower:3},
+    {name:"Koala",rarity:"rare",basePower:3},
+
+    {name:"Unicornio",rarity:"epic",basePower:6},
+    {name:"Grifo",rarity:"epic",basePower:6},
+    {name:"Kraken",rarity:"epic",basePower:6},
+    {name:"Hidra",rarity:"epic",basePower:6},
+    {name:"Gólem",rarity:"epic",basePower:6},
+    {name:"Minotauro",rarity:"epic",basePower:6},
+    {name:"Quimera",rarity:"epic",basePower:6},
+    {name:"Serpiente Marina",rarity:"epic",basePower:6},
+    {name:"Fénix Oscuro",rarity:"epic",basePower:6},
+    {name:"Dragón Azul",rarity:"epic",basePower:6},
+
+    {name:"Dragón Dorado",rarity:"legendary",basePower:10},
+    {name:"Ángel",rarity:"legendary",basePower:10},
+    {name:"Demonio",rarity:"legendary",basePower:10},
+    {name:"Titán",rarity:"legendary",basePower:10},
+    {name:"Dios Solar",rarity:"legendary",basePower:10},
+    {name:"Dios Lunar",rarity:"legendary",basePower:10},
+    {name:"Fénix Celestial",rarity:"legendary",basePower:10},
+    {name:"Ser Supremo",rarity:"legendary",basePower:10},
+    {name:"Bestia Cósmica",rarity:"legendary",basePower:10},
+    {name:"Dragón del Vacío",rarity:"legendary",basePower:10}
+];
+
+function save(){
+    localStorage.setItem("petGame",
+        JSON.stringify({coins,rebirths,pets,map,upgrades})
+    );
+}
+
+function load(){
+    let data = JSON.parse(localStorage.getItem("petGame"));
+    if(data){
+        coins=data.coins||0;
+        rebirths=data.rebirths||0;
+        pets=data.pets||[];
+        map=data.map||"Granja";
+        upgrades=data.upgrades||{incomeBoost:1};
+    }
+}
+load();
+
+function update(){
+    document.getElementById("coins").textContent=Math.floor(coins);
+    document.getElementById("rebirths").textContent=rebirths;
+    document.getElementById("map").textContent=map;
+    document.getElementById("incomePerSec").textContent=Math.floor(getIncomePerSecond());
+    renderPets();
+    renderEncyclopedia();
+    save();
+}
+
+function getPetPower(pet){
+    let milestones = Math.floor(pet.level / 5);
+    let multiplier = Math.pow(1.25, milestones);
+    return Math.floor(pet.basePower * multiplier);
+}
+
+function levelUpPet(pet){
+    pet.exp++;
+    if(pet.exp>=5){
+        pet.exp=0;
+        if(pet.level<100) pet.level++;
+    }
+}
+
+function getIncomePerSecond(){
+    if(pets.length===0) return 0;
+    let totalPower=0;
+    pets.forEach(p=> totalPower+=getPetPower(p));
+    let rebirthBoost=1+(rebirths*0.5);
+    let mapBoost=mapMultipliers[map]||1;
+    return totalPower*rebirthBoost*mapBoost*upgrades.incomeBoost;
+}
+
+setInterval(()=>{
+    let income=getIncomePerSecond();
+    if(income>0){
+        coins+=income;
+        pets.forEach(p=>levelUpPet(p));
+        update();
+    }
+},1000);
+
+function buyEgg(){
+    if(coins<100) return alert("No tienes suficientes monedas");
+    coins-=100;
+
+    let pet=eggPets[Math.floor(Math.random()*eggPets.length)];
+    let startLevel=Math.floor(Math.random()*3)+1;
+
+    pets.push({
+        name:pet.name,
+        rarity:pet.rarity,
+        basePower:pet.basePower,
+        level:startLevel,
+        exp:0
+    });
+
+    update();
+}
+
+function renderPets(){
+    let container=document.getElementById("pets");
+    container.innerHTML="";
+
+    if(pets.length===0){
+        container.innerHTML="No tienes mascotas todavía.";
+        return;
+    }
+
+    pets.forEach((p,index)=>{
+        let card=document.createElement("div");
+        card.style.position="relative";
+        card.style.display="inline-block";
+        card.style.width="110px";
+        card.style.height="115px";
+        card.style.margin="6px";
+        card.style.background="#333";
+        card.style.borderRadius="12px";
+        card.style.padding="8px";
+        card.style.border="2px solid #555";
+        card.style.textAlign="center";
+        card.style.fontSize="12px";
+        card.className=p.rarity;
+
+        card.innerHTML=`
+            <div style="font-weight:bold;font-size:14px;">
+                ${p.name}
+            </div>
+            <div>⭐ ${p.level}</div>
+            <div>💪 ${getPetPower(p)}</div>
+        `;
+
+        let btn=document.createElement("button");
+        btn.textContent="❌";
+
+        /* BOTÓN PERFECTAMENTE CENTRADO */
+        btn.style.position="absolute";
+        btn.style.bottom="5px";
+        btn.style.right="5px";
+        btn.style.width="24px";
+        btn.style.height="24px";
+        btn.style.display="flex";
+        btn.style.alignItems="center";
+        btn.style.justifyContent="center";
+        btn.style.padding="0";
+        btn.style.background="#ff4444";
+        btn.style.color="white";
+        btn.style.borderRadius="6px";
+
+        btn.onclick=function(){
+            pets.splice(index,1);
+            update();
+        };
+
+        card.appendChild(btn);
+        container.appendChild(card);
+    });
+}
+
+function renderEncyclopedia(){
+    let container=document.getElementById("encyclopedia");
+    container.innerHTML="";
+    eggPets.forEach(p=>{
+        container.innerHTML+=`
+        <div class="${p.rarity}">
+            ${p.name} | Poder Base: ${p.basePower}
+        </div>`;
+    });
+}
+
+function toggleMenu(id){
+    if(currentMenu===id){
+        document.getElementById(id).style.display="none";
+        currentMenu=null;
+    }else{
+        document.querySelectorAll(".menu").forEach(m=>m.style.display="none");
+        document.getElementById(id).style.display="block";
+        currentMenu=id;
+    }
+}
+
+function unlockMap(name,price){
+    if(coins>=price){
+        coins-=price;
+        map=name;
+        update();
+    }else alert("No tienes suficientes monedas");
+}
+
+function buyUpgrade(){
+    let cost=1000*upgrades.incomeBoost;
+    if(coins>=cost){
+        coins-=cost;
+        upgrades.incomeBoost+=0.5;
+        update();
+    }else alert("No tienes suficientes monedas");
+}
+
+function rebirth(){
+    if(coins>=10000){
+        coins=0;
+        pets=[];
+        rebirths++;
+        update();
+    }else alert("Necesitas 10,000 monedas");
+}
+
+update();
+
+</script>
+</body>
+</html>
