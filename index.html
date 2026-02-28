@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RTS Pixel 2008 - Modding y Auras</title>
+    <title>RTS Pixel 2008 - Profesiones con clic derecho y constructores automáticos</title>
     <style>
         body {
             margin: 0;
@@ -394,7 +394,33 @@
                             }
                             blueprints = blueprints.filter(b => b !== bp);
                             this.assignedBlueprint = null;
-                            this.profession = null;
+                            
+                            // Buscar otro blueprint sin constructor asignado
+                            let bestBlueprint = null;
+                            let bestDist = Infinity;
+                            for (let candidate of blueprints) {
+                                // Verificar si algún otro ciudadano ya tiene asignado este blueprint
+                                let alreadyAssigned = false;
+                                for (let unit of playerUnits) {
+                                    if (unit !== this && unit.type === 'peasant' && unit.profession === 'builder' && unit.assignedBlueprint === candidate) {
+                                        alreadyAssigned = true;
+                                        break;
+                                    }
+                                }
+                                if (!alreadyAssigned) {
+                                    const d = Math.hypot(this.x - candidate.x, this.y - candidate.y);
+                                    if (d < bestDist) {
+                                        bestDist = d;
+                                        bestBlueprint = candidate;
+                                    }
+                                }
+                            }
+                            if (bestBlueprint) {
+                                this.assignedBlueprint = bestBlueprint;
+                            } else {
+                                // No hay más blueprints, el constructor se queda sin asignación
+                                this.profession = null;
+                            }
                         }
                     }
                 } else {
@@ -421,7 +447,6 @@
                 const screenY = this.y - camY;
                 if (screenX < -20 || screenX > canvas.width + 20 || screenY < -20 || screenY > canvas.height + 20) return;
 
-                // Color según equipo y tipo
                 if (this.team === 'player') {
                     if (this.type === 'soldier') ctx.fillStyle = '#44f';
                     else if (this.type === 'archer') ctx.fillStyle = '#8a2be2';
@@ -430,10 +455,8 @@
                     ctx.fillStyle = '#f44';
                 }
 
-                // Dibujar cuerpo
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
 
-                // Icono de profesión para ciudadanos
                 if (this.type === 'peasant' && this.profession) {
                     ctx.fillStyle = '#ff0';
                     ctx.font = '12px monospace';
@@ -442,20 +465,15 @@
                     else if (this.profession === 'builder') ctx.fillText('🔨', screenX - 5, screenY - 15);
                 }
 
-                // Barra de vida
                 const hpPercent = this.hp / this.maxHp;
                 ctx.fillStyle = '#0f0';
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2 - 5, this.size * hpPercent, 2);
                 ctx.fillStyle = '#f00';
                 ctx.fillRect(screenX - this.size/2 + this.size * hpPercent, screenY - this.size/2 - 5, this.size * (1 - hpPercent), 2);
 
-                // Aura de selección (círculo brillante y cubo encima)
                 if (selectedUnit === this || selectedHouse === this) {
-                    // Cubo encima
                     ctx.fillStyle = '#ff0';
                     ctx.fillRect(screenX - 3, screenY - this.size/2 - 12, 6, 6);
-                    
-                    // Aura (círculo semitransparente)
                     ctx.strokeStyle = '#ff0';
                     ctx.lineWidth = 2;
                     ctx.globalAlpha = 0.6;
@@ -525,7 +543,6 @@
                     ctx.fillRect(screenX - this.width/2 + this.width * hpPercent, screenY - this.height/2 - 10, this.width * (1 - hpPercent), 3);
                 }
 
-                // Aura de selección para casas
                 if (selectedHouse === this) {
                     ctx.fillStyle = '#ff0';
                     ctx.fillRect(screenX - 3, screenY - this.height/2 - 12, 6, 6);
@@ -630,7 +647,6 @@
 
         // --- Inicialización ---
         function initGame() {
-            // Limpiar todo
             playerUnits = [];
             enemyUnits = [];
             houses = [];
@@ -641,7 +657,6 @@
             projectiles = [];
             treeLumberjackCount.clear();
 
-            // Crear árboles
             for (let i = 0; i < 30; i++) {
                 trees.push(new Tree(
                     200 + Math.random() * 1600,
@@ -649,25 +664,20 @@
                 ));
             }
 
-            // Unidades iniciales del jugador
             playerUnits.push(new Unit(500, 500, 'player', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
             playerUnits.push(new Unit(550, 500, 'player', 'peasant', 10, 0, mod.moveSpeed));
             playerUnits.push(new Unit(600, 500, 'player', 'peasant', 10, 0, mod.moveSpeed));
 
-            // Casa inicial
             houses.push(new Building(800, 500, 'house'));
             updateMaxPopulation();
 
-            // Algunos enemigos para probar
             enemyUnits.push(new Unit(1500, 500, 'enemy', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
             enemyUnits.push(new Unit(1550, 500, 'enemy', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
 
-            // Recursos
             wood = 100;
             food = 50;
         }
 
-        // --- Funciones auxiliares ---
         function updateMaxPopulation() {
             maxPopulation = 10 + houses.length * 5;
             document.getElementById('maxPop').innerText = maxPopulation;
@@ -727,7 +737,6 @@
             }
         }
 
-        // --- IA enemiga ---
         function enemyAI() {
             for (let enemy of enemyUnits) {
                 if (playerUnits.length === 0) break;
@@ -752,7 +761,6 @@
             }
         }
 
-        // --- Combate ---
         function resolveCombat() {
             for (let player of playerUnits) {
                 for (let enemy of enemyUnits) {
@@ -766,7 +774,6 @@
             enemyUnits = enemyUnits.filter(u => u.hp > 0);
         }
 
-        // --- Producción de granjas ---
         function updateFarms() {
             for (let farm of farms) {
                 const hasFarmer = playerUnits.some(u => u.type === 'peasant' && u.profession === 'farmer' && u.assignedFarm === farm);
@@ -776,7 +783,6 @@
             }
         }
 
-        // --- Proyectiles ---
         function updateProjectiles() {
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 projectiles[i].update();
@@ -784,7 +790,6 @@
             }
         }
 
-        // --- Dibujado ---
         function drawBackground(camX, camY) {
             ctx.fillStyle = '#1a3a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -806,7 +811,6 @@
             }
         }
 
-        // --- Eventos de teclado para cámara ---
         const keys = {};
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
@@ -818,7 +822,6 @@
             if (keys['ArrowRight']) cameraX = Math.min(WORLD_WIDTH - canvas.width, cameraX + CAMERA_SPEED);
         }
 
-        // --- Eventos de ratón ---
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -828,8 +831,7 @@
             const worldX = mouseX + cameraX;
             const worldY = mouseY + cameraY;
 
-            if (e.button === 0) { // Izquierdo
-                // Modo construcción
+            if (e.button === 0) { // Izquierdo: seleccionar
                 if (buildMode) {
                     const cost = buildCost[buildMode];
                     if (wood >= cost) {
@@ -849,7 +851,6 @@
                     return;
                 }
 
-                // Seleccionar unidades propias
                 let clicked = null;
                 for (let unit of playerUnits) {
                     const dist = Math.hypot(worldX - unit.x, worldY - unit.y);
@@ -865,7 +866,6 @@
                     return;
                 }
 
-                // Seleccionar casas
                 for (let house of houses) {
                     const dist = Math.hypot(worldX - house.x, worldY - house.y);
                     if (dist < house.width/2) {
@@ -876,59 +876,97 @@
                     }
                 }
 
-                // Si hay un ciudadano seleccionado y no tiene profesión, asignar según lo clickeado
-                if (selectedUnit && selectedUnit.type === 'peasant' && selectedUnit.profession === null) {
+                selectedUnit = null;
+                selectedHouse = null;
+                updateUI();
+
+            } else if (e.button === 2) { // Derecho: asignar profesión o mover
+                e.preventDefault();
+                if (selectedUnit && selectedUnit.type === 'peasant') {
+                    // Intentar asignar profesión según lo que se clickee
+                    let assigned = false;
+
                     // Árbol
                     for (let tree of trees) {
                         const dist = Math.hypot(worldX - tree.x, worldY - tree.y);
                         if (dist < 20) {
                             const count = treeLumberjackCount.get(tree) || 0;
                             if (count < MAX_LUMBERJACKS_PER_TREE) {
+                                // Cancelar profesión anterior si la tiene
+                                if (selectedUnit.profession) {
+                                    if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
+                                        const oldCount = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
+                                        treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, oldCount - 1));
+                                    }
+                                    selectedUnit.profession = null;
+                                    selectedUnit.assignedTree = null;
+                                    selectedUnit.assignedFarm = null;
+                                    selectedUnit.assignedBlueprint = null;
+                                }
                                 selectedUnit.profession = 'lumberjack';
                                 selectedUnit.assignedTree = tree;
                                 treeLumberjackCount.set(tree, count + 1);
-                                selectedUnit.targetX = selectedUnit.x;
+                                selectedUnit.targetX = selectedUnit.x; // Detener movimiento
                                 updateUI();
+                                assigned = true;
                             } else {
                                 alert('Este árbol ya tiene 3 leñadores');
                             }
-                            return;
+                            break;
                         }
                     }
+                    if (assigned) return;
+
                     // Granja
                     for (let farm of farms) {
                         const dist = Math.hypot(worldX - farm.x, worldY - farm.y);
                         if (dist < 20) {
+                            if (selectedUnit.profession) {
+                                if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
+                                    const oldCount = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
+                                    treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, oldCount - 1));
+                                }
+                                selectedUnit.profession = null;
+                                selectedUnit.assignedTree = null;
+                                selectedUnit.assignedFarm = null;
+                                selectedUnit.assignedBlueprint = null;
+                            }
                             selectedUnit.profession = 'farmer';
                             selectedUnit.assignedFarm = farm;
                             selectedUnit.targetX = selectedUnit.x;
                             updateUI();
-                            return;
+                            assigned = true;
+                            break;
                         }
                     }
+                    if (assigned) return;
+
                     // Blueprint
                     for (let bp of blueprints) {
                         const dist = Math.hypot(worldX - bp.x, worldY - bp.y);
                         if (dist < 20) {
+                            if (selectedUnit.profession) {
+                                if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
+                                    const oldCount = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
+                                    treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, oldCount - 1));
+                                }
+                                selectedUnit.profession = null;
+                                selectedUnit.assignedTree = null;
+                                selectedUnit.assignedFarm = null;
+                                selectedUnit.assignedBlueprint = null;
+                            }
                             selectedUnit.profession = 'builder';
                             selectedUnit.assignedBlueprint = bp;
                             selectedUnit.targetX = selectedUnit.x;
                             updateUI();
-                            return;
+                            assigned = true;
+                            break;
                         }
                     }
-                }
+                    if (assigned) return;
 
-                // Si no se clickeó nada, deseleccionar
-                selectedUnit = null;
-                selectedHouse = null;
-                updateUI();
-
-            } else if (e.button === 2) { // Derecho
-                e.preventDefault();
-                if (selectedUnit) {
-                    // Si es ciudadano con profesión, cancelar
-                    if (selectedUnit.type === 'peasant' && selectedUnit.profession) {
+                    // Si no se asignó profesión, mover y cancelar profesión actual
+                    if (selectedUnit.profession) {
                         if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
                             const count = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
                             treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, count - 1));
@@ -940,13 +978,16 @@
                     }
                     selectedUnit.targetX = worldX;
                     selectedUnit.targetY = worldY;
+                } else if (selectedUnit) {
+                    // Unidad no ciudadano: solo mover
+                    selectedUnit.targetX = worldX;
+                    selectedUnit.targetY = worldY;
                 }
             }
         });
 
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // --- Botones UI ---
         document.getElementById('buildHouse').addEventListener('click', () => buildMode = 'house');
         document.getElementById('buildFarm').addEventListener('click', () => buildMode = 'farm');
         document.getElementById('buildWall').addEventListener('click', () => buildMode = 'wall');
@@ -989,13 +1030,11 @@
 
         document.getElementById('startWave').addEventListener('click', startWave);
 
-        // --- Modding panel ---
         const modPanel = document.getElementById('modPanel');
         document.getElementById('toggleMod').addEventListener('click', () => {
             modPanel.style.display = modPanel.style.display === 'flex' ? 'none' : 'flex';
         });
 
-        // Sliders globales
         const modSoldierCost = document.getElementById('modSoldierCost');
         const modArcherCost = document.getElementById('modArcherCost');
         const modPeasantCost = document.getElementById('modPeasantCost');
@@ -1039,7 +1078,6 @@
             mod.moveSpeed = parseFloat(modSpeed.value);
             mod.farmOutput = parseInt(modFarmOutput.value);
 
-            // Actualizar unidades existentes
             for (let unit of playerUnits) {
                 unit.speed = mod.moveSpeed;
                 unit.attack = mod.attackDamage;
@@ -1051,7 +1089,6 @@
             updateUI();
         });
 
-        // Crear unidad personalizada
         document.getElementById('createCustomUnit').addEventListener('click', () => {
             const type = document.getElementById('customUnitType').value;
             const team = document.getElementById('customUnitTeam').value;
@@ -1062,11 +1099,9 @@
 
             let x, y;
             if (team === 'player') {
-                // Cerca del centro
                 x = 800 + Math.random() * 200;
                 y = 500 + Math.random() * 200;
             } else {
-                // En los bordes
                 if (Math.random() < 0.5) {
                     x = Math.random() < 0.5 ? 50 : WORLD_WIDTH - 50;
                     y = 100 + Math.random() * (WORLD_HEIGHT - 200);
@@ -1078,7 +1113,7 @@
 
             const newUnit = new Unit(x, y, team, type, hp, attack, speed, range);
             if (team === 'player') {
-                if (playerUnits.length < maxPopulation || type === 'peasant') { // Los ciudadanos también cuentan población
+                if (playerUnits.length < maxPopulation || type === 'peasant') {
                     playerUnits.push(newUnit);
                 } else {
                     alert('Límite de población alcanzado');
@@ -1089,9 +1124,7 @@
             updateUI();
         });
 
-        // Reiniciar partida
         document.getElementById('resetGame').addEventListener('click', () => {
-            // Aplicar mods primero
             mod.soldierCost = parseInt(modSoldierCost.value);
             mod.archerCost = parseInt(modArcherCost.value);
             mod.peasantCost = parseInt(modPeasantCost.value);
@@ -1107,12 +1140,10 @@
             updateUI();
         });
 
-        // --- Bucle principal ---
         function gameLoop() {
             frame++;
 
             handleCamera();
-
             enemyAI();
 
             for (let unit of playerUnits) {
