@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RTS Pixel 2008 - Profesiones</title>
+    <title>RTS Pixel 2008 - Profesiones y Construcción</title>
     <style>
         body {
             margin: 0;
@@ -79,11 +79,13 @@
             <span>👥 Pob: <span id="population">0</span>/<span id="maxPop">10</span></span>
         </div>
         <div class="ui-section">
-            <button id="buildHouse">🏠 Construir casa (50 madera)</button>
-            <button id="buildFarm">🌾 Construir granja (30 madera)</button>
+            <button id="buildHouse">🏠 Casa (50 madera)</button>
+            <button id="buildFarm">🌾 Granja (30 madera)</button>
+            <button id="buildWall">🧱 Muralla (60 madera)</button>
         </div>
         <div class="ui-section">
             <button id="spawnSoldier">⚔️ Soldado (20 comida)</button>
+            <button id="spawnArcher">🏹 Arquero (25 comida)</button>
             <button id="spawnPeasant">👷 Ciudadano (15 comida)</button>
         </div>
         <div class="ui-section">
@@ -97,35 +99,56 @@
 
 <script>
     (function() {
+        // Configuración
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
+        // Tamaño del mundo
         const WORLD_WIDTH = 2000;
         const WORLD_HEIGHT = 2000;
-        const TILE_SIZE = 20;
+        const GRID_SIZE = 40; // Tamaño de cuadrícula para edificios
 
+        // Cámara
         let cameraX = 0;
         let cameraY = 0;
         const CAMERA_SPEED = 10;
 
+        // Recursos
         let wood = 100;
         let food = 50;
 
+        // Unidades y edificios
         let playerUnits = [];
         let enemyUnits = [];
         let houses = [];
         let farms = [];
+        let walls = [];
         let trees = [];
+        let blueprints = []; // Edificios en construcción
 
+        // Proyectiles
+        let projectiles = [];
+
+        // Selección
         let selectedUnit = null;
         let selectedHouse = null;
 
-        let buildMode = null;
-        const buildCost = { house: 50, farm: 30 };
+        // Modo construcción
+        let buildMode = null; // 'house', 'farm', 'wall'
+        const buildCost = { house: 50, farm: 30, wall: 60 };
+        const buildMaxHp = { house: 200, farm: 150, wall: 400 };
 
+        // Población máxima
         let maxPopulation = 10;
+
+        // Frame counter
         let frame = 0;
+
+        // Límite de leñadores por árbol
+        const MAX_LUMBERJACKS_PER_TREE = 3;
+        // Array para llevar cuenta de cuántos leñadores tiene cada árbol
+        let treeLumberjackCount = new Map(); // tree -> count
 
         // --- Clases ---
         class Unit {
@@ -133,10 +156,11 @@
                 this.x = x;
                 this.y = y;
                 this.team = team;
-                this.type = type;
+                this.type = type; // 'soldier', 'archer', 'peasant'
                 this.hp = hp;
                 this.maxHp = hp;
                 this.attack = attack;
+                this.attackRange = (type === 'archer') ? 100 : 30;
                 this.targetX = x;
                 this.targetY = y;
                 this.speed = 1.5;
@@ -144,82 +168,36 @@
                 this.size = 14;
 
                 // Profesiones para ciudadanos
-                this.profession = 'idle'; // 'idle', 'lumberjack', 'farmer'
-                this.gatherTarget = null; // Árbol al que está talando
-                this.assignedFarm = null; // Granja a la que está asignado
-                this.workCooldown = 0; // Para producción
+                this.profession = null; // 'lumberjack', 'farmer', 'builder'
+                this.assignedTree = null; // Árbol asignado (para leñador)
+                this.assignedFarm = null; // Granja asignada (para granjero)
+                this.assignedBlueprint = null; // Plano asignado (para constructor)
+                this.gatherCooldown = 0;
             }
 
             move() {
                 if (this.attackCooldown > 0) this.attackCooldown--;
-                if (this.workCooldown > 0) this.workCooldown--;
+                if (this.gatherCooldown > 0) this.gatherCooldown--;
 
-                // Si es leñador y tiene árbol
-                if (this.profession === 'lumberjack' && this.gatherTarget) {
-                    if (!trees.includes(this.gatherTarget)) {
-                        // Árbol desapareció
-                        this.profession = 'idle';
-                        this.gatherTarget = null;
-                    } else {
-                        const dx = this.gatherTarget.x - this.x;
-                        const dy = this.gatherTarget.y - this.y;
-                        const dist = Math.hypot(dx, dy);
-                        if (dist < 30) {
-                            // Talar
-                            if (this.workCooldown <= 0) {
-                                this.gatherTarget.hp -= 2;
-                                this.workCooldown = 20;
-                                if (this.gatherTarget.hp <= 0) {
-                                    wood += this.gatherTarget.woodAmount;
-                                    // Liberar trabajadores del árbol
-                                    this.gatherTarget.currentWorkers--;
-                                    trees = trees.filter(t => t !== this.gatherTarget);
-                                    this.profession = 'idle';
-                                    this.gatherTarget = null;
-                                    updateUI();
-                                }
-                            }
-                        } else {
-                            // Moverse hacia el árbol
-                            const moveX = (dx / dist) * this.speed;
-                            const moveY = (dy / dist) * this.speed;
-                            this.x += moveX;
-                            this.y += moveY;
-                        }
-                        return; // No seguir con movimiento normal
-                    }
-                }
-
-                // Si es granjero y tiene granja
-                if (this.profession === 'farmer' && this.assignedFarm) {
-                    if (!farms.includes(this.assignedFarm)) {
-                        // Granja destruida (no implementado, pero por si acaso)
-                        this.profession = 'idle';
-                        this.assignedFarm.currentFarmers--;
-                        this.assignedFarm = null;
-                    } else {
-                        const dx = this.assignedFarm.x - this.x;
-                        const dy = this.assignedFarm.y - this.y;
-                        const dist = Math.hypot(dx, dy);
-                        if (dist < 40) {
-                            // Trabajar en granja: producir comida
-                            if (this.workCooldown <= 0) {
-                                food += 1; // Cada granjero produce 1 comida por ciclo
-                                this.workCooldown = 60; // Aprox 1 segundo a 60fps
-                                updateUI();
-                            }
-                        } else {
-                            // Moverse hacia la granja
-                            const moveX = (dx / dist) * this.speed;
-                            const moveY = (dy / dist) * this.speed;
-                            this.x += moveX;
-                            this.y += moveY;
-                        }
+                // Comportamiento según profesión
+                if (this.type === 'peasant') {
+                    if (this.profession === 'lumberjack' && this.assignedTree) {
+                        this.handleLumberjack();
+                        return;
+                    } else if (this.profession === 'farmer' && this.assignedFarm) {
+                        this.handleFarmer();
+                        return;
+                    } else if (this.profession === 'builder' && this.assignedBlueprint) {
+                        this.handleBuilder();
                         return;
                     }
                 }
 
-                // Movimiento normal hacia target
+                // Movimiento normal
+                this.moveToTarget();
+            }
+
+            moveToTarget() {
                 const dx = this.targetX - this.x;
                 const dy = this.targetY - this.y;
                 const dist = Math.hypot(dx, dy);
@@ -229,16 +207,150 @@
                     this.x += moveX;
                     this.y += moveY;
                 }
-
                 // Limitar al mundo
                 this.x = Math.max(10, Math.min(WORLD_WIDTH - 10, this.x));
                 this.y = Math.max(10, Math.min(WORLD_HEIGHT - 10, this.y));
             }
 
+            handleLumberjack() {
+                // Verificar si el árbol sigue existiendo
+                if (!trees.includes(this.assignedTree)) {
+                    // Buscar nuevo árbol
+                    this.findNewTree();
+                    if (!this.assignedTree) {
+                        this.profession = null;
+                        return;
+                    }
+                }
+
+                const tree = this.assignedTree;
+                const dx = tree.x - this.x;
+                const dy = tree.y - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < 30) {
+                    // Talar
+                    if (this.gatherCooldown <= 0) {
+                        tree.hp -= 3;
+                        this.gatherCooldown = 20;
+                        if (tree.hp <= 0) {
+                            // Recolectar madera
+                            wood += tree.woodAmount;
+                            // Liberar leñadores de este árbol
+                            treeLumberjackCount.delete(tree);
+                            trees = trees.filter(t => t !== tree);
+                            this.assignedTree = null;
+                            // Buscar nuevo árbol
+                            this.findNewTree();
+                            if (!this.assignedTree) {
+                                this.profession = null;
+                            }
+                        }
+                    }
+                } else {
+                    // Moverse hacia el árbol
+                    this.targetX = tree.x;
+                    this.targetY = tree.y;
+                    this.moveToTarget();
+                }
+            }
+
+            findNewTree() {
+                // Buscar el árbol más cercano con menos de 3 leñadores
+                let bestTree = null;
+                let bestDist = Infinity;
+                for (let tree of trees) {
+                    const count = treeLumberjackCount.get(tree) || 0;
+                    if (count < MAX_LUMBERJACKS_PER_TREE) {
+                        const dist = Math.hypot(this.x - tree.x, this.y - tree.y);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            bestTree = tree;
+                        }
+                    }
+                }
+                if (bestTree) {
+                    // Liberar el árbol anterior
+                    if (this.assignedTree) {
+                        const oldCount = treeLumberjackCount.get(this.assignedTree) || 0;
+                        treeLumberjackCount.set(this.assignedTree, Math.max(0, oldCount - 1));
+                    }
+                    this.assignedTree = bestTree;
+                    const newCount = (treeLumberjackCount.get(bestTree) || 0) + 1;
+                    treeLumberjackCount.set(bestTree, newCount);
+                }
+            }
+
+            handleFarmer() {
+                // Verificar si la granja sigue existiendo y está construida
+                if (!farms.includes(this.assignedFarm)) {
+                    this.profession = null;
+                    this.assignedFarm = null;
+                    return;
+                }
+                // La granja produce comida automáticamente, pero el granjero acelera o es necesario
+                // Para simplificar, mientras haya un granjero asignado, la granja produce cada cierto tiempo
+                // (La producción se maneja aparte)
+                // El granjero simplemente se queda cerca
+                const farm = this.assignedFarm;
+                const dx = farm.x - this.x;
+                const dy = farm.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 20) {
+                    this.targetX = farm.x;
+                    this.targetY = farm.y;
+                    this.moveToTarget();
+                }
+            }
+
+            handleBuilder() {
+                const bp = this.assignedBlueprint;
+                if (!blueprints.includes(bp)) {
+                    this.profession = null;
+                    this.assignedBlueprint = null;
+                    return;
+                }
+                const dx = bp.x - this.x;
+                const dy = bp.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 30) {
+                    // Construir
+                    if (this.gatherCooldown <= 0) {
+                        bp.hp += 5;
+                        this.gatherCooldown = 10;
+                        if (bp.hp >= bp.maxHp) {
+                            // Terminar construcción
+                            bp.hp = bp.maxHp;
+                            // Convertir blueprint en edificio real
+                            if (bp.type === 'house') {
+                                houses.push(new Building(bp.x, bp.y, 'house'));
+                            } else if (bp.type === 'farm') {
+                                farms.push(new Building(bp.x, bp.y, 'farm'));
+                            } else if (bp.type === 'wall') {
+                                walls.push(new Building(bp.x, bp.y, 'wall'));
+                            }
+                            blueprints = blueprints.filter(b => b !== bp);
+                            this.assignedBlueprint = null;
+                            this.profession = null;
+                        }
+                    }
+                } else {
+                    this.targetX = bp.x;
+                    this.targetY = bp.y;
+                    this.moveToTarget();
+                }
+            }
+
             attackUnit(target) {
                 if (this.attackCooldown <= 0) {
-                    target.hp -= this.attack;
-                    this.attackCooldown = 30;
+                    if (this.type === 'archer') {
+                        // Disparar proyectil
+                        projectiles.push(new Projectile(this.x, this.y, target, this.attack));
+                        this.attackCooldown = 40;
+                    } else {
+                        target.hp -= this.attack;
+                        this.attackCooldown = 30;
+                    }
                 }
             }
 
@@ -250,17 +362,23 @@
                 // Color según equipo y tipo
                 if (this.team === 'player') {
                     if (this.type === 'soldier') ctx.fillStyle = '#44f';
-                    else {
-                        // Ciudadano: color según profesión
-                        if (this.profession === 'lumberjack') ctx.fillStyle = '#8B4513'; // Marrón
-                        else if (this.profession === 'farmer') ctx.fillStyle = '#FFD700'; // Dorado
-                        else ctx.fillStyle = '#8a2be2'; // Azul violeta (idle)
-                    }
+                    else if (this.type === 'archer') ctx.fillStyle = '#8a2be2'; // Azul violeta
+                    else ctx.fillStyle = '#2e8b57'; // Verde para ciudadano
                 } else {
                     ctx.fillStyle = '#f44';
                 }
 
+                // Dibujar cuerpo (cuadrado)
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
+
+                // Si es ciudadano, mostrar icono de profesión
+                if (this.type === 'peasant' && this.profession) {
+                    ctx.fillStyle = '#ff0';
+                    ctx.font = '12px monospace';
+                    if (this.profession === 'lumberjack') ctx.fillText('🌲', screenX - 5, screenY - 15);
+                    else if (this.profession === 'farmer') ctx.fillText('🌾', screenX - 5, screenY - 15);
+                    else if (this.profession === 'builder') ctx.fillText('🔨', screenX - 5, screenY - 15);
+                }
 
                 // Barra de vida
                 const hpPercent = this.hp / this.maxHp;
@@ -276,56 +394,7 @@
                     ctx.beginPath();
                     ctx.arc(screenX, screenY, this.size/2 + 4, 0, 2 * Math.PI);
                     ctx.stroke();
-
-                    // Mostrar profesión
-                    ctx.fillStyle = '#fff';
-                    ctx.font = '12px monospace';
-                    ctx.fillText(this.profession, screenX - 20, screenY - 20);
                 }
-            }
-
-            // Asignar nueva profesión, liberando la anterior
-            assignLumberjack(tree) {
-                if (this.profession === 'lumberjack' && this.gatherTarget) {
-                    this.gatherTarget.currentWorkers--;
-                }
-                if (this.profession === 'farmer' && this.assignedFarm) {
-                    this.assignedFarm.currentFarmers--;
-                }
-                this.profession = 'lumberjack';
-                this.gatherTarget = tree;
-                this.assignedFarm = null;
-                tree.currentWorkers++;
-                this.targetX = tree.x; // Ir al árbol
-                this.targetY = tree.y;
-            }
-
-            assignFarmer(farm) {
-                if (this.profession === 'lumberjack' && this.gatherTarget) {
-                    this.gatherTarget.currentWorkers--;
-                }
-                if (this.profession === 'farmer' && this.assignedFarm) {
-                    this.assignedFarm.currentFarmers--;
-                }
-                this.profession = 'farmer';
-                this.assignedFarm = farm;
-                this.gatherTarget = null;
-                farm.currentFarmers++;
-                this.targetX = farm.x; // Ir a la granja
-                this.targetY = farm.y;
-            }
-
-            // Liberar profesión (por si acaso)
-            setIdle() {
-                if (this.profession === 'lumberjack' && this.gatherTarget) {
-                    this.gatherTarget.currentWorkers--;
-                }
-                if (this.profession === 'farmer' && this.assignedFarm) {
-                    this.assignedFarm.currentFarmers--;
-                }
-                this.profession = 'idle';
-                this.gatherTarget = null;
-                this.assignedFarm = null;
             }
         }
 
@@ -333,15 +402,17 @@
             constructor(x, y, type) {
                 this.x = x;
                 this.y = y;
-                this.type = type; // 'house' o 'farm'
+                this.type = type;
                 this.width = 40;
                 this.height = 40;
                 this.team = 'player';
-
-                // Para granjas: capacidad de granjeros
-                if (type === 'farm') {
-                    this.maxFarmers = 3;
-                    this.currentFarmers = 0;
+                // Para murallas, pueden tener más vida
+                if (type === 'wall') {
+                    this.maxHp = 400;
+                    this.hp = 400;
+                } else {
+                    this.maxHp = 200;
+                    this.hp = 200;
                 }
             }
 
@@ -365,28 +436,59 @@
                 } else if (this.type === 'farm') {
                     ctx.fillStyle = '#7cfc00';
                     ctx.fillRect(screenX - this.width/2, screenY - this.height/2, this.width, this.height);
-                    // Cultivos
                     ctx.fillStyle = '#ff0';
                     for (let i = -1; i <= 1; i++) {
                         for (let j = -1; j <= 1; j++) {
                             ctx.fillRect(screenX + i*10 - 5, screenY + j*10 - 5, 6, 6);
                         }
                     }
-                    // Mostrar ocupación
-                    if (this.type === 'farm') {
-                        ctx.fillStyle = '#fff';
-                        ctx.font = '12px monospace';
-                        ctx.fillText(`${this.currentFarmers}/${this.maxFarmers}`, screenX - 15, screenY - 25);
-                    }
+                } else if (this.type === 'wall') {
+                    ctx.fillStyle = '#888';
+                    ctx.fillRect(screenX - this.width/2, screenY - this.height/2, this.width, this.height);
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillRect(screenX - this.width/2 + 5, screenY - this.height/2 + 5, this.width - 10, this.height - 10);
                 }
 
-                if (selectedHouse === this && this.type === 'house') {
-                    ctx.strokeStyle = '#0f0';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.rect(screenX - this.width/2 - 2, screenY - this.height/2 - 2, this.width + 4, this.height + 4);
-                    ctx.stroke();
+                // Barra de vida (si está dañada)
+                if (this.hp < this.maxHp) {
+                    const hpPercent = this.hp / this.maxHp;
+                    ctx.fillStyle = '#0f0';
+                    ctx.fillRect(screenX - this.width/2, screenY - this.height/2 - 10, this.width * hpPercent, 3);
+                    ctx.fillStyle = '#f00';
+                    ctx.fillRect(screenX - this.width/2 + this.width * hpPercent, screenY - this.height/2 - 10, this.width * (1 - hpPercent), 3);
                 }
+            }
+        }
+
+        class Blueprint {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.width = 40;
+                this.height = 40;
+                this.hp = 0;
+                this.maxHp = buildMaxHp[type];
+                this.team = 'player';
+            }
+
+            draw(ctx, camX, camY) {
+                const screenX = this.x - camX;
+                const screenY = this.y - camY;
+                if (screenX < -this.width || screenX > canvas.width + this.width || screenY < -this.height || screenY > canvas.height + this.height) return;
+
+                ctx.fillStyle = '#fff';
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(screenX - this.width/2, screenY - this.height/2, this.width, this.height);
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = '#ff0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(screenX - this.width/2, screenY - this.height/2, this.width, this.height);
+
+                // Barra de progreso
+                const progress = this.hp / this.maxHp;
+                ctx.fillStyle = '#0f0';
+                ctx.fillRect(screenX - this.width/2, screenY - this.height/2 - 10, this.width * progress, 4);
             }
         }
 
@@ -394,11 +496,9 @@
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.hp = 20;
-                this.woodAmount = 10;
+                this.hp = 30;
+                this.woodAmount = 15;
                 this.size = 20;
-                this.maxWorkers = 3;
-                this.currentWorkers = 0;
             }
 
             draw(ctx, camX, camY) {
@@ -410,17 +510,48 @@
                 ctx.fillRect(screenX - 10, screenY - 15, 20, 30);
                 ctx.fillStyle = '#3a5';
                 ctx.fillRect(screenX - 15, screenY - 25, 30, 15);
+            }
+        }
 
-                // Mostrar ocupación
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px monospace';
-                ctx.fillText(`${this.currentWorkers}/${this.maxWorkers}`, screenX - 12, screenY - 35);
+        class Projectile {
+            constructor(x, y, target, damage) {
+                this.x = x;
+                this.y = y;
+                this.target = target;
+                this.damage = damage;
+                this.speed = 5;
+                this.active = true;
+            }
+
+            update() {
+                if (!this.target || this.target.hp <= 0) {
+                    this.active = false;
+                    return;
+                }
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < this.speed) {
+                    // Impacto
+                    this.target.hp -= this.damage;
+                    this.active = false;
+                } else {
+                    this.x += (dx / dist) * this.speed;
+                    this.y += (dy / dist) * this.speed;
+                }
+            }
+
+            draw(ctx, camX, camY) {
+                const screenX = this.x - camX;
+                const screenY = this.y - camY;
+                if (screenX < 0 || screenX > canvas.width || screenY < 0 || screenY > canvas.height) return;
+                ctx.fillStyle = '#ff0';
+                ctx.fillRect(screenX - 2, screenY - 2, 4, 4);
             }
         }
 
         // --- Inicialización ---
         function initGame() {
-            // Árboles
             for (let i = 0; i < 30; i++) {
                 trees.push(new Tree(
                     200 + Math.random() * 1600,
@@ -428,57 +559,63 @@
                 ));
             }
 
-            // Unidades iniciales
             playerUnits.push(new Unit(500, 500, 'player', 'soldier'));
             playerUnits.push(new Unit(550, 500, 'player', 'peasant'));
             playerUnits.push(new Unit(600, 500, 'player', 'peasant'));
 
-            // Casa inicial
             houses.push(new Building(800, 500, 'house'));
             updateMaxPopulation();
 
-            // Enemigos
             enemyUnits.push(new Unit(1500, 500, 'enemy', 'soldier'));
             enemyUnits.push(new Unit(1550, 500, 'enemy', 'soldier'));
         }
 
+        // --- Funciones auxiliares ---
         function updateMaxPopulation() {
             maxPopulation = 10 + houses.length * 5;
             document.getElementById('maxPop').innerText = maxPopulation;
         }
 
-        function isPositionFree(x, y, type) {
-            const width = 40;
-            if (x < width/2 || x > WORLD_WIDTH - width/2 || y < width/2 || y > WORLD_HEIGHT - width/2) return false;
-            for (let b of [...houses, ...farms]) {
-                const dist = Math.hypot(x - b.x, y - b.y);
-                if (dist < width) return false;
+        function updateUI() {
+            document.getElementById('wood').innerText = wood;
+            document.getElementById('food').innerText = food;
+            document.getElementById('population').innerText = playerUnits.length;
+            document.getElementById('maxPop').innerText = maxPopulation;
+            if (selectedUnit) {
+                let info = `${selectedUnit.team} ${selectedUnit.type}`;
+                if (selectedUnit.type === 'peasant' && selectedUnit.profession) {
+                    info += ` (${selectedUnit.profession})`;
+                }
+                document.getElementById('selectedInfo').innerText = info;
+            } else if (selectedHouse) {
+                document.getElementById('selectedInfo').innerText = 'Casa seleccionada';
+            } else {
+                document.getElementById('selectedInfo').innerText = 'Ninguno';
             }
-            for (let t of trees) {
-                const dist = Math.hypot(x - t.x, y - t.y);
-                if (dist < width) return false;
-            }
-            return true;
         }
 
-        function spawnUnitNearHouse(house, type) {
-            if (!house) return;
-            const cost = (type === 'soldier') ? 20 : 15;
-            if (food < cost) {
-                alert('Comida insuficiente');
-                return;
+        function snapToGrid(x, y) {
+            const gridX = Math.round(x / GRID_SIZE) * GRID_SIZE;
+            const gridY = Math.round(y / GRID_SIZE) * GRID_SIZE;
+            return { x: gridX, y: gridY };
+        }
+
+        function isPositionFree(x, y) {
+            // Comprobar límites
+            if (x < GRID_SIZE/2 || x > WORLD_WIDTH - GRID_SIZE/2 || y < GRID_SIZE/2 || y > WORLD_HEIGHT - GRID_SIZE/2) return false;
+            // Edificios construidos
+            for (let b of [...houses, ...farms, ...walls]) {
+                if (Math.hypot(x - b.x, y - b.y) < GRID_SIZE) return false;
             }
-            if (playerUnits.length >= maxPopulation) {
-                alert('Límite de población alcanzado');
-                return;
+            // Blueprints
+            for (let bp of blueprints) {
+                if (Math.hypot(x - bp.x, y - bp.y) < GRID_SIZE) return false;
             }
-            food -= cost;
-            const angle = Math.random() * 2 * Math.PI;
-            const dist = 50;
-            const x = house.x + Math.cos(angle) * dist;
-            const y = house.y + Math.sin(angle) * dist;
-            playerUnits.push(new Unit(x, y, 'player', type));
-            updateUI();
+            // Árboles
+            for (let t of trees) {
+                if (Math.hypot(x - t.x, y - t.y) < GRID_SIZE) return false;
+            }
+            return true;
         }
 
         function startWave() {
@@ -496,6 +633,7 @@
             }
         }
 
+        // --- IA enemiga ---
         function enemyAI() {
             for (let enemy of enemyUnits) {
                 if (playerUnits.length === 0) break;
@@ -509,7 +647,7 @@
                     }
                 }
                 if (closest) {
-                    if (closestDist < 30) {
+                    if (closestDist < enemy.attackRange) {
                         enemy.attackUnit(closest);
                     } else {
                         enemy.targetX = closest.x;
@@ -520,33 +658,59 @@
             }
         }
 
+        // --- Combate ---
         function resolveCombat() {
+            // Ataques de jugadores a enemigos
             for (let player of playerUnits) {
                 for (let enemy of enemyUnits) {
                     const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-                    if (dist < 30) {
+                    if (dist < player.attackRange) {
                         player.attackUnit(enemy);
                     }
                 }
             }
+            // Eliminar muertos
             playerUnits = playerUnits.filter(u => u.hp > 0);
             enemyUnits = enemyUnits.filter(u => u.hp > 0);
         }
 
+        // --- Producción de granjas ---
+        function updateFarms() {
+            for (let farm of farms) {
+                // Si hay al menos un granjero asignado a esta granja, produce
+                const hasFarmer = playerUnits.some(u => u.type === 'peasant' && u.profession === 'farmer' && u.assignedFarm === farm);
+                if (hasFarmer) {
+                    food += 1;
+                }
+            }
+        }
+
+        // --- Actualizar proyectiles ---
+        function updateProjectiles() {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                projectiles[i].update();
+                if (!projectiles[i].active) {
+                    projectiles.splice(i, 1);
+                }
+            }
+        }
+
+        // --- Dibujado ---
         function drawBackground(camX, camY) {
             ctx.fillStyle = '#1a3a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.strokeStyle = '#2a4a2a';
             ctx.lineWidth = 1;
-            const startX = Math.floor(camX / TILE_SIZE) * TILE_SIZE;
-            const startY = Math.floor(camY / TILE_SIZE) * TILE_SIZE;
-            for (let x = startX; x < camX + canvas.width; x += TILE_SIZE) {
+            const startX = Math.floor(camX / GRID_SIZE) * GRID_SIZE;
+            const startY = Math.floor(camY / GRID_SIZE) * GRID_SIZE;
+            for (let x = startX; x < camX + canvas.width; x += GRID_SIZE) {
                 ctx.beginPath();
                 ctx.moveTo(x - camX, 0);
                 ctx.lineTo(x - camX, canvas.height);
                 ctx.stroke();
             }
-            for (let y = startY; y < camY + canvas.height; y += TILE_SIZE) {
+            for (let y = startY; y < camY + canvas.height; y += GRID_SIZE) {
                 ctx.beginPath();
                 ctx.moveTo(0, y - camY);
                 ctx.lineTo(canvas.width, y - camY);
@@ -554,34 +718,12 @@
             }
         }
 
-        function updateUI() {
-            document.getElementById('wood').innerText = wood;
-            document.getElementById('food').innerText = food;
-            document.getElementById('population').innerText = playerUnits.length;
-            document.getElementById('maxPop').innerText = maxPopulation;
-            if (selectedUnit) {
-                let info = `${selectedUnit.team} ${selectedUnit.type}`;
-                if (selectedUnit.type === 'peasant') {
-                    info += ` (${selectedUnit.profession})`;
-                }
-                document.getElementById('selectedInfo').innerText = info;
-            } else if (selectedHouse) {
-                document.getElementById('selectedInfo').innerText = 'Casa seleccionada';
-            } else {
-                document.getElementById('selectedInfo').innerText = 'Ninguno';
-            }
-        }
-
-        // --- Control de cámara con teclas ---
+        // --- Eventos de teclado para cámara ---
         const keys = {};
-        window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-        });
-        window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-        });
+        window.addEventListener('keydown', (e) => keys[e.key] = true);
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-        function handleCameraKeys() {
+        function handleCamera() {
             if (keys['ArrowUp']) cameraY = Math.max(0, cameraY - CAMERA_SPEED);
             if (keys['ArrowDown']) cameraY = Math.min(WORLD_HEIGHT - canvas.height, cameraY + CAMERA_SPEED);
             if (keys['ArrowLeft']) cameraX = Math.max(0, cameraX - CAMERA_SPEED);
@@ -599,18 +741,15 @@
             const worldY = mouseY + cameraY;
 
             if (e.button === 0) { // Izquierdo
+                // Si estamos en modo construcción
                 if (buildMode) {
                     const cost = buildCost[buildMode];
-                    if ((buildMode === 'house' && wood >= cost) || (buildMode === 'farm' && wood >= cost)) {
-                        if (isPositionFree(worldX, worldY, buildMode)) {
-                            if (buildMode === 'house') {
-                                houses.push(new Building(worldX, worldY, 'house'));
-                                wood -= cost;
-                                updateMaxPopulation();
-                            } else {
-                                farms.push(new Building(worldX, worldY, 'farm'));
-                                wood -= cost;
-                            }
+                    if (wood >= cost) {
+                        const { x: gridX, y: gridY } = snapToGrid(worldX, worldY);
+                        if (isPositionFree(gridX, gridY)) {
+                            // Crear blueprint
+                            blueprints.push(new Blueprint(gridX, gridY, buildMode));
+                            wood -= cost;
                             buildMode = null;
                             updateUI();
                         } else {
@@ -623,9 +762,8 @@
                     return;
                 }
 
-                // Seleccionar unidades o casas
+                // Seleccionar unidades propias
                 let clicked = null;
-                // Unidades jugador
                 for (let unit of playerUnits) {
                     const dist = Math.hypot(worldX - unit.x, worldY - unit.y);
                     if (dist < unit.size) {
@@ -636,71 +774,88 @@
                 if (clicked) {
                     selectedUnit = clicked;
                     selectedHouse = null;
-                } else {
-                    // Casas
-                    for (let house of houses) {
-                        const dist = Math.hypot(worldX - house.x, worldY - house.y);
-                        if (dist < house.width/2) {
-                            selectedHouse = house;
-                            selectedUnit = null;
-                            break;
-                        }
-                    }
-                    if (!selectedHouse) {
+                    updateUI();
+                    return;
+                }
+
+                // Seleccionar casas
+                for (let house of houses) {
+                    const dist = Math.hypot(worldX - house.x, worldY - house.y);
+                    if (dist < house.width/2) {
+                        selectedHouse = house;
                         selectedUnit = null;
+                        updateUI();
+                        return;
                     }
                 }
-                updateUI();
-            } else if (e.button === 2) { // Derecho
-                e.preventDefault();
-                if (selectedUnit) {
-                    // Si es ciudadano, podemos asignar profesión
-                    if (selectedUnit.type === 'peasant') {
-                        // Buscar árbol cerca
-                        let nearestTree = null;
-                        let minDist = Infinity;
-                        for (let tree of trees) {
-                            const dist = Math.hypot(worldX - tree.x, worldY - tree.y);
-                            if (dist < 50 && dist < minDist) {
-                                minDist = dist;
-                                nearestTree = tree;
-                            }
-                        }
-                        if (nearestTree) {
-                            // Comprobar si el árbol tiene espacio
-                            if (nearestTree.currentWorkers < nearestTree.maxWorkers) {
-                                selectedUnit.assignLumberjack(nearestTree);
+
+                // Si hay un ciudadano seleccionado, asignar profesión según lo que se clickeó
+                if (selectedUnit && selectedUnit.type === 'peasant' && selectedUnit.profession === null) {
+                    // Comprobar si se clickeó un árbol
+                    for (let tree of trees) {
+                        const dist = Math.hypot(worldX - tree.x, worldY - tree.y);
+                        if (dist < 20) {
+                            // Asignar como leñador si hay espacio
+                            const count = treeLumberjackCount.get(tree) || 0;
+                            if (count < MAX_LUMBERJACKS_PER_TREE) {
+                                selectedUnit.profession = 'lumberjack';
+                                selectedUnit.assignedTree = tree;
+                                treeLumberjackCount.set(tree, count + 1);
+                                selectedUnit.targetX = selectedUnit.x;
+                                updateUI();
                             } else {
                                 alert('Este árbol ya tiene 3 leñadores');
                             }
                             return;
                         }
-
-                        // Buscar granja cerca
-                        let nearestFarm = null;
-                        minDist = Infinity;
-                        for (let farm of farms) {
-                            const dist = Math.hypot(worldX - farm.x, worldY - farm.y);
-                            if (dist < 50 && dist < minDist) {
-                                minDist = dist;
-                                nearestFarm = farm;
-                            }
-                        }
-                        if (nearestFarm) {
-                            if (nearestFarm.currentFarmers < nearestFarm.maxFarmers) {
-                                selectedUnit.assignFarmer(nearestFarm);
-                            } else {
-                                alert('Esta granja ya tiene 3 granjeros');
-                            }
+                    }
+                    // Comprobar si se clickeó una granja construida
+                    for (let farm of farms) {
+                        const dist = Math.hypot(worldX - farm.x, worldY - farm.y);
+                        if (dist < 20) {
+                            selectedUnit.profession = 'farmer';
+                            selectedUnit.assignedFarm = farm;
+                            selectedUnit.targetX = selectedUnit.x;
+                            updateUI();
                             return;
                         }
                     }
+                    // Comprobar si se clickeó un blueprint
+                    for (let bp of blueprints) {
+                        const dist = Math.hypot(worldX - bp.x, worldY - bp.y);
+                        if (dist < 20) {
+                            selectedUnit.profession = 'builder';
+                            selectedUnit.assignedBlueprint = bp;
+                            selectedUnit.targetX = selectedUnit.x;
+                            updateUI();
+                            return;
+                        }
+                    }
+                }
 
-                    // Si no es ciudadano o no se asignó profesión, movimiento normal
+                // Si no se clickeó nada, deseleccionar
+                selectedUnit = null;
+                selectedHouse = null;
+                updateUI();
+
+            } else if (e.button === 2) { // Derecho
+                e.preventDefault();
+                if (selectedUnit) {
+                    // Si es ciudadano con profesión, cancelar profesión?
+                    if (selectedUnit.type === 'peasant' && selectedUnit.profession) {
+                        // Liberar recursos
+                        if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
+                            const count = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
+                            treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, count - 1));
+                        }
+                        selectedUnit.profession = null;
+                        selectedUnit.assignedTree = null;
+                        selectedUnit.assignedFarm = null;
+                        selectedUnit.assignedBlueprint = null;
+                    }
+                    // Mover a la posición
                     selectedUnit.targetX = worldX;
                     selectedUnit.targetY = worldY;
-                    // Si era un ciudadano con profesión, no la cancelamos al moverse (pero podemos permitir que se mueva mientras trabaja, aunque se alejará)
-                    // Para no cancelar, no hacemos nada adicional. Si queremos que al moverse cancele la profesión, habría que hacer selectedUnit.setIdle().
                 }
             }
         });
@@ -708,65 +863,89 @@
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
         // --- Botones UI ---
-        document.getElementById('buildHouse').addEventListener('click', () => {
-            buildMode = 'house';
-        });
-        document.getElementById('buildFarm').addEventListener('click', () => {
-            buildMode = 'farm';
-        });
+        document.getElementById('buildHouse').addEventListener('click', () => buildMode = 'house');
+        document.getElementById('buildFarm').addEventListener('click', () => buildMode = 'farm');
+        document.getElementById('buildWall').addEventListener('click', () => buildMode = 'wall');
+
         document.getElementById('spawnSoldier').addEventListener('click', () => {
-            if (selectedHouse) {
-                spawnUnitNearHouse(selectedHouse, 'soldier');
-            } else {
-                alert('Selecciona una casa primero');
-            }
+            if (!selectedHouse) { alert('Selecciona una casa'); return; }
+            if (food < 20) { alert('Comida insuficiente'); return; }
+            if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
+            food -= 20;
+            const angle = Math.random() * 2 * Math.PI;
+            const x = selectedHouse.x + Math.cos(angle) * 50;
+            const y = selectedHouse.y + Math.sin(angle) * 50;
+            playerUnits.push(new Unit(x, y, 'player', 'soldier'));
+            updateUI();
         });
+
+        document.getElementById('spawnArcher').addEventListener('click', () => {
+            if (!selectedHouse) { alert('Selecciona una casa'); return; }
+            if (food < 25) { alert('Comida insuficiente'); return; }
+            if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
+            food -= 25;
+            const angle = Math.random() * 2 * Math.PI;
+            const x = selectedHouse.x + Math.cos(angle) * 50;
+            const y = selectedHouse.y + Math.sin(angle) * 50;
+            playerUnits.push(new Unit(x, y, 'player', 'archer'));
+            updateUI();
+        });
+
         document.getElementById('spawnPeasant').addEventListener('click', () => {
-            if (selectedHouse) {
-                spawnUnitNearHouse(selectedHouse, 'peasant');
-            } else {
-                alert('Selecciona una casa primero');
-            }
+            if (!selectedHouse) { alert('Selecciona una casa'); return; }
+            if (food < 15) { alert('Comida insuficiente'); return; }
+            if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
+            food -= 15;
+            const angle = Math.random() * 2 * Math.PI;
+            const x = selectedHouse.x + Math.cos(angle) * 50;
+            const y = selectedHouse.y + Math.sin(angle) * 50;
+            playerUnits.push(new Unit(x, y, 'player', 'peasant'));
+            updateUI();
         });
+
         document.getElementById('startWave').addEventListener('click', startWave);
 
         // --- Bucle principal ---
         function gameLoop() {
             frame++;
 
-            handleCameraKeys();
+            handleCamera();
 
+            // Actualizar IA enemiga
             enemyAI();
 
+            // Mover unidades del jugador
             for (let unit of playerUnits) {
                 unit.move();
             }
 
+            // Producción de granjas (cada 60 frames)
+            if (frame % 60 === 0) {
+                updateFarms();
+            }
+
+            // Actualizar proyectiles
+            updateProjectiles();
+
+            // Combatir
             resolveCombat();
 
+            // Actualizar UI
             updateUI();
 
+            // Dibujar
             drawBackground(cameraX, cameraY);
 
-            for (let tree of trees) {
-                tree.draw(ctx, cameraX, cameraY);
-            }
+            for (let tree of trees) tree.draw(ctx, cameraX, cameraY);
+            for (let house of houses) house.draw(ctx, cameraX, cameraY);
+            for (let farm of farms) farm.draw(ctx, cameraX, cameraY);
+            for (let wall of walls) wall.draw(ctx, cameraX, cameraY);
+            for (let bp of blueprints) bp.draw(ctx, cameraX, cameraY);
+            for (let enemy of enemyUnits) enemy.draw(ctx, cameraX, cameraY);
+            for (let player of playerUnits) player.draw(ctx, cameraX, cameraY);
+            for (let proj of projectiles) proj.draw(ctx, cameraX, cameraY);
 
-            for (let house of houses) {
-                house.draw(ctx, cameraX, cameraY);
-            }
-            for (let farm of farms) {
-                farm.draw(ctx, cameraX, cameraY);
-            }
-
-            for (let enemy of enemyUnits) {
-                enemy.draw(ctx, cameraX, cameraY);
-            }
-
-            for (let player of playerUnits) {
-                player.draw(ctx, cameraX, cameraY);
-            }
-
+            // Mostrar modo construcción
             if (buildMode) {
                 ctx.fillStyle = '#fff';
                 ctx.font = '20px monospace';
