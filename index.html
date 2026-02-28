@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RTS Pixel 2008 - Profesiones y Modding</title>
+    <title>RTS Pixel 2008 - Modding y Auras</title>
     <style>
         body {
             margin: 0;
@@ -77,19 +77,32 @@
             padding: 10px;
             display: none;
             flex-direction: column;
-            gap: 5px;
+            gap: 10px;
             z-index: 100;
             color: #0f0;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
+            width: 300px;
+        }
+        #modPanel h3 {
+            margin: 5px 0;
         }
         #modPanel label {
             display: flex;
             justify-content: space-between;
             gap: 10px;
+            font-size: 14px;
         }
-        #modPanel input {
+        #modPanel input, #modPanel select {
             width: 150px;
+            background: #333;
+            color: #0f0;
+            border: 1px solid #0f0;
+        }
+        #modPanel .section {
+            border-top: 1px solid #0f0;
+            padding-top: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -121,7 +134,7 @@
         </div>
     </div>
     <div id="modPanel">
-        <h3>Modding - Ajustes</h3>
+        <h3>⚙️ Ajustes globales</h3>
         <label>Costo soldado: <input type="range" id="modSoldierCost" min="5" max="50" value="20"> <span id="modSoldierCostVal">20</span></label>
         <label>Costo arquero: <input type="range" id="modArcherCost" min="5" max="50" value="25"> <span id="modArcherCostVal">25</span></label>
         <label>Costo ciudadano: <input type="range" id="modPeasantCost" min="5" max="50" value="15"> <span id="modPeasantCostVal">15</span></label>
@@ -129,7 +142,33 @@
         <label>Daño ataque: <input type="range" id="modAttackDamage" min="1" max="10" value="2"> <span id="modAttackDamageVal">2</span></label>
         <label>Velocidad movimiento: <input type="range" id="modSpeed" min="0.5" max="5" step="0.1" value="1.5"> <span id="modSpeedVal">1.5</span></label>
         <label>Producción granja (comida/seg): <input type="range" id="modFarmOutput" min="0" max="5" value="1"> <span id="modFarmOutputVal">1</span></label>
-        <button id="applyMods">Aplicar</button>
+
+        <div class="section">
+            <h3>🆕 Crear unidad personalizada</h3>
+            <label>Tipo: 
+                <select id="customUnitType">
+                    <option value="soldier">Soldado</option>
+                    <option value="archer">Arquero</option>
+                    <option value="peasant">Ciudadano</option>
+                </select>
+            </label>
+            <label>Bando: 
+                <select id="customUnitTeam">
+                    <option value="player">Jugador</option>
+                    <option value="enemy">Enemigo</option>
+                </select>
+            </label>
+            <label>Vida: <input type="number" id="customUnitHp" min="1" max="100" value="10"></label>
+            <label>Ataque: <input type="number" id="customUnitAttack" min="1" max="20" value="2"></label>
+            <label>Velocidad: <input type="number" id="customUnitSpeed" min="0.5" max="5" step="0.1" value="1.5"></label>
+            <label>Rango: <input type="number" id="customUnitRange" min="20" max="200" value="30"></label>
+            <button id="createCustomUnit">✨ Crear unidad</button>
+        </div>
+
+        <div class="section">
+            <button id="applyMods">Aplicar cambios globales</button>
+            <button id="resetGame">🔄 Reiniciar partida</button>
+        </div>
     </div>
 </div>
 
@@ -196,7 +235,7 @@
 
         // --- Clases ---
         class Unit {
-            constructor(x, y, team, type = 'soldier', hp = 10, attack = mod.attackDamage) {
+            constructor(x, y, team, type = 'soldier', hp = 10, attack = mod.attackDamage, speed = mod.moveSpeed, range = null) {
                 this.x = x;
                 this.y = y;
                 this.team = team;
@@ -204,10 +243,10 @@
                 this.hp = hp;
                 this.maxHp = hp;
                 this.attack = attack;
-                this.attackRange = (type === 'archer') ? 100 : 30;
+                this.attackRange = range || (type === 'archer' ? 100 : 30);
                 this.targetX = x;
                 this.targetY = y;
-                this.speed = mod.moveSpeed;
+                this.speed = speed;
                 this.attackCooldown = 0;
                 this.size = 14;
 
@@ -369,7 +408,7 @@
                 if (this.attackCooldown <= 0) {
                     if (this.type === 'archer') {
                         projectiles.push(new Projectile(this.x, this.y, target, this.attack));
-                        this.attackCooldown = mod.attackCooldown * 1.3; // Arqueros más lentos
+                        this.attackCooldown = mod.attackCooldown * 1.3;
                     } else {
                         target.hp -= this.attack;
                         this.attackCooldown = mod.attackCooldown;
@@ -382,6 +421,7 @@
                 const screenY = this.y - camY;
                 if (screenX < -20 || screenX > canvas.width + 20 || screenY < -20 || screenY > canvas.height + 20) return;
 
+                // Color según equipo y tipo
                 if (this.team === 'player') {
                     if (this.type === 'soldier') ctx.fillStyle = '#44f';
                     else if (this.type === 'archer') ctx.fillStyle = '#8a2be2';
@@ -390,8 +430,10 @@
                     ctx.fillStyle = '#f44';
                 }
 
+                // Dibujar cuerpo
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
 
+                // Icono de profesión para ciudadanos
                 if (this.type === 'peasant' && this.profession) {
                     ctx.fillStyle = '#ff0';
                     ctx.font = '12px monospace';
@@ -400,18 +442,27 @@
                     else if (this.profession === 'builder') ctx.fillText('🔨', screenX - 5, screenY - 15);
                 }
 
+                // Barra de vida
                 const hpPercent = this.hp / this.maxHp;
                 ctx.fillStyle = '#0f0';
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2 - 5, this.size * hpPercent, 2);
                 ctx.fillStyle = '#f00';
                 ctx.fillRect(screenX - this.size/2 + this.size * hpPercent, screenY - this.size/2 - 5, this.size * (1 - hpPercent), 2);
 
-                if (selectedUnit === this) {
-                    ctx.strokeStyle = '#0f0';
+                // Aura de selección (círculo brillante y cubo encima)
+                if (selectedUnit === this || selectedHouse === this) {
+                    // Cubo encima
+                    ctx.fillStyle = '#ff0';
+                    ctx.fillRect(screenX - 3, screenY - this.size/2 - 12, 6, 6);
+                    
+                    // Aura (círculo semitransparente)
+                    ctx.strokeStyle = '#ff0';
                     ctx.lineWidth = 2;
+                    ctx.globalAlpha = 0.6;
                     ctx.beginPath();
-                    ctx.arc(screenX, screenY, this.size/2 + 4, 0, 2 * Math.PI);
+                    ctx.arc(screenX, screenY, this.size/2 + 8, 0, 2 * Math.PI);
                     ctx.stroke();
+                    ctx.globalAlpha = 1.0;
                 }
             }
         }
@@ -472,6 +523,19 @@
                     ctx.fillRect(screenX - this.width/2, screenY - this.height/2 - 10, this.width * hpPercent, 3);
                     ctx.fillStyle = '#f00';
                     ctx.fillRect(screenX - this.width/2 + this.width * hpPercent, screenY - this.height/2 - 10, this.width * (1 - hpPercent), 3);
+                }
+
+                // Aura de selección para casas
+                if (selectedHouse === this) {
+                    ctx.fillStyle = '#ff0';
+                    ctx.fillRect(screenX - 3, screenY - this.height/2 - 12, 6, 6);
+                    ctx.strokeStyle = '#ff0';
+                    ctx.lineWidth = 2;
+                    ctx.globalAlpha = 0.6;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, this.width/2 + 8, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
                 }
             }
         }
@@ -566,6 +630,18 @@
 
         // --- Inicialización ---
         function initGame() {
+            // Limpiar todo
+            playerUnits = [];
+            enemyUnits = [];
+            houses = [];
+            farms = [];
+            walls = [];
+            trees = [];
+            blueprints = [];
+            projectiles = [];
+            treeLumberjackCount.clear();
+
+            // Crear árboles
             for (let i = 0; i < 30; i++) {
                 trees.push(new Tree(
                     200 + Math.random() * 1600,
@@ -573,15 +649,22 @@
                 ));
             }
 
-            playerUnits.push(new Unit(500, 500, 'player', 'soldier'));
-            playerUnits.push(new Unit(550, 500, 'player', 'peasant'));
-            playerUnits.push(new Unit(600, 500, 'player', 'peasant'));
+            // Unidades iniciales del jugador
+            playerUnits.push(new Unit(500, 500, 'player', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
+            playerUnits.push(new Unit(550, 500, 'player', 'peasant', 10, 0, mod.moveSpeed));
+            playerUnits.push(new Unit(600, 500, 'player', 'peasant', 10, 0, mod.moveSpeed));
 
+            // Casa inicial
             houses.push(new Building(800, 500, 'house'));
             updateMaxPopulation();
 
-            enemyUnits.push(new Unit(1500, 500, 'enemy', 'soldier'));
-            enemyUnits.push(new Unit(1550, 500, 'enemy', 'soldier'));
+            // Algunos enemigos para probar
+            enemyUnits.push(new Unit(1500, 500, 'enemy', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
+            enemyUnits.push(new Unit(1550, 500, 'enemy', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
+
+            // Recursos
+            wood = 100;
+            food = 50;
         }
 
         // --- Funciones auxiliares ---
@@ -640,7 +723,7 @@
                     x = 100 + Math.random() * (WORLD_WIDTH - 200);
                     y = Math.random() < 0.5 ? 50 : WORLD_HEIGHT - 50;
                 }
-                enemyUnits.push(new Unit(x, y, 'enemy', 'soldier'));
+                enemyUnits.push(new Unit(x, y, 'enemy', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
             }
         }
 
@@ -876,7 +959,7 @@
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
-            playerUnits.push(new Unit(x, y, 'player', 'soldier'));
+            playerUnits.push(new Unit(x, y, 'player', 'soldier', 10, mod.attackDamage, mod.moveSpeed));
             updateUI();
         });
 
@@ -888,7 +971,7 @@
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
-            playerUnits.push(new Unit(x, y, 'player', 'archer'));
+            playerUnits.push(new Unit(x, y, 'player', 'archer', 8, mod.attackDamage, mod.moveSpeed, 100));
             updateUI();
         });
 
@@ -900,7 +983,7 @@
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
-            playerUnits.push(new Unit(x, y, 'player', 'peasant'));
+            playerUnits.push(new Unit(x, y, 'player', 'peasant', 8, 0, mod.moveSpeed));
             updateUI();
         });
 
@@ -912,7 +995,7 @@
             modPanel.style.display = modPanel.style.display === 'flex' ? 'none' : 'flex';
         });
 
-        // Sliders
+        // Sliders globales
         const modSoldierCost = document.getElementById('modSoldierCost');
         const modArcherCost = document.getElementById('modArcherCost');
         const modPeasantCost = document.getElementById('modPeasantCost');
@@ -956,15 +1039,71 @@
             mod.moveSpeed = parseFloat(modSpeed.value);
             mod.farmOutput = parseInt(modFarmOutput.value);
 
-            // Actualizar unidades existentes (solo velocidad y daño? El daño se aplica a nuevos ataques, no a stats pasados)
+            // Actualizar unidades existentes
             for (let unit of playerUnits) {
                 unit.speed = mod.moveSpeed;
-                unit.attack = mod.attackDamage; // Actualizar daño (para nuevas unidades también, pero esto afecta a las actuales)
+                unit.attack = mod.attackDamage;
             }
             for (let unit of enemyUnits) {
                 unit.speed = mod.moveSpeed;
                 unit.attack = mod.attackDamage;
             }
+            updateUI();
+        });
+
+        // Crear unidad personalizada
+        document.getElementById('createCustomUnit').addEventListener('click', () => {
+            const type = document.getElementById('customUnitType').value;
+            const team = document.getElementById('customUnitTeam').value;
+            const hp = parseInt(document.getElementById('customUnitHp').value);
+            const attack = parseInt(document.getElementById('customUnitAttack').value);
+            const speed = parseFloat(document.getElementById('customUnitSpeed').value);
+            const range = parseInt(document.getElementById('customUnitRange').value);
+
+            let x, y;
+            if (team === 'player') {
+                // Cerca del centro
+                x = 800 + Math.random() * 200;
+                y = 500 + Math.random() * 200;
+            } else {
+                // En los bordes
+                if (Math.random() < 0.5) {
+                    x = Math.random() < 0.5 ? 50 : WORLD_WIDTH - 50;
+                    y = 100 + Math.random() * (WORLD_HEIGHT - 200);
+                } else {
+                    x = 100 + Math.random() * (WORLD_WIDTH - 200);
+                    y = Math.random() < 0.5 ? 50 : WORLD_HEIGHT - 50;
+                }
+            }
+
+            const newUnit = new Unit(x, y, team, type, hp, attack, speed, range);
+            if (team === 'player') {
+                if (playerUnits.length < maxPopulation || type === 'peasant') { // Los ciudadanos también cuentan población
+                    playerUnits.push(newUnit);
+                } else {
+                    alert('Límite de población alcanzado');
+                }
+            } else {
+                enemyUnits.push(newUnit);
+            }
+            updateUI();
+        });
+
+        // Reiniciar partida
+        document.getElementById('resetGame').addEventListener('click', () => {
+            // Aplicar mods primero
+            mod.soldierCost = parseInt(modSoldierCost.value);
+            mod.archerCost = parseInt(modArcherCost.value);
+            mod.peasantCost = parseInt(modPeasantCost.value);
+            mod.attackCooldown = parseInt(modAttackCooldown.value);
+            mod.attackDamage = parseInt(modAttackDamage.value);
+            mod.moveSpeed = parseFloat(modSpeed.value);
+            mod.farmOutput = parseInt(modFarmOutput.value);
+
+            initGame();
+            selectedUnit = null;
+            selectedHouse = null;
+            buildMode = null;
             updateUI();
         });
 
