@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RTS Pixel 2008 - Profesiones y Construcción</title>
+    <title>RTS Pixel 2008 - Profesiones y Modding</title>
     <style>
         body {
             margin: 0;
@@ -36,6 +36,7 @@
             flex-wrap: wrap;
             gap: 15px;
             font-size: 16px;
+            position: relative;
         }
         .ui-section {
             display: flex;
@@ -67,6 +68,29 @@
             display: flex;
             gap: 20px;
         }
+        #modPanel {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: #222;
+            border: 2px solid #0f0;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+            color: #0f0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #modPanel label {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        #modPanel input {
+            width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -90,10 +114,22 @@
         </div>
         <div class="ui-section">
             <button id="startWave">🔥 Iniciar oleada</button>
+            <button id="toggleMod">🎮 Modding</button>
         </div>
         <div id="info">
             <span id="selectedInfo">Ninguno</span>
         </div>
+    </div>
+    <div id="modPanel">
+        <h3>Modding - Ajustes</h3>
+        <label>Costo soldado: <input type="range" id="modSoldierCost" min="5" max="50" value="20"> <span id="modSoldierCostVal">20</span></label>
+        <label>Costo arquero: <input type="range" id="modArcherCost" min="5" max="50" value="25"> <span id="modArcherCostVal">25</span></label>
+        <label>Costo ciudadano: <input type="range" id="modPeasantCost" min="5" max="50" value="15"> <span id="modPeasantCostVal">15</span></label>
+        <label>Cooldown ataque (frames): <input type="range" id="modAttackCooldown" min="10" max="100" value="30"> <span id="modAttackCooldownVal">30</span></label>
+        <label>Daño ataque: <input type="range" id="modAttackDamage" min="1" max="10" value="2"> <span id="modAttackDamageVal">2</span></label>
+        <label>Velocidad movimiento: <input type="range" id="modSpeed" min="0.5" max="5" step="0.1" value="1.5"> <span id="modSpeedVal">1.5</span></label>
+        <label>Producción granja (comida/seg): <input type="range" id="modFarmOutput" min="0" max="5" value="1"> <span id="modFarmOutputVal">1</span></label>
+        <button id="applyMods">Aplicar</button>
     </div>
 </div>
 
@@ -107,16 +143,27 @@
         // Tamaño del mundo
         const WORLD_WIDTH = 2000;
         const WORLD_HEIGHT = 2000;
-        const GRID_SIZE = 40; // Tamaño de cuadrícula para edificios
+        const GRID_SIZE = 40;
 
         // Cámara
         let cameraX = 0;
         let cameraY = 0;
         const CAMERA_SPEED = 10;
 
-        // Recursos
+        // Recursos iniciales
         let wood = 100;
         let food = 50;
+
+        // Parámetros modificables (modding)
+        let mod = {
+            soldierCost: 20,
+            archerCost: 25,
+            peasantCost: 15,
+            attackCooldown: 30,
+            attackDamage: 2,
+            moveSpeed: 1.5,
+            farmOutput: 1
+        };
 
         // Unidades y edificios
         let playerUnits = [];
@@ -125,9 +172,7 @@
         let farms = [];
         let walls = [];
         let trees = [];
-        let blueprints = []; // Edificios en construcción
-
-        // Proyectiles
+        let blueprints = [];
         let projectiles = [];
 
         // Selección
@@ -135,7 +180,7 @@
         let selectedHouse = null;
 
         // Modo construcción
-        let buildMode = null; // 'house', 'farm', 'wall'
+        let buildMode = null;
         const buildCost = { house: 50, farm: 30, wall: 60 };
         const buildMaxHp = { house: 200, farm: 150, wall: 400 };
 
@@ -147,31 +192,30 @@
 
         // Límite de leñadores por árbol
         const MAX_LUMBERJACKS_PER_TREE = 3;
-        // Array para llevar cuenta de cuántos leñadores tiene cada árbol
-        let treeLumberjackCount = new Map(); // tree -> count
+        let treeLumberjackCount = new Map();
 
         // --- Clases ---
         class Unit {
-            constructor(x, y, team, type = 'soldier', hp = 10, attack = 2) {
+            constructor(x, y, team, type = 'soldier', hp = 10, attack = mod.attackDamage) {
                 this.x = x;
                 this.y = y;
                 this.team = team;
-                this.type = type; // 'soldier', 'archer', 'peasant'
+                this.type = type;
                 this.hp = hp;
                 this.maxHp = hp;
                 this.attack = attack;
                 this.attackRange = (type === 'archer') ? 100 : 30;
                 this.targetX = x;
                 this.targetY = y;
-                this.speed = 1.5;
+                this.speed = mod.moveSpeed;
                 this.attackCooldown = 0;
                 this.size = 14;
 
-                // Profesiones para ciudadanos
+                // Profesiones
                 this.profession = null; // 'lumberjack', 'farmer', 'builder'
-                this.assignedTree = null; // Árbol asignado (para leñador)
-                this.assignedFarm = null; // Granja asignada (para granjero)
-                this.assignedBlueprint = null; // Plano asignado (para constructor)
+                this.assignedTree = null;
+                this.assignedFarm = null;
+                this.assignedBlueprint = null;
                 this.gatherCooldown = 0;
             }
 
@@ -179,7 +223,6 @@
                 if (this.attackCooldown > 0) this.attackCooldown--;
                 if (this.gatherCooldown > 0) this.gatherCooldown--;
 
-                // Comportamiento según profesión
                 if (this.type === 'peasant') {
                     if (this.profession === 'lumberjack' && this.assignedTree) {
                         this.handleLumberjack();
@@ -193,7 +236,6 @@
                     }
                 }
 
-                // Movimiento normal
                 this.moveToTarget();
             }
 
@@ -207,15 +249,12 @@
                     this.x += moveX;
                     this.y += moveY;
                 }
-                // Limitar al mundo
                 this.x = Math.max(10, Math.min(WORLD_WIDTH - 10, this.x));
                 this.y = Math.max(10, Math.min(WORLD_HEIGHT - 10, this.y));
             }
 
             handleLumberjack() {
-                // Verificar si el árbol sigue existiendo
                 if (!trees.includes(this.assignedTree)) {
-                    // Buscar nuevo árbol
                     this.findNewTree();
                     if (!this.assignedTree) {
                         this.profession = null;
@@ -229,18 +268,14 @@
                 const dist = Math.hypot(dx, dy);
 
                 if (dist < 30) {
-                    // Talar
                     if (this.gatherCooldown <= 0) {
                         tree.hp -= 3;
                         this.gatherCooldown = 20;
                         if (tree.hp <= 0) {
-                            // Recolectar madera
                             wood += tree.woodAmount;
-                            // Liberar leñadores de este árbol
                             treeLumberjackCount.delete(tree);
                             trees = trees.filter(t => t !== tree);
                             this.assignedTree = null;
-                            // Buscar nuevo árbol
                             this.findNewTree();
                             if (!this.assignedTree) {
                                 this.profession = null;
@@ -248,7 +283,6 @@
                         }
                     }
                 } else {
-                    // Moverse hacia el árbol
                     this.targetX = tree.x;
                     this.targetY = tree.y;
                     this.moveToTarget();
@@ -256,7 +290,10 @@
             }
 
             findNewTree() {
-                // Buscar el árbol más cercano con menos de 3 leñadores
+                if (this.assignedTree) {
+                    const oldCount = treeLumberjackCount.get(this.assignedTree) || 0;
+                    treeLumberjackCount.set(this.assignedTree, Math.max(0, oldCount - 1));
+                }
                 let bestTree = null;
                 let bestDist = Infinity;
                 for (let tree of trees) {
@@ -270,11 +307,6 @@
                     }
                 }
                 if (bestTree) {
-                    // Liberar el árbol anterior
-                    if (this.assignedTree) {
-                        const oldCount = treeLumberjackCount.get(this.assignedTree) || 0;
-                        treeLumberjackCount.set(this.assignedTree, Math.max(0, oldCount - 1));
-                    }
                     this.assignedTree = bestTree;
                     const newCount = (treeLumberjackCount.get(bestTree) || 0) + 1;
                     treeLumberjackCount.set(bestTree, newCount);
@@ -282,16 +314,11 @@
             }
 
             handleFarmer() {
-                // Verificar si la granja sigue existiendo y está construida
                 if (!farms.includes(this.assignedFarm)) {
                     this.profession = null;
                     this.assignedFarm = null;
                     return;
                 }
-                // La granja produce comida automáticamente, pero el granjero acelera o es necesario
-                // Para simplificar, mientras haya un granjero asignado, la granja produce cada cierto tiempo
-                // (La producción se maneja aparte)
-                // El granjero simplemente se queda cerca
                 const farm = this.assignedFarm;
                 const dx = farm.x - this.x;
                 const dy = farm.y - this.y;
@@ -314,14 +341,11 @@
                 const dy = bp.y - this.y;
                 const dist = Math.hypot(dx, dy);
                 if (dist < 30) {
-                    // Construir
                     if (this.gatherCooldown <= 0) {
                         bp.hp += 5;
                         this.gatherCooldown = 10;
                         if (bp.hp >= bp.maxHp) {
-                            // Terminar construcción
                             bp.hp = bp.maxHp;
-                            // Convertir blueprint en edificio real
                             if (bp.type === 'house') {
                                 houses.push(new Building(bp.x, bp.y, 'house'));
                             } else if (bp.type === 'farm') {
@@ -344,12 +368,11 @@
             attackUnit(target) {
                 if (this.attackCooldown <= 0) {
                     if (this.type === 'archer') {
-                        // Disparar proyectil
                         projectiles.push(new Projectile(this.x, this.y, target, this.attack));
-                        this.attackCooldown = 40;
+                        this.attackCooldown = mod.attackCooldown * 1.3; // Arqueros más lentos
                     } else {
                         target.hp -= this.attack;
-                        this.attackCooldown = 30;
+                        this.attackCooldown = mod.attackCooldown;
                     }
                 }
             }
@@ -359,19 +382,16 @@
                 const screenY = this.y - camY;
                 if (screenX < -20 || screenX > canvas.width + 20 || screenY < -20 || screenY > canvas.height + 20) return;
 
-                // Color según equipo y tipo
                 if (this.team === 'player') {
                     if (this.type === 'soldier') ctx.fillStyle = '#44f';
-                    else if (this.type === 'archer') ctx.fillStyle = '#8a2be2'; // Azul violeta
-                    else ctx.fillStyle = '#2e8b57'; // Verde para ciudadano
+                    else if (this.type === 'archer') ctx.fillStyle = '#8a2be2';
+                    else ctx.fillStyle = '#2e8b57';
                 } else {
                     ctx.fillStyle = '#f44';
                 }
 
-                // Dibujar cuerpo (cuadrado)
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
 
-                // Si es ciudadano, mostrar icono de profesión
                 if (this.type === 'peasant' && this.profession) {
                     ctx.fillStyle = '#ff0';
                     ctx.font = '12px monospace';
@@ -380,14 +400,12 @@
                     else if (this.profession === 'builder') ctx.fillText('🔨', screenX - 5, screenY - 15);
                 }
 
-                // Barra de vida
                 const hpPercent = this.hp / this.maxHp;
                 ctx.fillStyle = '#0f0';
                 ctx.fillRect(screenX - this.size/2, screenY - this.size/2 - 5, this.size * hpPercent, 2);
                 ctx.fillStyle = '#f00';
                 ctx.fillRect(screenX - this.size/2 + this.size * hpPercent, screenY - this.size/2 - 5, this.size * (1 - hpPercent), 2);
 
-                // Selección
                 if (selectedUnit === this) {
                     ctx.strokeStyle = '#0f0';
                     ctx.lineWidth = 2;
@@ -406,7 +424,6 @@
                 this.width = 40;
                 this.height = 40;
                 this.team = 'player';
-                // Para murallas, pueden tener más vida
                 if (type === 'wall') {
                     this.maxHp = 400;
                     this.hp = 400;
@@ -449,7 +466,6 @@
                     ctx.fillRect(screenX - this.width/2 + 5, screenY - this.height/2 + 5, this.width - 10, this.height - 10);
                 }
 
-                // Barra de vida (si está dañada)
                 if (this.hp < this.maxHp) {
                     const hpPercent = this.hp / this.maxHp;
                     ctx.fillStyle = '#0f0';
@@ -485,7 +501,6 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(screenX - this.width/2, screenY - this.height/2, this.width, this.height);
 
-                // Barra de progreso
                 const progress = this.hp / this.maxHp;
                 ctx.fillStyle = '#0f0';
                 ctx.fillRect(screenX - this.width/2, screenY - this.height/2 - 10, this.width * progress, 4);
@@ -532,7 +547,6 @@
                 const dy = this.target.y - this.y;
                 const dist = Math.hypot(dx, dy);
                 if (dist < this.speed) {
-                    // Impacto
                     this.target.hp -= this.damage;
                     this.active = false;
                 } else {
@@ -595,23 +609,20 @@
         }
 
         function snapToGrid(x, y) {
-            const gridX = Math.round(x / GRID_SIZE) * GRID_SIZE;
-            const gridY = Math.round(y / GRID_SIZE) * GRID_SIZE;
-            return { x: gridX, y: gridY };
+            return {
+                x: Math.round(x / GRID_SIZE) * GRID_SIZE,
+                y: Math.round(y / GRID_SIZE) * GRID_SIZE
+            };
         }
 
         function isPositionFree(x, y) {
-            // Comprobar límites
             if (x < GRID_SIZE/2 || x > WORLD_WIDTH - GRID_SIZE/2 || y < GRID_SIZE/2 || y > WORLD_HEIGHT - GRID_SIZE/2) return false;
-            // Edificios construidos
             for (let b of [...houses, ...farms, ...walls]) {
                 if (Math.hypot(x - b.x, y - b.y) < GRID_SIZE) return false;
             }
-            // Blueprints
             for (let bp of blueprints) {
                 if (Math.hypot(x - bp.x, y - bp.y) < GRID_SIZE) return false;
             }
-            // Árboles
             for (let t of trees) {
                 if (Math.hypot(x - t.x, y - t.y) < GRID_SIZE) return false;
             }
@@ -660,7 +671,6 @@
 
         // --- Combate ---
         function resolveCombat() {
-            // Ataques de jugadores a enemigos
             for (let player of playerUnits) {
                 for (let enemy of enemyUnits) {
                     const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
@@ -669,7 +679,6 @@
                     }
                 }
             }
-            // Eliminar muertos
             playerUnits = playerUnits.filter(u => u.hp > 0);
             enemyUnits = enemyUnits.filter(u => u.hp > 0);
         }
@@ -677,21 +686,18 @@
         // --- Producción de granjas ---
         function updateFarms() {
             for (let farm of farms) {
-                // Si hay al menos un granjero asignado a esta granja, produce
                 const hasFarmer = playerUnits.some(u => u.type === 'peasant' && u.profession === 'farmer' && u.assignedFarm === farm);
                 if (hasFarmer) {
-                    food += 1;
+                    food += mod.farmOutput;
                 }
             }
         }
 
-        // --- Actualizar proyectiles ---
+        // --- Proyectiles ---
         function updateProjectiles() {
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 projectiles[i].update();
-                if (!projectiles[i].active) {
-                    projectiles.splice(i, 1);
-                }
+                if (!projectiles[i].active) projectiles.splice(i, 1);
             }
         }
 
@@ -699,7 +705,6 @@
         function drawBackground(camX, camY) {
             ctx.fillStyle = '#1a3a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.strokeStyle = '#2a4a2a';
             ctx.lineWidth = 1;
             const startX = Math.floor(camX / GRID_SIZE) * GRID_SIZE;
@@ -741,13 +746,12 @@
             const worldY = mouseY + cameraY;
 
             if (e.button === 0) { // Izquierdo
-                // Si estamos en modo construcción
+                // Modo construcción
                 if (buildMode) {
                     const cost = buildCost[buildMode];
                     if (wood >= cost) {
                         const { x: gridX, y: gridY } = snapToGrid(worldX, worldY);
                         if (isPositionFree(gridX, gridY)) {
-                            // Crear blueprint
                             blueprints.push(new Blueprint(gridX, gridY, buildMode));
                             wood -= cost;
                             buildMode = null;
@@ -789,13 +793,12 @@
                     }
                 }
 
-                // Si hay un ciudadano seleccionado, asignar profesión según lo que se clickeó
+                // Si hay un ciudadano seleccionado y no tiene profesión, asignar según lo clickeado
                 if (selectedUnit && selectedUnit.type === 'peasant' && selectedUnit.profession === null) {
-                    // Comprobar si se clickeó un árbol
+                    // Árbol
                     for (let tree of trees) {
                         const dist = Math.hypot(worldX - tree.x, worldY - tree.y);
                         if (dist < 20) {
-                            // Asignar como leñador si hay espacio
                             const count = treeLumberjackCount.get(tree) || 0;
                             if (count < MAX_LUMBERJACKS_PER_TREE) {
                                 selectedUnit.profession = 'lumberjack';
@@ -809,7 +812,7 @@
                             return;
                         }
                     }
-                    // Comprobar si se clickeó una granja construida
+                    // Granja
                     for (let farm of farms) {
                         const dist = Math.hypot(worldX - farm.x, worldY - farm.y);
                         if (dist < 20) {
@@ -820,7 +823,7 @@
                             return;
                         }
                     }
-                    // Comprobar si se clickeó un blueprint
+                    // Blueprint
                     for (let bp of blueprints) {
                         const dist = Math.hypot(worldX - bp.x, worldY - bp.y);
                         if (dist < 20) {
@@ -841,9 +844,8 @@
             } else if (e.button === 2) { // Derecho
                 e.preventDefault();
                 if (selectedUnit) {
-                    // Si es ciudadano con profesión, cancelar profesión?
+                    // Si es ciudadano con profesión, cancelar
                     if (selectedUnit.type === 'peasant' && selectedUnit.profession) {
-                        // Liberar recursos
                         if (selectedUnit.profession === 'lumberjack' && selectedUnit.assignedTree) {
                             const count = treeLumberjackCount.get(selectedUnit.assignedTree) || 0;
                             treeLumberjackCount.set(selectedUnit.assignedTree, Math.max(0, count - 1));
@@ -853,7 +855,6 @@
                         selectedUnit.assignedFarm = null;
                         selectedUnit.assignedBlueprint = null;
                     }
-                    // Mover a la posición
                     selectedUnit.targetX = worldX;
                     selectedUnit.targetY = worldY;
                 }
@@ -869,9 +870,9 @@
 
         document.getElementById('spawnSoldier').addEventListener('click', () => {
             if (!selectedHouse) { alert('Selecciona una casa'); return; }
-            if (food < 20) { alert('Comida insuficiente'); return; }
+            if (food < mod.soldierCost) { alert('Comida insuficiente'); return; }
             if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
-            food -= 20;
+            food -= mod.soldierCost;
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
@@ -881,9 +882,9 @@
 
         document.getElementById('spawnArcher').addEventListener('click', () => {
             if (!selectedHouse) { alert('Selecciona una casa'); return; }
-            if (food < 25) { alert('Comida insuficiente'); return; }
+            if (food < mod.archerCost) { alert('Comida insuficiente'); return; }
             if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
-            food -= 25;
+            food -= mod.archerCost;
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
@@ -893,9 +894,9 @@
 
         document.getElementById('spawnPeasant').addEventListener('click', () => {
             if (!selectedHouse) { alert('Selecciona una casa'); return; }
-            if (food < 15) { alert('Comida insuficiente'); return; }
+            if (food < mod.peasantCost) { alert('Comida insuficiente'); return; }
             if (playerUnits.length >= maxPopulation) { alert('Límite de población'); return; }
-            food -= 15;
+            food -= mod.peasantCost;
             const angle = Math.random() * 2 * Math.PI;
             const x = selectedHouse.x + Math.cos(angle) * 50;
             const y = selectedHouse.y + Math.sin(angle) * 50;
@@ -905,37 +906,89 @@
 
         document.getElementById('startWave').addEventListener('click', startWave);
 
+        // --- Modding panel ---
+        const modPanel = document.getElementById('modPanel');
+        document.getElementById('toggleMod').addEventListener('click', () => {
+            modPanel.style.display = modPanel.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Sliders
+        const modSoldierCost = document.getElementById('modSoldierCost');
+        const modArcherCost = document.getElementById('modArcherCost');
+        const modPeasantCost = document.getElementById('modPeasantCost');
+        const modAttackCooldown = document.getElementById('modAttackCooldown');
+        const modAttackDamage = document.getElementById('modAttackDamage');
+        const modSpeed = document.getElementById('modSpeed');
+        const modFarmOutput = document.getElementById('modFarmOutput');
+
+        const modSoldierCostVal = document.getElementById('modSoldierCostVal');
+        const modArcherCostVal = document.getElementById('modArcherCostVal');
+        const modPeasantCostVal = document.getElementById('modPeasantCostVal');
+        const modAttackCooldownVal = document.getElementById('modAttackCooldownVal');
+        const modAttackDamageVal = document.getElementById('modAttackDamageVal');
+        const modSpeedVal = document.getElementById('modSpeedVal');
+        const modFarmOutputVal = document.getElementById('modFarmOutputVal');
+
+        function updateModDisplay() {
+            modSoldierCostVal.innerText = modSoldierCost.value;
+            modArcherCostVal.innerText = modArcherCost.value;
+            modPeasantCostVal.innerText = modPeasantCost.value;
+            modAttackCooldownVal.innerText = modAttackCooldown.value;
+            modAttackDamageVal.innerText = modAttackDamage.value;
+            modSpeedVal.innerText = modSpeed.value;
+            modFarmOutputVal.innerText = modFarmOutput.value;
+        }
+
+        modSoldierCost.addEventListener('input', updateModDisplay);
+        modArcherCost.addEventListener('input', updateModDisplay);
+        modPeasantCost.addEventListener('input', updateModDisplay);
+        modAttackCooldown.addEventListener('input', updateModDisplay);
+        modAttackDamage.addEventListener('input', updateModDisplay);
+        modSpeed.addEventListener('input', updateModDisplay);
+        modFarmOutput.addEventListener('input', updateModDisplay);
+
+        document.getElementById('applyMods').addEventListener('click', () => {
+            mod.soldierCost = parseInt(modSoldierCost.value);
+            mod.archerCost = parseInt(modArcherCost.value);
+            mod.peasantCost = parseInt(modPeasantCost.value);
+            mod.attackCooldown = parseInt(modAttackCooldown.value);
+            mod.attackDamage = parseInt(modAttackDamage.value);
+            mod.moveSpeed = parseFloat(modSpeed.value);
+            mod.farmOutput = parseInt(modFarmOutput.value);
+
+            // Actualizar unidades existentes (solo velocidad y daño? El daño se aplica a nuevos ataques, no a stats pasados)
+            for (let unit of playerUnits) {
+                unit.speed = mod.moveSpeed;
+                unit.attack = mod.attackDamage; // Actualizar daño (para nuevas unidades también, pero esto afecta a las actuales)
+            }
+            for (let unit of enemyUnits) {
+                unit.speed = mod.moveSpeed;
+                unit.attack = mod.attackDamage;
+            }
+            updateUI();
+        });
+
         // --- Bucle principal ---
         function gameLoop() {
             frame++;
 
             handleCamera();
 
-            // Actualizar IA enemiga
             enemyAI();
 
-            // Mover unidades del jugador
             for (let unit of playerUnits) {
                 unit.move();
             }
 
-            // Producción de granjas (cada 60 frames)
             if (frame % 60 === 0) {
                 updateFarms();
             }
 
-            // Actualizar proyectiles
             updateProjectiles();
-
-            // Combatir
             resolveCombat();
-
-            // Actualizar UI
             updateUI();
 
-            // Dibujar
             drawBackground(cameraX, cameraY);
-
             for (let tree of trees) tree.draw(ctx, cameraX, cameraY);
             for (let house of houses) house.draw(ctx, cameraX, cameraY);
             for (let farm of farms) farm.draw(ctx, cameraX, cameraY);
@@ -945,7 +998,6 @@
             for (let player of playerUnits) player.draw(ctx, cameraX, cameraY);
             for (let proj of projectiles) proj.draw(ctx, cameraX, cameraY);
 
-            // Mostrar modo construcción
             if (buildMode) {
                 ctx.fillStyle = '#fff';
                 ctx.font = '20px monospace';
