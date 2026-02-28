@@ -1,346 +1,666 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Mini Pet Simulator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTS minimalista · Aldeanos · Madera y Oro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Evita seleccionar texto mientras se juega */
+        }
 
-<style>
-body{
-    font-family: Arial;
-    background: linear-gradient(135deg,#1e1e2f,#2b2b45);
-    color:white;
-    text-align:center;
-    overflow-x:hidden;
-}
-button{
-    padding:10px 15px;
-    margin:5px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:bold;
-}
-.menu{
-    display:none;
-    background:#222;
-    padding:15px;
-    border-radius:15px;
-    margin:10px auto;
-    width:300px;
-}
-.common{color:white}
-.rare{color:#4da6ff}
-.epic{color:#c44dff}
-.legendary{color:gold}
-#animation{
-    font-size:40px;
-    height:50px;
-}
-#pets{
-    margin-top:15px;
-}
-</style>
+        body {
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a2a1f;
+        }
+
+        #gameCanvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2a3a2f;
+            cursor: default;
+        }
+
+        /* Panel superior (recursos) */
+        .ui-top {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 20, 0.85);
+            backdrop-filter: blur(4px);
+            color: #e3d6b5;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            display: flex;
+            gap: 40px;
+            border: 1px solid #7b6b4b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            letter-spacing: 0.5px;
+            z-index: 10;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .resource span:first-child {
+            color: #b59d6b;
+            font-weight: 600;
+        }
+
+        .resource span:last-child {
+            background: #0f1a0f;
+            padding: 4px 12px;
+            border-radius: 30px;
+            min-width: 60px;
+            text-align: center;
+            color: #f0e6c5;
+            border: 1px solid #6a8e4a;
+        }
+
+        /* Panel lateral (botón construir) */
+        .ui-side {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(30, 40, 30, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 20px 15px;
+            border-radius: 30px;
+            border: 1px solid #7b6b4b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+
+        .build-btn {
+            background: #4a6b3a;
+            border: 2px solid #b89a5a;
+            color: #f0e6c5;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 14px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 4px 0 #1e2e1a;
+            letter-spacing: 1px;
+            min-width: 140px;
+        }
+
+        .build-btn:hover {
+            background: #5f864a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1e2e1a;
+        }
+
+        .build-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1e2e1a;
+        }
+
+        .build-hint {
+            color: #b59d6b;
+            font-size: 0.9rem;
+            text-align: center;
+            border-top: 1px solid #4a5a3a;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        /* Instrucciones pequeñas */
+        .tips {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(0,0,0,0.4);
+            color: #c0bba0;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(3px);
+            border: 1px solid #5f6b4b;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body>
+    <canvas id="gameCanvas"></canvas>
 
-<h1>🐾 Mini Pet Simulator</h1>
-<p>💰 Monedas: <span id="coins">0</span></p>
-<p>🏆 Rebirths: <span id="rebirths">0</span></p>
-<p>🌍 Mapa: <span id="map">Granja</span></p>
-<p>⚡ Dinero/segundo: <span id="incomePerSec">0</span></p>
+    <!-- UI superior: recursos -->
+    <div class="ui-top">
+        <div class="resource">
+            <span>🌲 MADERA</span>
+            <span id="woodDisplay">0</span>
+        </div>
+        <div class="resource">
+            <span>👑 ORO</span>
+            <span id="goldDisplay">0</span>
+        </div>
+    </div>
 
-<button onclick="toggleMenu('eggsMenu')">🥚 Huevos</button>
-<button onclick="toggleMenu('encyclopediaMenu')">📖 Enciclopedia</button>
-<button onclick="toggleMenu('mapsMenu')">🌍 Mapas</button>
-<button onclick="toggleMenu('shopMenu')">🏪 Tienda</button>
-<button onclick="rebirth()">🏆 Rebirth</button>
+    <!-- UI lateral: botón construir casa -->
+    <div class="ui-side">
+        <button class="build-btn" id="buildHouseBtn">🏠 CONSTRUIR CASA</button>
+        <div class="build-hint">(cuesta 50 madera)<br>crea un aldeano</div>
+    </div>
 
-<div id="animation"></div>
+    <!-- mini ayudas -->
+    <div class="tips">
+        ⬅️➡️⬆️⬇️ = mover cámara | 🖱️ izq: seleccionar / arrastrar | 🖱️ der: mover
+    </div>
 
-<h2>🐶 Tus Mascotas</h2>
-<div id="pets"></div>
+    <script>
+        (function() {
+            // --- configuración inicial ---
+            const canvas = document.getElementById('gameCanvas');
+            let ctx = canvas.getContext('2d');
 
-<div id="eggsMenu" class="menu">
-<h3>🥚 Huevo Básico (100 monedas)</h3>
-<p>Common 60% | Rare 25% | Epic 10% | Legendary 5%</p>
-<button onclick="buyEgg()">Abrir</button>
-</div>
+            // dimensiones dinámicas
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
 
-<div id="encyclopediaMenu" class="menu">
-<h3>📖 Todas las Mascotas</h3>
-<div id="encyclopedia"></div>
-</div>
+            // --- mundo y cámara ---
+            let cameraX = 200;  // desplazamiento inicial para ver árboles
+            let cameraY = 150;
+            const CAMERA_SPEED = 25;  // teclas
 
-<div id="mapsMenu" class="menu">
-<h3>🌍 Mapas</h3>
-<button onclick="unlockMap('Desierto',1000)">Desierto (x2) - 1000</button>
-<button onclick="unlockMap('Espacio',5000)">Espacio (x4) - 5000</button>
-</div>
+            // --- recursos globales ---
+            let wood = 80;       // algo para empezar
+            let gold = 100;       // oro decorativo
 
-<div id="shopMenu" class="menu">
-<h3>🏪 Mejoras Permanentes</h3>
-<button onclick="buyUpgrade()">Mejorar Ingresos</button>
-</div>
+            // --- entidades ---
+            const units = [];
+            const trees = [];
 
-<script>
+            // unidad: color, pos, target, estado
+            const UNIT_SIZE = 22;        // cuadrado
+            const UNIT_SPEED = 2.2;      // por frame
 
-let coins = 200;
-let rebirths = 0;
-let pets = [];
-let map = "Granja";
-let currentMenu = null;
-let upgrades = { incomeBoost: 1 };
+            // árbol: círculo verde
+            const TREE_RADIUS = 22;
 
-const mapMultipliers = {
-    "Granja": 1,
-    "Desierto": 2,
-    "Espacio": 4
-};
+            // selección
+            let selectedUnits = [];            // índices o referencias (guardamos objetos)
+            let selectionBoxActive = false;
+            let selectionStart = { x: 0, y: 0 };
+            let selectionEnd = { x: 0, y: 0 };
+            const DRAG_THRESHOLD = 5;          // píxeles para considerar arrastre
 
-/* 64 MASCOTAS TOTALES (4 originales + 60 nuevas) */
-const eggPets = [
+            // --- inicializar aldeanos (unidades) ---
+            function createUnit(x, y) {
+                units.push({
+                    x, y,
+                    targetX: x,
+                    targetY: y,
+                    speed: UNIT_SPEED,
+                    state: 'idle',       // 'idle', 'moving', 'gathering'
+                    gatheringTreeId: null,
+                    lastGatherTime: 0,
+                    color: `hsl(${Math.random() * 40 + 20}, 80%, 60%)`, // tonos tierra
+                    selected: false
+                });
+            }
 
-    /* Originales */
-    {name:"Perro",rarity:"common",basePower:1},
-    {name:"Gato",rarity:"rare",basePower:3},
-    {name:"Dragón",rarity:"epic",basePower:6},
-    {name:"Fénix",rarity:"legendary",basePower:10},
+            // --- crear árboles (verdes) ---
+            function createTree(x, y) {
+                trees.push({
+                    x, y,
+                    radius: TREE_RADIUS,
+                    id: trees.length,
+                    woodAmount: Infinity   // inagotable para demo
+                });
+            }
 
-    /* 60 nuevas */
-    {name:"Conejo",rarity:"common",basePower:1},
-    {name:"Ratón",rarity:"common",basePower:1},
-    {name:"Gallina",rarity:"common",basePower:1},
-    {name:"Cerdo",rarity:"common",basePower:1},
-    {name:"Vaca",rarity:"common",basePower:1},
-    {name:"Oveja",rarity:"common",basePower:1},
-    {name:"Cabra",rarity:"common",basePower:1},
-    {name:"Tortuga",rarity:"common",basePower:1},
-    {name:"Pato",rarity:"common",basePower:1},
-    {name:"Ardilla",rarity:"common",basePower:1},
+            // poblado inicial
+            createUnit(520, 340);
+            createUnit(580, 400);
+            createUnit(450, 280);
+            createUnit(610, 220);
 
-    {name:"Lobo",rarity:"rare",basePower:3},
-    {name:"Zorro",rarity:"rare",basePower:3},
-    {name:"Águila",rarity:"rare",basePower:3},
-    {name:"Pantera",rarity:"rare",basePower:3},
-    {name:"Tigre",rarity:"rare",basePower:3},
-    {name:"Leopardo",rarity:"rare",basePower:3},
-    {name:"Búho",rarity:"rare",basePower:3},
-    {name:"Delfín",rarity:"rare",basePower:3},
-    {name:"Canguro",rarity:"rare",basePower:3},
-    {name:"Koala",rarity:"rare",basePower:3},
+            // algunos árboles
+            createTree(800, 500);
+            createTree(860, 550);
+            createTree(300, 600);
+            createTree(250, 250);
+            createTree(1100, 300);
+            createTree(400, 750);
+            createTree(700, 180);
+            createTree(950, 680);
 
-    {name:"Unicornio",rarity:"epic",basePower:6},
-    {name:"Grifo",rarity:"epic",basePower:6},
-    {name:"Kraken",rarity:"epic",basePower:6},
-    {name:"Hidra",rarity:"epic",basePower:6},
-    {name:"Gólem",rarity:"epic",basePower:6},
-    {name:"Minotauro",rarity:"epic",basePower:6},
-    {name:"Quimera",rarity:"epic",basePower:6},
-    {name:"Serpiente Marina",rarity:"epic",basePower:6},
-    {name:"Fénix Oscuro",rarity:"epic",basePower:6},
-    {name:"Dragón Azul",rarity:"epic",basePower:6},
+            // --- actualizar displays UI ---
+            function updateUI() {
+                document.getElementById('woodDisplay').innerText = wood;
+                document.getElementById('goldDisplay').innerText = gold;
+            }
+            updateUI();
 
-    {name:"Dragón Dorado",rarity:"legendary",basePower:10},
-    {name:"Ángel",rarity:"legendary",basePower:10},
-    {name:"Demonio",rarity:"legendary",basePower:10},
-    {name:"Titán",rarity:"legendary",basePower:10},
-    {name:"Dios Solar",rarity:"legendary",basePower:10},
-    {name:"Dios Lunar",rarity:"legendary",basePower:10},
-    {name:"Fénix Celestial",rarity:"legendary",basePower:10},
-    {name:"Ser Supremo",rarity:"legendary",basePower:10},
-    {name:"Bestia Cósmica",rarity:"legendary",basePower:10},
-    {name:"Dragón del Vacío",rarity:"legendary",basePower:10}
-];
+            // --- lógica de recolección automática (llamada en game loop) ---
+            function updateGathering(now) {
+                for (let unit of units) {
+                    if (unit.state === 'gathering' && unit.gatheringTreeId !== null) {
+                        // asegurar que sigue cerca del árbol (si se alejó, pasa a idle)
+                        const tree = trees[unit.gatheringTreeId];
+                        if (!tree) {
+                            unit.state = 'idle';
+                            unit.gatheringTreeId = null;
+                            continue;
+                        }
+                        const dx = unit.x - tree.x;
+                        const dy = unit.y - tree.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist > TREE_RADIUS + UNIT_SIZE) {
+                            unit.state = 'idle';
+                            unit.gatheringTreeId = null;
+                            continue;
+                        }
 
-function save(){
-    localStorage.setItem("petGame",
-        JSON.stringify({coins,rebirths,pets,map,upgrades})
-    );
-}
+                        // recolectar cada 2 segundos
+                        if (now - unit.lastGatherTime >= 2000) {
+                            wood += 1;          // +1 madera
+                            unit.lastGatherTime = now;
+                            updateUI();
+                        }
+                    }
+                }
+            }
 
-function load(){
-    let data = JSON.parse(localStorage.getItem("petGame"));
-    if(data){
-        coins=data.coins||0;
-        rebirths=data.rebirths||0;
-        pets=data.pets||[];
-        map=data.map||"Granja";
-        upgrades=data.upgrades||{incomeBoost:1};
-    }
-}
-load();
+            // --- detección de árboles cercanos (para iniciar recolección) ---
+            function tryStartGathering(unit) {
+                if (unit.state === 'gathering') return; // ya está
 
-function update(){
-    document.getElementById("coins").textContent=Math.floor(coins);
-    document.getElementById("rebirths").textContent=rebirths;
-    document.getElementById("map").textContent=map;
-    document.getElementById("incomePerSec").textContent=Math.floor(getIncomePerSecond());
-    renderPets();
-    renderEncyclopedia();
-    save();
-}
+                for (let i = 0; i < trees.length; i++) {
+                    const tree = trees[i];
+                    const dx = unit.x - tree.x;
+                    const dy = unit.y - tree.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < TREE_RADIUS + UNIT_SIZE/2) {
+                        // unidad lo suficientemente cerca
+                        unit.state = 'gathering';
+                        unit.gatheringTreeId = i;
+                        unit.lastGatherTime = performance.now(); // reset timer
+                        unit.targetX = unit.x;   // se queda quieto
+                        unit.targetY = unit.y;
+                        break;
+                    }
+                }
+            }
 
-function getPetPower(pet){
-    let milestones = Math.floor(pet.level / 5);
-    let multiplier = Math.pow(1.25, milestones);
-    return Math.floor(pet.basePower * multiplier);
-}
+            // --- mover unidades hacia su target (interpolación suave) ---
+            function moveUnits() {
+                for (let unit of units) {
+                    if (unit.state === 'moving') {
+                        const dx = unit.targetX - unit.x;
+                        const dy = unit.targetY - unit.y;
+                        const distance = Math.sqrt(dx*dx + dy*dy);
 
-function levelUpPet(pet){
-    pet.exp++;
-    if(pet.exp>=5){
-        pet.exp=0;
-        if(pet.level<100) pet.level++;
-    }
-}
+                        if (distance < UNIT_SPEED) {
+                            unit.x = unit.targetX;
+                            unit.y = unit.targetY;
+                            // al llegar, cambia a idle (luego verá si hay árbol)
+                            unit.state = 'idle';
+                        } else {
+                            const angle = Math.atan2(dy, dx);
+                            unit.x += Math.cos(angle) * UNIT_SPEED;
+                            unit.y += Math.sin(angle) * UNIT_SPEED;
+                        }
+                    }
+                }
+            }
 
-function getIncomePerSecond(){
-    if(pets.length===0) return 0;
-    let totalPower=0;
-    pets.forEach(p=> totalPower+=getPetPower(p));
-    let rebirthBoost=1+(rebirths*0.5);
-    let mapBoost=mapMultipliers[map]||1;
-    return totalPower*rebirthBoost*mapBoost*upgrades.incomeBoost;
-}
+            // --- actualizar estado idle -> recolección si está cerca de árbol ---
+            function updateIdleToGathering() {
+                for (let unit of units) {
+                    if (unit.state === 'idle' || unit.state === 'moving') {
+                        // si está moving, no forzamos; pero al final se pondrá idle
+                        // solo probamos si ya está idle
+                        if (unit.state === 'idle') {
+                            tryStartGathering(unit);
+                        }
+                    }
+                }
+            }
 
-setInterval(()=>{
-    let income=getIncomePerSecond();
-    if(income>0){
-        coins+=income;
-        pets.forEach(p=>levelUpPet(p));
-        update();
-    }
-},1000);
+            // --- dibujar cuadrícula (fondo con desplazamiento) ---
+            function drawGrid() {
+                const cellSize = 60;
+                const startX = Math.floor(cameraX / cellSize) * cellSize - cameraX;
+                const startY = Math.floor(cameraY / cellSize) * cellSize - cameraY;
 
-function buyEgg(){
-    if(coins<100) return alert("No tienes suficientes monedas");
-    coins-=100;
+                ctx.strokeStyle = '#5f7a5a';
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                for (let x = startX; x < canvas.width; x += cellSize) {
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                }
+                for (let y = startY; y < canvas.height; y += cellSize) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                }
+                ctx.strokeStyle = '#3e5a3a';
+                ctx.stroke();
+            }
 
-    let pet=eggPets[Math.floor(Math.random()*eggPets.length)];
-    let startLevel=Math.floor(Math.random()*3)+1;
+            // --- dibujar árboles ---
+            function drawTrees() {
+                for (let tree of trees) {
+                    const screenX = tree.x - cameraX;
+                    const screenY = tree.y - cameraY;
+                    if (screenX + tree.radius < 0 || screenX - tree.radius > canvas.width ||
+                        screenY + tree.radius < 0 || screenY - tree.radius > canvas.height) continue;
 
-    pets.push({
-        name:pet.name,
-        rarity:pet.rarity,
-        basePower:pet.basePower,
-        level:startLevel,
-        exp:0
-    });
+                    // tronco
+                    ctx.fillStyle = '#8b5a2b';
+                    ctx.beginPath();
+                    ctx.rect(screenX - 5, screenY + 8, 10, 20);
+                    ctx.fill();
 
-    update();
-}
+                    // copa
+                    ctx.fillStyle = '#3a9e4a';
+                    ctx.shadowColor = '#204d20';
+                    ctx.shadowBlur = 14;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY - 8, tree.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    // detalles
+                    ctx.fillStyle = '#5fb85f';
+                    ctx.beginPath();
+                    ctx.arc(screenX - 8, screenY - 18, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(screenX + 10, screenY - 12, 7, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
 
-function renderPets(){
-    let container=document.getElementById("pets");
-    container.innerHTML="";
+            // --- dibujar aldeanos (unidades) ---
+            function drawUnits() {
+                for (let unit of units) {
+                    const screenX = unit.x - cameraX;
+                    const screenY = unit.y - cameraY;
+                    if (screenX + UNIT_SIZE < 0 || screenX > canvas.width ||
+                        screenY + UNIT_SIZE < 0 || screenY > canvas.height) continue;
 
-    if(pets.length===0){
-        container.innerHTML="No tienes mascotas todavía.";
-        return;
-    }
+                    // sombra
+                    ctx.fillStyle = '#2a3a2a';
+                    ctx.globalAlpha = 0.3;
+                    ctx.beginPath();
+                    ctx.ellipse(screenX + UNIT_SIZE/2 - 2, screenY + UNIT_SIZE - 2, UNIT_SIZE/2, 6, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
 
-    pets.forEach((p,index)=>{
-        let card=document.createElement("div");
-        card.style.position="relative";
-        card.style.display="inline-block";
-        card.style.width="110px";
-        card.style.height="115px";
-        card.style.margin="6px";
-        card.style.background="#333";
-        card.style.borderRadius="12px";
-        card.style.padding="8px";
-        card.style.border="2px solid #555";
-        card.style.textAlign="center";
-        card.style.fontSize="12px";
-        card.className=p.rarity;
+                    // cuerpo
+                    ctx.fillStyle = unit.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#b59d6b';
+                    ctx.fillRect(screenX, screenY, UNIT_SIZE, UNIT_SIZE);
 
-        card.innerHTML=`
-            <div style="font-weight:bold;font-size:14px;">
-                ${p.name}
-            </div>
-            <div>⭐ ${p.level}</div>
-            <div>💪 ${getPetPower(p)}</div>
-        `;
+                    // indicador de selección (marco dorado)
+                    if (selectedUnits.includes(unit)) {
+                        ctx.strokeStyle = '#f5c542';
+                        ctx.lineWidth = 4;
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = '#f0b000';
+                        ctx.strokeRect(screenX - 2, screenY - 2, UNIT_SIZE + 4, UNIT_SIZE + 4);
+                    }
 
-        let btn=document.createElement("button");
-        btn.textContent="❌";
+                    // pequeño icono de estado
+                    if (unit.state === 'gathering') {
+                        ctx.fillStyle = '#f5e56b';
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.arc(screenX + UNIT_SIZE/2, screenY - 8, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillStyle = '#3a4a2a';
+                        ctx.font = 'bold 12px monospace';
+                        ctx.shadowBlur = 0;
+                        ctx.fillText('🌲', screenX + UNIT_SIZE/2 - 8, screenY - 12);
+                    }
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                }
+            }
 
-        /* BOTÓN PERFECTAMENTE CENTRADO */
-        btn.style.position="absolute";
-        btn.style.bottom="5px";
-        btn.style.right="5px";
-        btn.style.width="24px";
-        btn.style.height="24px";
-        btn.style.display="flex";
-        btn.style.alignItems="center";
-        btn.style.justifyContent="center";
-        btn.style.padding="0";
-        btn.style.background="#ff4444";
-        btn.style.color="white";
-        btn.style.borderRadius="6px";
+            // --- dibujar cuadro de selección ---
+            function drawSelectionBox() {
+                if (!selectionBoxActive) return;
+                const x = Math.min(selectionStart.x, selectionEnd.x);
+                const y = Math.min(selectionStart.y, selectionEnd.y);
+                const w = Math.abs(selectionEnd.x - selectionStart.x);
+                const h = Math.abs(selectionEnd.y - selectionStart.y);
+                ctx.strokeStyle = '#f5c542';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 6]);
+                ctx.strokeRect(x, y, w, h);
+                ctx.fillStyle = 'rgba(245, 197, 66, 0.1)';
+                ctx.fillRect(x, y, w, h);
+                ctx.setLineDash([]);
+            }
 
-        btn.onclick=function(){
-            pets.splice(index,1);
-            update();
-        };
+            // --- procesar selección por caja (al soltar) ---
+            function applyBoxSelection() {
+                if (!selectionBoxActive) return;
+                const rectStart = { x: Math.min(selectionStart.x, selectionEnd.x), y: Math.min(selectionStart.y, selectionEnd.y) };
+                const rectEnd = { x: Math.max(selectionStart.x, selectionEnd.x), y: Math.max(selectionStart.y, selectionEnd.y) };
 
-        card.appendChild(btn);
-        container.appendChild(card);
-    });
-}
+                // convertir a mundo
+                const worldStart = { x: rectStart.x + cameraX, y: rectStart.y + cameraY };
+                const worldEnd   = { x: rectEnd.x + cameraX, y: rectEnd.y + cameraY };
 
-function renderEncyclopedia(){
-    let container=document.getElementById("encyclopedia");
-    container.innerHTML="";
-    eggPets.forEach(p=>{
-        container.innerHTML+=`
-        <div class="${p.rarity}">
-            ${p.name} | Poder Base: ${p.basePower}
-        </div>`;
-    });
-}
+                // deseleccionar todos
+                for (let unit of units) unit.selected = false;
+                selectedUnits = [];
 
-function toggleMenu(id){
-    if(currentMenu===id){
-        document.getElementById(id).style.display="none";
-        currentMenu=null;
-    }else{
-        document.querySelectorAll(".menu").forEach(m=>m.style.display="none");
-        document.getElementById(id).style.display="block";
-        currentMenu=id;
-    }
-}
+                // seleccionar los que estén dentro
+                for (let unit of units) {
+                    if (unit.x >= worldStart.x && unit.x <= worldEnd.x &&
+                        unit.y >= worldStart.y && unit.y <= worldEnd.y) {
+                        unit.selected = true;
+                        selectedUnits.push(unit);
+                    }
+                }
+                selectionBoxActive = false;
+            }
 
-function unlockMap(name,price){
-    if(coins>=price){
-        coins-=price;
-        map=name;
-        update();
-    }else alert("No tienes suficientes monedas");
-}
+            // --- manejo de eventos del ratón ---
+            let isMouseDown = false;
+            let mouseDownScreen = { x: 0, y: 0 };
+            let dragStarted = false;
 
-function buyUpgrade(){
-    let cost=1000*upgrades.incomeBoost;
-    if(coins>=cost){
-        coins-=cost;
-        upgrades.incomeBoost+=0.5;
-        update();
-    }else alert("No tienes suficientes monedas");
-}
+            function handleMouseDown(e) {
+                e.preventDefault();
+                if (e.button !== 0) return; // solo izquierdo
 
-function rebirth(){
-    if(coins>=10000){
-        coins=0;
-        pets=[];
-        rebirths++;
-        update();
-    }else alert("Necesitas 10,000 monedas");
-}
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
 
-update();
+                isMouseDown = true;
+                mouseDownScreen = { x: mouseX, y: mouseY };
+                selectionStart = { x: mouseX, y: mouseY };
+                selectionEnd = { x: mouseX, y: mouseY };
+                dragStarted = false; // aún no es arrastre
+            }
 
-</script>
+            function handleMouseMove(e) {
+                if (!isMouseDown) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+
+                selectionEnd = { x: mouseX, y: mouseY };
+
+                const dx = mouseX - mouseDownScreen.x;
+                const dy = mouseY - mouseDownScreen.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (!dragStarted && dist > DRAG_THRESHOLD) {
+                    dragStarted = true;
+                    selectionBoxActive = true;
+                }
+            }
+
+            function handleMouseUp(e) {
+                if (e.button !== 0) return;
+
+                if (selectionBoxActive) {
+                    applyBoxSelection();
+                } else if (!dragStarted && isMouseDown) {
+                    // click simple: seleccionar unidad o deseleccionar
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    const mouseX = (e.clientX - rect.left) * scaleX;
+                    const mouseY = (e.clientY - rect.top) * scaleY;
+
+                    const worldX = mouseX + cameraX;
+                    const worldY = mouseY + cameraY;
+
+                    // buscar unidad bajo el ratón (última para que parezca la de arriba)
+                    let clickedUnit = null;
+                    for (let i = units.length - 1; i >= 0; i--) {
+                        const u = units[i];
+                        if (worldX >= u.x && worldX <= u.x + UNIT_SIZE &&
+                            worldY >= u.y && worldY <= u.y + UNIT_SIZE) {
+                            clickedUnit = u;
+                            break;
+                        }
+                    }
+
+                    // deseleccionar todos
+                    for (let u of units) u.selected = false;
+                    selectedUnits = [];
+
+                    if (clickedUnit) {
+                        clickedUnit.selected = true;
+                        selectedUnits = [clickedUnit];
+                    }
+                }
+
+                isMouseDown = false;
+                dragStarted = false;
+                selectionBoxActive = false;
+            }
+
+            // clic derecho: movimiento
+            function handleContextMenu(e) {
+                e.preventDefault();
+                if (selectedUnits.length === 0) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+
+                const worldX = mouseX + cameraX;
+                const worldY = mouseY + cameraY;
+
+                for (let unit of selectedUnits) {
+                    unit.targetX = worldX;
+                    unit.targetY = worldY;
+                    unit.state = 'moving';
+                    unit.gatheringTreeId = null;   // dejar de recolectar
+                }
+            }
+
+            // teclado: mover cámara
+            function handleKeyDown(e) {
+                const key = e.key;
+                if (key.startsWith('Arrow')) {
+                    e.preventDefault();
+                    switch (key) {
+                        case 'ArrowLeft': cameraX = Math.max(0, cameraX - CAMERA_SPEED); break;
+                        case 'ArrowRight': cameraX += CAMERA_SPEED; break;
+                        case 'ArrowUp': cameraY = Math.max(0, cameraY - CAMERA_SPEED); break;
+                        case 'ArrowDown': cameraY += CAMERA_SPEED; break;
+                    }
+                }
+            }
+
+            // botón construir casa (funcional: cuesta 50 madera, crea aldeano)
+            document.getElementById('buildHouseBtn').addEventListener('click', () => {
+                if (wood >= 50) {
+                    wood -= 50;
+                    // crear aldeano cerca del centro de la cámara
+                    const spawnX = cameraX + canvas.width/2 + (Math.random() * 80 - 40);
+                    const spawnY = cameraY + canvas.height/2 + (Math.random() * 80 - 40);
+                    createUnit(spawnX, spawnY);
+                    updateUI();
+                } else {
+                    alert('❌ No tienes suficiente madera (necesitas 50)');
+                }
+            });
+
+            // registrar eventos
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('contextmenu', handleContextMenu);
+            window.addEventListener('keydown', handleKeyDown);
+
+            // para cuando se suelta fuera del canvas
+            window.addEventListener('mouseup', (e) => {
+                if (e.button === 0) {
+                    if (selectionBoxActive) applyBoxSelection();
+                    isMouseDown = false;
+                    dragStarted = false;
+                    selectionBoxActive = false;
+                }
+            });
+
+            // --- bucle principal del juego ---
+            function gameLoop(now) {
+                // mover unidades hacia sus targets
+                moveUnits();
+
+                // comprobar si alguna unidad idle está cerca de árbol
+                updateIdleToGathering();
+
+                // actualizar recolección (tiempo real)
+                updateGathering(now);
+
+                // dibujar
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid();
+                drawTrees();
+                drawUnits();
+                drawSelectionBox();
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            requestAnimationFrame(gameLoop);
+        })();
+    </script>
 </body>
 </html>
-
-
