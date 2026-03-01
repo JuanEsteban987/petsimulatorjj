@@ -3,732 +3,547 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2008 Shape Programmer PRO</title>
+    <title>🤖 Programación en el laberinto · juego custom</title>
     <style>
-        /* === ESTÉTICA 2008 MEJORADA === */
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
-
         body {
-            background: #39658a;
-            background: -moz-linear-gradient(top, #4b7ca1, #1a4b6d);
-            background: -webkit-gradient(linear, left top, left bottom, from(#4b7ca1), to(#1a4b6d));
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Monaco', cursive, sans-serif;
+            background: linear-gradient(145deg, #1e2b3a 0%, #0f1a24 100%);
             min-height: 100vh;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-            margin: 0;
-            border: 3px solid #ffcc00;
-            box-shadow: inset 0 0 30px #00000066;
         }
-
-        .ventana-principal {
-            width: 1200px;
-            max-width: 100%;
-            background: #ece9d8;
-            border: 4px solid #2a6f9c;
-            border-radius: 12px 12px 8px 8px;
-            padding: 12px;
-            -webkit-box-shadow: 8px 8px 16px #1e1e1e, inset 2px 2px 4px #ffffffb0;
-            box-shadow: 8px 8px 16px #1e1e1e, inset 2px 2px 4px #ffffffb0;
+        .game-container {
+            max-width: 650px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 3rem 3rem 2rem 2rem;
+            padding: 2rem 1.5rem 2rem 1.5rem;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
+            border: 1px solid #4b6e8c;
         }
-
-        .titulo-ventana {
-            background: #2a6f9c;
-            padding: 6px 10px;
-            border-radius: 8px 8px 0 0;
+        h1 {
+            text-align: center;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            font-size: 2.1rem;
+            letter-spacing: 1px;
+            color: #ffd966;
+            text-shadow: 0 3px 0 #7a4d00, 0 5px 10px #00000080;
+            word-break: break-word;
+        }
+        .sub {
+            text-align: center;
+            color: #b0d4f0;
+            margin-top: -0.2rem;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+            font-weight: 300;
+            border-bottom: 1px dashed #3e607b;
+            padding-bottom: 0.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.7rem;
+            aspect-ratio: 1 / 1;
+            max-width: 350px;
+            margin: 0 auto 1.5rem auto;
+            background: #21384b;
+            padding: 1rem;
+            border-radius: 2.5rem;
+            box-shadow: inset 0 -3px 0 #0d1b26, 0 15px 20px #00000060;
+        }
+        .cell {
+            background: #2f4b65;
+            border-radius: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 600;
+            aspect-ratio: 1 / 1;
+            box-shadow: inset 0 -4px 0 #1b3140, 0 0 0 2px #2c4d66;
+            color: #fff9e6;
+            text-shadow: 0 2px 0 #00000070;
+            transition: 0.1s ease;
+        }
+        .cell.player-cell {
+            background: #f7c45a;
+            box-shadow: inset 0 -4px 0 #b57c2a, 0 0 0 3px #ffecaa;
+            color: #1e2b3a;
+        }
+        .wall {
+            background: #3d2e24;
+            box-shadow: inset 0 -4px 0 #241b15, 0 0 0 2px #684e3a;
+            color: #ae8f76;
+        }
+        .info-panel {
+            background: #14222e;
+            border-radius: 3rem;
+            padding: 1.5rem 1.2rem;
+            box-shadow: inset 0 2px 6px #00000080, 0 8px 0 #0b151f;
+            border: 1px solid #42749b;
+        }
+        .command-section-title {
+            color: #c7e5ff;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin: 0 0 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+            border-left: 6px solid #ffb347;
+            padding-left: 1rem;
+        }
+        .commands-list {
+            background: #0f1c28;
+            border-radius: 2.5rem;
+            min-height: 4rem;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            border: 1px solid #31658c;
+            box-shadow: inset 0 2px 5px #000000;
+        }
+        .command-chip {
+            background: #2f5575;
+            border-radius: 3rem;
+            padding: 0.4rem 0.9rem 0.4rem 1.3rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: white;
+            box-shadow: 0 3px 0 #173248, inset 0 0 0 1px #7fa9cc;
+        }
+        .command-chip button {
+            background: #ac3e3e;
+            border: none;
             color: white;
             font-weight: bold;
-            font-size: 20px;
-            letter-spacing: 1px;
-            text-shadow: 2px 2px 0 #0f2f44;
-            display: flex;
+            font-size: 1.2rem;
+            line-height: 1;
+            border-radius: 50%;
+            width: 1.7rem;
+            height: 1.7rem;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid #ffd966;
-        }
-
-        .contenido-flex {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .panel-codigo {
-            flex: 1.3;
-            min-width: 320px;
-            background: #d4d0c8;
-            border: 3px inset #ffffffd0;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            padding: 15px;
-            box-shadow: inset -2px -2px 8px #404040, inset 2px 2px 8px #f0f0f0;
-        }
-
-        .panel-codigo label {
-            display: block;
-            font-size: 18px;
-            color: #1e3a5f;
-            margin-bottom: 5px;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #bbccdd;
-        }
-
-        textarea {
-            width: 100%;
-            height: 180px;
-            background: #171717;
-            border: 4px solid #7b7b7b;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 15px;
-            padding: 10px;
-            resize: vertical;
-            box-shadow: inset 0 0 12px #00aa00, 0 0 5px cyan;
-            border-radius: 0;
-            line-height: 1.5;
-        }
-
-        .botonera-principal {
-            margin: 15px 0 10px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .boton-2008 {
-            background: #b0d0f0;
-            border: 3px outset #ffffff;
-            border-right-color: #2a3f6e;
-            border-bottom-color: #2a3f6e;
-            color: #002856;
-            font-family: 'Comic Sans MS', cursive;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 8px 18px;
+            justify-content: center;
             cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 2px 2px 0 #0a1c33;
+            box-shadow: 0 2px 0 #631d1d;
             transition: 0.1s ease;
-            border-radius: 0px;
+            padding: 0;
         }
-
-        .boton-2008:hover {
-            background: #c5e1ff;
-            border: 3px outset #fcfcfc;
-            transform: scale(0.98);
+        .command-chip button:hover {
+            background: #c55a5a;
+            transform: scale(1.05);
         }
-
-        .boton-2008:active {
-            border: 3px inset #8ba0c0;
-            background: #8faed0;
-            box-shadow: inset 1px 1px 5px #131313;
+        .command-chip button:active {
+            transform: translateY(2px);
+            box-shadow: none;
         }
-
-        .boton-pequeno {
-            font-size: 14px;
-            padding: 5px 10px;
-            background: #e0e0c0;
-            border: 2px outset #ffffe0;
-            border-right-color: #6b6b4e;
-            border-bottom-color: #6b6b4e;
-        }
-
-        .panel-autocompletar {
-            background: #b9c9d6;
-            border: 3px ridge #4f7b99;
-            padding: 10px;
-            margin: 12px 0 5px;
-        }
-
-        .panel-autocompletar .titulo {
-            font-size: 16px;
-            color: #0b2d44;
-            margin-bottom: 8px;
-            font-weight: bold;
-            border-bottom: 2px solid #0f3857;
-        }
-
-        .comandos-rapidos {
+        .add-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.2rem 0 1rem 0;
         }
-
-        .comando-boton {
-            background: #eef4d0;
-            border: 2px outset #faffc4;
-            border-right-color: #8a9344;
-            border-bottom-color: #8a9344;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 4px 8px;
-            cursor: pointer;
-            color: #1d3d5c;
-            box-shadow: 1px 1px 0 #1a2f40;
-        }
-
-        .comando-boton:hover {
-            background: #f8ffb5;
-        }
-
-        .panel-canvas {
-            flex: 2;
-            min-width: 450px;
-            background: #586e7e;
-            border: 5px ridge #6f8fa2;
-            padding: 10px;
-            box-shadow: 0 0 0 2px #2c4b63, 10px 10px 20px #00000070;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            background: #2c3e4e;
-            border: 3px solid #b9c9d6;
-            box-shadow: inset 0 0 30px #000000, 4px 4px 8px black;
-            cursor: crosshair;
-            image-rendering: pixelated;
-        }
-
-        .barra-estado {
-            margin-top: 15px;
-            background: #b7c9d6;
-            border: 2px inset #f0f0f0;
-            border-top-color: #4a5c6b;
-            border-left-color: #4a5c6b;
-            padding: 6px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            color: #002240;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
+        .btn {
+            background: #f0d9b0;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem;
+            border-radius: 3rem;
+            display: inline-flex;
             align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 5px 0 #a07948, 0 8px 12px #00000040;
+            cursor: pointer;
+            transition: 0.08s linear;
+            color: #1e2b3a;
+            border: 1px solid #ffecb3;
         }
-
-        .status-text {
-            text-shadow: 1px 1px 0 #cedae4;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #a07948, 0 5px 10px #00000040;
         }
-
-        .contador-shapes {
-            background: #1d4357;
-            color: #c0e0ff;
-            padding: 2px 12px;
-            border: 2px inset #58a3c7;
-            border-radius: 20px;
-            font-size: 15px;
+        .btn-primary {
+            background: #ffb854;
+            box-shadow: 0 5px 0 #b16f1d;
+            color: #1e2b1e;
         }
-
-        .marquee-2008 {
-            background: #f0dd96;
-            border: 2px solid #aa7b3c;
-            padding: 4px;
-            font-size: 18px;
-            color: #4d2800;
-            margin: 8px 0 0;
-            white-space: nowrap;
-            overflow: hidden;
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0 0.5rem;
         }
-
-        .marquee-2008 span {
-            display: inline-block;
-            width: 100%;
-            animation: marquesina 12s linear infinite;
-            font-weight: bold;
+        .message {
+            background: #07121c;
+            border-radius: 4rem;
+            padding: 0.9rem 1.8rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #cce6ff;
+            border: 1px solid #2b6599;
+            margin-top: 1.5rem;
+            box-shadow: inset 0 2px 5px black;
+            min-height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        @keyframes marquesina {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        .footer-dir {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0 0.2rem;
+            color: #9bc2e6;
+            font-size: 1.2rem;
         }
-
-        hr {
-            border: 1px solid #406b8a;
-            border-style: inset;
-            margin: 12px 0 4px;
+        .badge {
+            background: #31658c;
+            border-radius: 2rem;
+            padding: 0.2rem 1.2rem;
+            font-weight: 600;
+            color: #ffdd9e;
         }
     </style>
 </head>
 <body>
-<div class="ventana-principal">
-    <div class="titulo-ventana">
-        <span>◈ SHAPE PROGRAMMER 2008 ◈</span>
-        <span style="font-size:14px; margin-left:auto;">+ 9 nuevos comandos</span>
+<div class="game-container">
+    <h1>⚙️ LABERINTO CODE</h1>
+    <div class="sub">construye tu programa → alcanza la ★</div>
+
+    <!-- cuadrícula 5x5 -->
+    <div class="grid" id="gridContainer"></div>
+
+    <!-- indicador de dirección actual (extra) -->
+    <div class="footer-dir">
+        <span>🤖 dirección:</span>
+        <span class="badge" id="directionBadge">→</span>
     </div>
-    <div class="marquee-2008">
-        <span>★ AUTCOMPLETAR CON BOTONES ★ LIST / DELETE / CLEAN / COLOR / RENAME / MOVID / TPID ★</span>
-    </div>
 
-    <div class="contenido-flex">
-        <!-- PANEL IZQUIERDO: CÓDIGO Y AUTOCOMPLETAR -->
-        <div class="panel-codigo">
-            <label>📟 TERMINAL DE COMANDOS (cada línea uno):</label>
-            <textarea id="codigoArea" placeholder="Ejemplo:
-create:'cuadradoRojo,1':'Cubo':'red'
-mov:'60':'20'
-create:'circuloAzul,2':'Círculo':'#2266ff'
-tp:'400':'200'">create:"MiForma,101":"Cubo":"#FF44AA"
-mov:"30":"-10"
-create:"Bola,202":"Circulo":"gold"
-tp:"500":"150"</textarea>
-
-            <div class="botonera-principal">
-                <button class="boton-2008" id="runBtn">▶ EJECUTAR</button>
-                <button class="boton-2008" id="resetBtn">♻ RESET SHAPES</button>
-                <button class="boton-2008" id="limpiarCmdBtn">⌧ LIMPIAR CÓDIGO</button>
-            </div>
-
-            <!-- AUTOCOMPLETAR: BOTONES QUE INSERTAN PLANTILLAS -->
-            <div class="panel-autocompletar">
-                <div class="titulo">⚡ AUTCOMPLETAR (haz clic para insertar comando):</div>
-                <div class="comandos-rapidos">
-                    <span class="comando-boton" data-cmd="create">create:"nombre,ID":"Cubo":"red"</span>
-                    <span class="comando-boton" data-cmd="mov">mov:"X":"Y"</span>
-                    <span class="comando-boton" data-cmd="tp">tp:"X":"Y"</span>
-                    <span class="comando-boton" data-cmd="movid">movid:"ID":"X":"Y"</span>
-                    <span class="comando-boton" data-cmd="tpid">tpid:"ID":"X":"Y"</span>
-                    <span class="comando-boton" data-cmd="color">color:"ID":"blue"</span>
-                    <span class="comando-boton" data-cmd="rename">rename:"ID":"nuevoNombre"</span>
-                    <span class="comando-boton" data-cmd="delete">delete</span>
-                    <span class="comando-boton" data-cmd="deleteid">delete:"ID"</span>
-                    <span class="comando-boton" data-cmd="list">list</span>
-                    <span class="comando-boton" data-cmd="clean">clean</span>
-                </div>
-                <div style="font-size:12px; margin-top:6px; color:#1d3a4f;"> click → añade línea. Edita los valores.</div>
-            </div>
-
-            <hr>
-            <div style="font-size:14px; color:#142f44; background:#fbe6b0; padding:8px; border:2px dashed #b0804c;">
-                <strong>📌 COMANDOS 2008 (nuevos en negrita):</strong><br>
-                create:"nombre,ID":"Cubo/Circulo/Triangulo":"color"<br>
-                mov:"X":"Y" | tp:"X":"Y" <br>
-                <strong>movid:"ID":"X":"Y" | tpid:"ID":"X":"Y"</strong><br>
-                <strong>color:"ID":"nuevocolor" | rename:"ID":"nuevonombre"</strong><br>
-                <strong>delete (último) | delete:"ID" | list | clean</strong><br>
-                <span style="font-size:12px;">*Se aceptan comillas dobles, simples u omitidas si sin espacios.</span>
-            </div>
+    <div class="info-panel">
+        <div class="command-section-title">
+            <span>📜 TUS INSTRUCCIONES</span>
+            <span style="font-size:0.9rem; background:#0e2a3b; padding:0.2rem 1rem; border-radius:40px;" id="cmdCount">0</span>
         </div>
 
-        <!-- PANEL DERECHO: CANVAS -->
-        <div class="panel-canvas">
-            <canvas id="lienzo" width="700" height="400"></canvas>
-            <div class="barra-estado">
-                <span class="status-text" id="estadoMsg">✔ Listo. Crea figuras.</span>
-                <span class="contador-shapes" id="contadorShapes">0 shapes</span>
-            </div>
-            <div style="margin-top: 6px; text-align:right; color:#e9f2fa; text-shadow:1px 1px 0 #0f1f2f;">
-                canvas 700x400
-            </div>
+        <!-- lista de comandos agregados -->
+        <div id="commandsList" class="commands-list">
+            <!-- se llena dinámicamente -->
+        </div>
+
+        <!-- botones para agregar comandos -->
+        <div class="add-buttons">
+            <button class="btn" id="addForward">⬆️ ADELANTE</button>
+            <button class="btn" id="addLeft">↪️ IZQUIERDA</button>
+            <button class="btn" id="addRight">↩️ DERECHA</button>
+        </div>
+
+        <!-- acciones principales -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="runBtn">▶️ EJECUTAR</button>
+            <button class="btn" id="resetGameBtn">🔄 REINICIAR</button>
+            <button class="btn" id="clearCommandsBtn">🗑️ BORRAR TODO</button>
         </div>
     </div>
 
-    <div style="display: flex; gap: 12px; margin-top: 12px; background:#cddae5; padding: 4px; border:1px solid #457d9c;">
-        <span>★</span><span> MSN 2008</span><span>★</span><span style="margin-left:auto;">MySpace</span><span>★</span><span>Fotolog</span><span>★</span>
+    <!-- área de mensajes (feedback) -->
+    <div id="message" class="message">
+        ⚡ Coloca instrucciones y pulsa EJECUTAR
     </div>
 </div>
 
 <script>
     (function() {
-        // --- CONFIGURACIÓN Y ESTADO ---
-        const canvas = document.getElementById('lienzo');
-        const ctx = canvas.getContext('2d');
-        const statusEl = document.getElementById('estadoMsg');
-        const contadorEl = document.getElementById('contadorShapes');
-        const codigoArea = document.getElementById('codigoArea');
+        // ----- CONFIGURACIÓN DEL JUEGO -----
+        const SIZE = 5;  // grid 5x5
+        // Muros fijos (paredes) para dar reto
+        const WALLS = [
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 3, y: 2 },
+            // { x: 1, y: 3 }, // se puede descomentar para más muros
+        ];
+        const GOAL = { x: 4, y: 4 };  // meta fija
 
-        let shapes = [];
-        let lastShapeIndex = -1;
-        const DEFAULT_X = 350;
-        const DEFAULT_Y = 200;
+        // Estado del jugador
+        let player = { x: 0, y: 0 };
+        let direction = 0;        // 0: derecha, 1: abajo, 2: izquierda, 3: arriba
 
-        // --- FUNCIONES DE DIBUJO (igual) ---
-        function drawShape(shape) {
-            const { type, color, x, y } = shape;
-            ctx.fillStyle = color;
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#00000080';
-            ctx.shadowBlur = 6;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
+        // Programa del jugador (lista de comandos)
+        let commands = [];        // cada elemento: 'forward', 'left', 'right'
 
-            switch (type.toLowerCase()) {
-                case 'cubo':
-                case 'cube':
-                case 'cuadrado':
-                    ctx.fillRect(x - 25, y - 25, 50, 50);
-                    ctx.strokeRect(x - 25, y - 25, 50, 50);
-                    break;
-                case 'circulo':
-                case 'circle':
-                case 'círculo':
-                    ctx.beginPath();
-                    ctx.arc(x, y, 25, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    break;
-                case 'triangulo':
-                case 'triangle':
-                    ctx.beginPath();
-                    ctx.moveTo(x, y - 30);
-                    ctx.lineTo(x - 25, y + 15);
-                    ctx.lineTo(x + 25, y + 15);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                    break;
-                default:
-                    ctx.beginPath();
-                    ctx.moveTo(x, y - 20);
-                    ctx.lineTo(x + 20, y);
-                    ctx.lineTo(x, y + 20);
-                    ctx.lineTo(x - 20, y);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-            }
-            ctx.shadowBlur = 0;
-        }
+        // Elementos del DOM
+        const gridEl = document.getElementById('gridContainer');
+        const commandsListEl = document.getElementById('commandsList');
+        const messageEl = document.getElementById('message');
+        const directionBadge = document.getElementById('directionBadge');
+        const cmdCountSpan = document.getElementById('cmdCount');
 
-        function redrawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#20394c';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#4c6c87';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < canvas.width; i += 30) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#2b4b5e';
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 30) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#2b4b5e';
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-            shapes.forEach(shape => drawShape(shape));
-            contadorEl.innerText = shapes.length + (shapes.length === 1 ? ' shape' : ' shapes');
-        }
+        // Mapeo de dirección a símbolo
+        const DIR_SYMBOLS = ['→', '↓', '←', '↑'];
 
-        // --- PARSEADOR MEJORADO: acepta comillas dobles, simples o sin comillas si no hay espacios ---
-        function parsearArgumentos(linea) {
-            const partes = [];
-            let buffer = '';
-            let dentroComillas = false;
-            let comillaUsada = '';
-            for (let i = 0; i < linea.length; i++) {
-                const c = linea[i];
-                if ((c === '"' || c === "'") && (!dentroComillas || comillaUsada === c)) {
-                    if (dentroComillas && comillaUsada === c) {
-                        // cierre
-                        dentroComillas = false;
-                        comillaUsada = '';
-                        partes.push(buffer);
-                        buffer = '';
+        // ----- FUNCIONES DE ACTUALIZACIÓN DE INTERFAZ -----
+
+        // Dibuja la cuadrícula según estado actual (jugador, meta, muros)
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    // Comprobar si es muro
+                    const isWall = WALLS.some(w => w.x === col && w.y === row);
+                    if (isWall) {
+                        cell.classList.add('wall');
+                        cell.textContent = '█';
                     } else {
-                        dentroComillas = true;
-                        comillaUsada = c;
+                        // Determinar si es la posición del jugador
+                        if (player.x === col && player.y === row) {
+                            cell.classList.add('player-cell');
+                            cell.textContent = DIR_SYMBOLS[direction];  // mostramos dirección
+                        }
+                        // Si no es jugador, pero es la meta
+                        else if (GOAL.x === col && GOAL.y === row) {
+                            cell.textContent = '★';
+                            cell.style.color = '#ffd966';
+                        } else {
+                            // Celda vacía
+                            cell.textContent = '·';
+                            cell.style.color = '#5c7f9c';
+                        }
                     }
-                    continue;
+                    gridEl.appendChild(cell);
                 }
-                if (c === ':' && !dentroComillas) {
-                    if (buffer.trim() !== '') {
-                        partes.push(buffer.trim());
-                    } else {
-                        partes.push(''); // argumento vacío
-                    }
-                    buffer = '';
-                    continue;
-                }
-                buffer += c;
             }
-            if (buffer.trim() !== '' || dentroComillas) {
-                partes.push(buffer.trim());
-            }
-            return partes;
+            // Actualizar badge de dirección
+            directionBadge.textContent = DIR_SYMBOLS[direction];
         }
 
-        // --- EJECUTAR UN COMANDO (devuelve true si ok) ---
-        function ejecutarComando(linea, numeroLinea) {
-            linea = linea.trim();
-            if (linea === '' || linea.startsWith('//')) return true;
-
-            // Extraer comando (primera palabra hasta ':')
-            const idxColon = linea.indexOf(':');
-            let comando, resto;
-            if (idxColon === -1) {
-                comando = linea.toLowerCase();
-                resto = '';
+        // Renderiza la lista de comandos (con botones de eliminar)
+        function renderCommands() {
+            commandsListEl.innerHTML = '';
+            if (commands.length === 0) {
+                commandsListEl.style.justifyContent = 'center';
+                const emptyMsg = document.createElement('span');
+                emptyMsg.textContent = '✖️ ninguna instrucción';
+                emptyMsg.style.color = '#6f8fa8';
+                emptyMsg.style.fontStyle = 'italic';
+                commandsListEl.appendChild(emptyMsg);
             } else {
-                comando = linea.substring(0, idxColon).toLowerCase().trim();
-                resto = linea.substring(idxColon + 1);
+                commandsListEl.style.justifyContent = 'flex-start';
+                commands.forEach((cmd, index) => {
+                    const chip = document.createElement('span');
+                    chip.className = 'command-chip';
+                    let texto = '';
+                    if (cmd === 'forward') texto = '⬆️ Adelante';
+                    else if (cmd === 'left') texto = '↪️ Izquierda';
+                    else if (cmd === 'right') texto = '↩️ Derecha';
+
+                    chip.innerHTML = `${texto} <button class="remove-cmd" data-index="${index}">✕</button>`;
+                    commandsListEl.appendChild(chip);
+                });
+
+                // Agregar eventos a los botones de eliminar (usamos delegación más simple)
+                document.querySelectorAll('.remove-cmd').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const idx = btn.getAttribute('data-index');
+                        if (idx !== null) removeCommand(parseInt(idx));
+                    });
+                });
+            }
+            // actualizar contador
+            cmdCountSpan.textContent = commands.length;
+        }
+
+        // Mostrar mensaje al usuario
+        function setMessage(text, esExito = false, esError = false) {
+            messageEl.textContent = text;
+            if (esExito) messageEl.style.background = '#1f5130';
+            else if (esError) messageEl.style.background = '#631f1f';
+            else messageEl.style.background = '#07121c';
+        }
+
+        // ----- LÓGICA DE COMANDOS -----
+
+        function addCommand(cmdType) {
+            commands.push(cmdType);
+            renderCommands();
+            setMessage('➕ instrucción añadida', false, false);
+        }
+
+        function removeCommand(index) {
+            if (index >= 0 && index < commands.length) {
+                commands.splice(index, 1);
+                renderCommands();
+                setMessage('❌ instrucción eliminada', false, false);
+            }
+        }
+
+        function clearCommands() {
+            commands = [];
+            renderCommands();
+            setMessage('📭 programa borrado', false, false);
+        }
+
+        // Reiniciar jugador a posición inicial (0,0) y dirección derecha
+        function resetGame() {
+            player = { x: 0, y: 0 };
+            direction = 0;  // derecha
+            // No borramos comandos automáticamente (depende del botón)
+            renderGrid();
+            setMessage('🔄 Juego reiniciado. ¡Puedes programar!', false, false);
+        }
+
+        // Función que ejecuta el programa actual desde la posición actual
+        function runProgram() {
+            if (commands.length === 0) {
+                setMessage('⚠️ Agrega algunas instrucciones primero', false, true);
+                return;
             }
 
-            // Parsear argumentos del resto
-            let args = [];
-            if (resto.trim() !== '') {
-                args = parsearArgumentos(resto);
-            }
+            // Copiar estado actual para simular
+            let simX = player.x;
+            let simY = player.y;
+            let simDir = direction;
 
-            try {
-                // --- CREATE ---
-                if (comando === 'create') {
-                    if (args.length < 3) {
-                        statusEl.innerText = `Error create: necesita 3 argumentos`;
-                        return false;
+            // Definir movimientos según dirección
+            const dx = [1, 0, -1, 0];  // derecha, abajo, izquierda, arriba (columna x)
+            const dy = [0, 1, 0, -1];  // fila y
+
+            let mensaje = '';
+            let exito = false;
+            let choque = false;
+            let metaAlcanzada = false;
+
+            // Recorrer instrucciones
+            for (let i = 0; i < commands.length; i++) {
+                const cmd = commands[i];
+
+                if (cmd === 'left') {
+                    simDir = (simDir + 3) % 4;  // gira izquierda
+                }
+                else if (cmd === 'right') {
+                    simDir = (simDir + 1) % 4;  // gira derecha
+                }
+                else if (cmd === 'forward') {
+                    // calcular nueva posición
+                    const newX = simX + dx[simDir];
+                    const newY = simY + dy[simDir];
+
+                    // verificar límites
+                    if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE) {
+                        mensaje = `🧱 ¡Instrucción ${i+1} se sale del tablero!`;
+                        choque = true;
+                        break;
                     }
-                    const nombreId = args[0];
-                    let nombre = nombreId;
-                    let id = '' + (shapes.length + 1);
-                    if (nombreId.includes(',')) {
-                        const split = nombreId.split(',').map(s => s.trim());
-                        nombre = split[0] || 'sinNombre';
-                        id = split[1] || id;
-                    } else {
-                        nombre = nombreId;
+
+                    // verificar muro
+                    const chocaMuro = WALLS.some(w => w.x === newX && w.y === newY);
+                    if (chocaMuro) {
+                        mensaje = `💥 ¡Instrucción ${i+1} choca contra un muro!`;
+                        choque = true;
+                        break;
                     }
 
-                    let formaRaw = args[1].toLowerCase();
-                    let forma = 'Cubo';
-                    if (formaRaw.includes('circulo') || formaRaw.includes('circle') || formaRaw.includes('círculo')) forma = 'Circulo';
-                    else if (formaRaw.includes('triangulo') || formaRaw.includes('triangle')) forma = 'Triangulo';
-                    else forma = 'Cubo';
+                    // mover
+                    simX = newX;
+                    simY = newY;
 
-                    const color = args[2] || '#FFB6C1';
-
-                    const newShape = {
-                        id: id,
-                        name: nombre,
-                        type: forma,
-                        color: color,
-                        x: DEFAULT_X,
-                        y: DEFAULT_Y
-                    };
-                    shapes.push(newShape);
-                    lastShapeIndex = shapes.length - 1;
-                    statusEl.innerText = `✔ Creado: ${nombre} (ID ${id})`;
-                }
-                // --- MOV (último) ---
-                else if (comando === 'mov') {
-                    if (shapes.length === 0) { statusEl.innerText = `Error mov: no hay shapes`; return false; }
-                    if (args.length < 2) { statusEl.innerText = `Error mov: necesito X e Y`; return false; }
-                    const dx = parseFloat(args[0]);
-                    const dy = parseFloat(args[1]);
-                    if (isNaN(dx) || isNaN(dy)) { statusEl.innerText = `Error mov: X/Y deben ser números`; return false; }
-                    const shape = shapes[lastShapeIndex];
-                    shape.x += dx;
-                    shape.y += dy;
-                    statusEl.innerText = `✔ Movido último (${shape.name}) a (${Math.round(shape.x)},${Math.round(shape.y)})`;
-                }
-                // --- TP (último) ---
-                else if (comando === 'tp') {
-                    if (shapes.length === 0) { statusEl.innerText = `Error tp: no hay shapes`; return false; }
-                    if (args.length < 2) { statusEl.innerText = `Error tp: necesito X e Y`; return false; }
-                    const newX = parseFloat(args[0]);
-                    const newY = parseFloat(args[1]);
-                    if (isNaN(newX) || isNaN(newY)) { statusEl.innerText = `Error tp: coordenadas inválidas`; return false; }
-                    const shape = shapes[lastShapeIndex];
-                    shape.x = newX;
-                    shape.y = newY;
-                    statusEl.innerText = `✔ Teletransportado último a (${newX},${newY})`;
-                }
-                // --- MOVID (mover por ID) ---
-                else if (comando === 'movid') {
-                    if (args.length < 3) { statusEl.innerText = `Error movid: necesito ID, X, Y`; return false; }
-                    const idBuscado = args[0];
-                    const dx = parseFloat(args[1]);
-                    const dy = parseFloat(args[2]);
-                    if (isNaN(dx) || isNaN(dy)) { statusEl.innerText = `Error movid: X/Y deben ser números`; return false; }
-                    const index = shapes.findIndex(s => s.id == idBuscado);
-                    if (index === -1) { statusEl.innerText = `Error movid: ID ${idBuscado} no encontrado`; return false; }
-                    shapes[index].x += dx;
-                    shapes[index].y += dy;
-                    lastShapeIndex = index; // actualizar último
-                    statusEl.innerText = `✔ Movido ID ${idBuscado} a (${Math.round(shapes[index].x)},${Math.round(shapes[index].y)})`;
-                }
-                // --- TPID ---
-                else if (comando === 'tpid') {
-                    if (args.length < 3) { statusEl.innerText = `Error tpid: necesito ID, X, Y`; return false; }
-                    const idBuscado = args[0];
-                    const newX = parseFloat(args[1]);
-                    const newY = parseFloat(args[2]);
-                    if (isNaN(newX) || isNaN(newY)) { statusEl.innerText = `Error tpid: coordenadas inválidas`; return false; }
-                    const index = shapes.findIndex(s => s.id == idBuscado);
-                    if (index === -1) { statusEl.innerText = `Error tpid: ID ${idBuscado} no encontrado`; return false; }
-                    shapes[index].x = newX;
-                    shapes[index].y = newY;
-                    lastShapeIndex = index;
-                    statusEl.innerText = `✔ TP ID ${idBuscado} a (${newX},${newY})`;
-                }
-                // --- COLOR ---
-                else if (comando === 'color') {
-                    if (args.length < 2) { statusEl.innerText = `Error color: necesito ID y color`; return false; }
-                    const idBuscado = args[0];
-                    const nuevoColor = args[1];
-                    const index = shapes.findIndex(s => s.id == idBuscado);
-                    if (index === -1) { statusEl.innerText = `Error color: ID ${idBuscado} no encontrado`; return false; }
-                    shapes[index].color = nuevoColor;
-                    lastShapeIndex = index;
-                    statusEl.innerText = `✔ Color cambiado para ID ${idBuscado}`;
-                }
-                // --- RENAME ---
-                else if (comando === 'rename') {
-                    if (args.length < 2) { statusEl.innerText = `Error rename: necesito ID y nombre`; return false; }
-                    const idBuscado = args[0];
-                    const nuevoNombre = args[1];
-                    const index = shapes.findIndex(s => s.id == idBuscado);
-                    if (index === -1) { statusEl.innerText = `Error rename: ID ${idBuscado} no encontrado`; return false; }
-                    shapes[index].name = nuevoNombre;
-                    lastShapeIndex = index;
-                    statusEl.innerText = `✔ Renombrado ID ${idBuscado} a ${nuevoNombre}`;
-                }
-                // --- DELETE (sin argumento: último; con argumento: ID) ---
-                else if (comando === 'delete') {
-                    if (args.length === 0) {
-                        if (shapes.length === 0) { statusEl.innerText = `Error delete: no hay shapes`; return false; }
-                        const eliminado = shapes.splice(lastShapeIndex, 1)[0];
-                        if (shapes.length === 0) lastShapeIndex = -1;
-                        else lastShapeIndex = Math.min(lastShapeIndex, shapes.length - 1);
-                        statusEl.innerText = `✔ Eliminado último (${eliminado.name})`;
-                    } else {
-                        const idBuscado = args[0];
-                        const index = shapes.findIndex(s => s.id == idBuscado);
-                        if (index === -1) { statusEl.innerText = `Error delete: ID ${idBuscado} no encontrado`; return false; }
-                        shapes.splice(index, 1);
-                        if (shapes.length === 0) lastShapeIndex = -1;
-                        else if (lastShapeIndex >= shapes.length) lastShapeIndex = shapes.length - 1;
-                        statusEl.innerText = `✔ Eliminado ID ${idBuscado}`;
+                    // comprobar si llegó a la meta
+                    if (simX === GOAL.x && simY === GOAL.y) {
+                        metaAlcanzada = true;
+                        mensaje = `🏆 ¡GENIAL! Has alcanzado la estrella ★`;
+                        exito = true;
+                        break;  // termina programa porque ganó
                     }
                 }
-                // --- CLEAN (borrar todo) ---
-                else if (comando === 'clean') {
-                    shapes = [];
-                    lastShapeIndex = -1;
-                    statusEl.innerText = `✔ Todas las shapes eliminadas (clean)`;
-                }
-                // --- LIST (mostrar en estado) ---
-                else if (comando === 'list') {
-                    if (shapes.length === 0) {
-                        statusEl.innerText = `No hay shapes.`;
-                    } else {
-                        let lista = shapes.map(s => `${s.name}(ID:${s.id}, ${s.type}, ${s.color})`).join('; ');
-                        statusEl.innerText = `Shapes: ${lista}`;
-                    }
-                }
-                else {
-                    statusEl.innerText = `Comando desconocido: ${comando}`;
-                    return false;
-                }
-            } catch (e) {
-                statusEl.innerText = `Error en línea ${numeroLinea}: ${e.message}`;
-                return false;
             }
-            return true;
-        }
 
-        function ejecutarTodo() {
-            const lineas = codigoArea.value.split('\n');
-            let algunaOk = false;
-            for (let i = 0; i < lineas.length; i++) {
-                const ok = ejecutarComando(lineas[i], i + 1);
-                if (ok) algunaOk = true;
+            // Si no hubo choque ni meta, pero termina el ciclo
+            if (!choque && !metaAlcanzada) {
+                mensaje = `📌 Programa terminado. No llegaste a la meta.`;
             }
-            redrawCanvas();
-            if (!algunaOk && shapes.length === 0) {
-                statusEl.innerText = '⚠ No se ejecutó ningún comando válido';
+
+            // Actualizar estado real del jugador con el resultado de la simulación
+            // (si hubo choque, el jugador se queda en la última posición válida antes del choque)
+            player.x = simX;
+            player.y = simY;
+            direction = simDir;
+
+            // Reflejar cambios en la cuadrícula
+            renderGrid();
+
+            // Mostrar mensaje apropiado
+            if (exito) setMessage(mensaje, true, false);
+            else if (choque) setMessage(mensaje, false, true);
+            else setMessage(mensaje, false, false);
+
+            // (Opcional) Si se ganó, podemos celebrar, pero no reseteamos automáticamente.
+        }
+
+        // ----- INICIALIZACIÓN Y EVENTOS -----
+
+        function initGame() {
+            // Asegurar que muros no estén sobre la meta o inicio
+            // (por si acaso se modifica WALLS, comprobación simple)
+            if (WALLS.some(w => (w.x === GOAL.x && w.y === GOAL.y) || (w.x === 0 && w.y === 0))) {
+                console.warn("Revisa WALLS: no debe cubrir inicio(0,0) ni meta(4,4)");
             }
+
+            renderGrid();
+            renderCommands();
+            setMessage('⚡ Crea tu algoritmo y ejecuta', false, false);
         }
 
-        function resetShapes() {
-            shapes = [];
-            lastShapeIndex = -1;
-            redrawCanvas();
-            statusEl.innerText = '♻ Shapes eliminadas. Crea nuevas.';
-        }
+        // Event listeners
+        document.getElementById('addForward').addEventListener('click', () => addCommand('forward'));
+        document.getElementById('addLeft').addEventListener('click', () => addCommand('left'));
+        document.getElementById('addRight').addEventListener('click', () => addCommand('right'));
 
-        function limpiarComandos() {
-            codigoArea.value = '';
-            statusEl.innerText = '⌨ Escribe nuevos comandos';
-        }
+        document.getElementById('runBtn').addEventListener('click', runProgram);
 
-        // --- AUTOCOMPLETAR: insertar plantilla en textarea ---
-        function insertarPlantilla(plantilla) {
-            const posInicial = codigoArea.selectionStart;
-            const texto = codigoArea.value;
-            const nuevoTexto = texto.substring(0, posInicial) + plantilla + texto.substring(codigoArea.selectionEnd);
-            codigoArea.value = nuevoTexto;
-            codigoArea.focus();
-            // Colocar cursor después de la plantilla
-            const nuevaPos = posInicial + plantilla.length;
-            codigoArea.setSelectionRange(nuevaPos, nuevaPos);
-        }
-
-        // Event listeners para botones de autocompletar
-        document.querySelectorAll('.comando-boton').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const cmd = btn.getAttribute('data-cmd');
-                let plantilla = '';
-                switch (cmd) {
-                    case 'create': plantilla = 'create:"nombre,ID":"Cubo":"red"'; break;
-                    case 'mov': plantilla = 'mov:"X":"Y"'; break;
-                    case 'tp': plantilla = 'tp:"X":"Y"'; break;
-                    case 'movid': plantilla = 'movid:"ID":"X":"Y"'; break;
-                    case 'tpid': plantilla = 'tpid:"ID":"X":"Y"'; break;
-                    case 'color': plantilla = 'color:"ID":"blue"'; break;
-                    case 'rename': plantilla = 'rename:"ID":"nuevoNombre"'; break;
-                    case 'delete': plantilla = 'delete'; break;
-                    case 'deleteid': plantilla = 'delete:"ID"'; break;
-                    case 'list': plantilla = 'list'; break;
-                    case 'clean': plantilla = 'clean'; break;
-                    default: plantilla = btn.innerText;
-                }
-                insertarPlantilla(plantilla);
-            });
+        document.getElementById('resetGameBtn').addEventListener('click', () => {
+            resetGame();
+            // Por diseño, no borramos comandos al resetear. (opcional, así el programa se conserva)
+            // Si se desea borrar también comandos, descomentar:
+            // clearCommands(); 
+            // Pero lo dejamos sin borrar: el jugador puede reutilizar programa.
         });
 
-        // Eventos principales
-        document.getElementById('runBtn').addEventListener('click', ejecutarTodo);
-        document.getElementById('resetBtn').addEventListener('click', resetShapes);
-        document.getElementById('limpiarCmdBtn').addEventListener('click', limpiarComandos);
-
-        canvas.addEventListener('dblclick', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (e.clientX - rect.left) * scaleX;
-            const mouseY = (e.clientY - rect.top) * scaleY;
-            shapes.push({
-                id: 'dblclick' + Math.floor(Math.random()*1000),
-                name: 'dblclick',
-                type: 'Circulo',
-                color: '#AAAAAA',
-                x: mouseX,
-                y: mouseY
-            });
-            lastShapeIndex = shapes.length - 1;
-            redrawCanvas();
-            statusEl.innerText = `➕ Círculo gris en (${Math.round(mouseX)},${Math.round(mouseY)})`;
+        document.getElementById('clearCommandsBtn').addEventListener('click', () => {
+            clearCommands();
         });
 
-        // Inicializar
-        redrawCanvas();
-        statusEl.innerText = 'Ready. Usa botones de autocompletar.';
+        // Llamar a la inicialización
+        initGame();
+
+        // (opcional) Botón de reset también podría borrar? prefiero que no, pero damos la opción.
+        // Añadimos un pequeño extra: si se desea borrar y resetear a la vez, se usa reiniciar + borrar.
+        // Perfecto.
+
+        // Extra: mostrar goal y dirección cada vez
     })();
 </script>
 </body>
