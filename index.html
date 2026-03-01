@@ -101,6 +101,7 @@
             transition: all 0.1s;
             font-family: 'Courier New', monospace;
             min-width: 100px;
+            position: relative;
         }
         
         button:hover {
@@ -125,6 +126,66 @@
         
         button.reset:hover {
             background: #e06f6f;
+        }
+        
+        /* Botón de última tecla */
+        .last-key-button {
+            background: #ffb86b;
+            border-bottom-color: #c2803a;
+            color: #1a1e2a;
+            position: relative;
+            overflow: visible;
+            min-width: 120px;
+        }
+        
+        .last-key-button:hover {
+            background: #ffca8c;
+        }
+        
+        .key-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4fa3e3;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 0 #2d6ca3;
+            margin-bottom: 10px;
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+            border: 2px solid white;
+        }
+        
+        .key-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #4fa3e3 transparent transparent transparent;
+        }
+        
+        .last-key-button:hover .key-tooltip {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
         }
         
         .manual {
@@ -279,26 +340,6 @@
             margin-top: 15px;
         }
         
-        .last-input {
-            background: #1e2433;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            text-align: center;
-            border: 2px solid #2d3445;
-        }
-        
-        .last-key {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffb86b;
-            background: #0f1219;
-            padding: 5px 15px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-        
         .syntax-highlight {
             color: #ffb86b;
         }
@@ -318,10 +359,6 @@
         <!-- Área del juego -->
         <div class="game-area">
             <canvas id="gameCanvas" width="700" height="400"></canvas>
-            <div class="last-input">
-                <span>Última tecla presionada:</span>
-                <div class="last-key" id="lastKeyDisplay">—</div>
-            </div>
         </div>
         
         <!-- Panel de código -->
@@ -333,7 +370,7 @@
 // mover:"objeto":"pasos"
 // var:"nombre":"tipo":"objeto"
 // varset:"nombre":"numero"
-// posset:"objeto":"x":"y"  ← NUEVO
+// posset:"objeto":"x":"y"
 
 // EJEMPLO DE INPUTS:
 input:"A"
@@ -370,6 +407,10 @@ posset:"enemigo":"400":"200"</textarea>
                 <button class="execute" onclick="executeCode()">▶ EJECUTAR TODO</button>
                 <button class="reset" onclick="resetGame()">↺ REINICIAR</button>
                 <button onclick="addExample()">📋 EJEMPLO</button>
+                <button class="last-key-button" id="lastKeyButton">
+                    ⌨️ ÚLTIMA TECLA
+                    <span class="key-tooltip" id="lastKeyTooltip">—</span>
+                </button>
             </div>
             
             <div id="errorDisplay" class="error-message"></div>
@@ -405,13 +446,13 @@ posset:"enemigo":"400":"200"</textarea>
                 <h3>📚 MANUAL DE COMANDOS</h3>
                 <div class="command-list">
                     <div class="command-item new-command">
-                        <div class="command-name">🎯 POSSET (NUEVO)</div>
+                        <div class="command-name">🎯 POSSET</div>
                         <div class="command-example">posset:"objeto":"x":"y"</div>
                         <div class="command-desc">Establece la posición exacta del objeto en coordenadas X e Y</div>
                     </div>
                     
                     <div class="command-item new-command">
-                        <div class="command-name">⌨️ INPUT (NUEVO FORMATO)</div>
+                        <div class="command-name">⌨️ INPUT</div>
                         <div class="command-example">input:"TECLA"<br>    comando1<br>    comando2<br>finish</div>
                         <div class="command-desc">Define un bloque de código para una tecla (A, B, C, etc)</div>
                     </div>
@@ -462,34 +503,14 @@ posset:"enemigo":"400":"200"</textarea>
         let gameInitialized = false;
         let lastKey = '—';
         
+        // Referencia al tooltip
+        const lastKeyTooltip = document.getElementById('lastKeyTooltip');
+        
         // Input handlers
         let inputHandlers = {
-            'a': [],
-            'b': [],
-            'c': [],
-            'd': [],
-            'e': [],
-            'f': [],
-            'g': [],
-            'h': [],
-            'i': [],
-            'j': [],
-            'k': [],
-            'l': [],
-            'm': [],
-            'n': [],
-            'o': [],
-            'p': [],
-            'q': [],
-            'r': [],
-            's': [],
-            't': [],
-            'u': [],
-            'v': [],
-            'w': [],
-            'x': [],
-            'y': [],
-            'z': []
+            'a': [], 'b': [], 'c': [], 'd': [], 'e': [], 'f': [], 'g': [], 'h': [], 'i': [],
+            'j': [], 'k': [], 'l': [], 'm': [], 'n': [], 'o': [], 'p': [], 'q': [], 'r': [],
+            's': [], 't': [], 'u': [], 'v': [], 'w': [], 'x': [], 'y': [], 'z': []
         };
         
         // Colores predefinidos
@@ -520,6 +541,21 @@ posset:"enemigo":"400":"200"</textarea>
                 ctx.lineTo(i, canvas.height);
                 ctx.stroke();
             }
+            
+            // Dibujar ejes de coordenadas
+            ctx.strokeStyle = '#4fa3e3';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, 200);
+            ctx.lineTo(canvas.width, 200);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(350, 0);
+            ctx.lineTo(350, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
             
             // Dibujar cada objeto
             Object.keys(gameObjects).forEach(key => {
@@ -563,6 +599,11 @@ posset:"enemigo":"400":"200"</textarea>
                 ctx.shadowBlur = 4;
                 ctx.shadowOffsetY = 2;
                 ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
+                
+                // Coordenadas
+                ctx.font = '10px Courier New';
+                ctx.fillStyle = '#b4e1fd';
+                ctx.fillText(`(${obj.x},${obj.y})`, obj.x - 25, obj.y - 45);
                 
                 // Barra de vida
                 const vidaVar = Object.values(gameVariables).find(v => 
@@ -940,7 +981,7 @@ posset:"enemigo":"400":"200"</textarea>
             nextPosition = 50;
             gameInitialized = false;
             lastKey = '—';
-            document.getElementById('lastKeyDisplay').textContent = lastKey;
+            lastKeyTooltip.textContent = lastKey;
             
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
@@ -977,6 +1018,10 @@ posset:"enemigo":"400":"200"</textarea>
                 }
             }
             
+            // Actualizar última tecla
+            lastKey = tecla.toUpperCase();
+            lastKeyTooltip.textContent = lastKey;
+            
             drawGame();
             updateLists();
         }
@@ -987,8 +1032,6 @@ posset:"enemigo":"400":"200"</textarea>
             
             if (key.match(/[a-z]/)) {
                 e.preventDefault();
-                lastKey = key.toUpperCase();
-                document.getElementById('lastKeyDisplay').textContent = lastKey;
                 executeInput(key);
             }
         });
