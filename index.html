@@ -3,1046 +3,543 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch 2008 - Múltiples scripts + 250 bloques mejorados</title>
+    <title>Mini Godot · Creador de juegos estilo Godot</title>
     <style>
-        /* ===== ESTILO 2008 ===== */
         * {
-            box-sizing: border-box;
-            font-family: 'Courier New', 'MS Sans Serif', 'Segoe UI', monospace;
-        }
-        body {
-            background: #3a6ea5;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background-color: #1a1e24;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: radial-gradient(circle at 20% 30%, #6bb5f0, #0a2f6c);
+            padding: 16px;
         }
-        .game-container {
-            width: 1500px;
+
+        /* Contenedor principal: imita la ventana del editor Godot */
+        .godot-editor {
+            width: 1200px;
             max-width: 100%;
-            background: #d4d0c8;
+            background-color: #2d2f33;
             border-radius: 8px;
-            border: 4px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 15px;
-            box-shadow: inset -2px -2px 0 #0a0a0a, inset 2px 2px 0 #ffffff;
-        }
-        .header {
-            background: #0a2f6c;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 3px solid;
-            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
-            margin-bottom: 15px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            text-shadow: 2px 2px 0 #001433;
-        }
-        .header button {
-            background: #d4d0c8;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            color: #000;
-            font-weight: bold;
-            padding: 8px 25px;
-            cursor: pointer;
-            font-size: 16px;
-            text-transform: uppercase;
-        }
-        .header button:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-            transform: translate(1px,1px);
-        }
-        .main-area {
-            display: flex;
-            gap: 15px;
-        }
-        /* Panel izquierdo: canvas + editor */
-        .canvas-panel {
-            flex: 2;
-            background: #bfbfbf;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 12px;
-        }
-        canvas {
-            width: 100%;
-            height: 300px;
-            background: #000;
-            border: 3px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            display: block;
-        }
-        .sprite-editor {
-            background: #d4d0c8;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 12px;
-            margin-top: 15px;
-            color: #000;
-        }
-        .sprite-editor h3 {
-            margin: 0 0 10px 0;
-            background: #0a2f6c;
-            color: white;
-            padding: 4px;
-            border: 2px solid;
-            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
-            text-align: center;
-            font-size: 16px;
-        }
-        .editor-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            background: #bfbfbf;
-            padding: 5px;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
-        .editor-row label {
-            width: 70px;
-            font-weight: bold;
-        }
-        .editor-row input, .editor-row select {
-            flex: 1;
-            padding: 4px;
-            background: #fff;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            font-family: 'Courier New', monospace;
-        }
-        .editor-row input[type=range] {
-            padding: 0;
-        }
-        .log {
-            background: #000;
-            color: #0f0;
-            border: 3px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 8px;
-            margin-top: 15px;
-            height: 70px;
-            overflow-y: auto;
-            font-size: 12px;
-        }
-        /* Panel derecho: scripts y bloques */
-        .blocks-panel {
-            flex: 3;
-            background: #bfbfbf;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 10px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            overflow: hidden;
+            border: 1px solid #4a4e54;
         }
-        /* Selector de scripts */
-        .script-manager {
-            background: #808080;
-            border: 3px solid;
-            border-color: #ffffff #404040 #404040 #ffffff;
-            padding: 8px;
+
+        /* Barra de menú superior (como en Godot) */
+        .menu-bar {
+            background-color: #33363b;
+            padding: 6px 16px;
             display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 28px;
+            border-bottom: 1px solid #23262a;
+            color: #b0b6c0;
+            font-size: 14px;
+            font-weight: 500;
         }
-        .script-manager select {
-            flex: 1;
-            background: #fff;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 4px;
-            font-weight: bold;
+        .menu-bar span {
+            cursor: default;
+            transition: color 0.1s;
         }
-        .script-manager button {
-            background: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 4px 10px;
-            font-weight: bold;
-            cursor: pointer;
+        .menu-bar span:hover {
+            color: #8eadd5;
         }
-        .categories {
+
+        /* Panel principal: toolbar izquierda, canvas central, inspector derecha */
+        .main-workspace {
             display: flex;
-            gap: 4px;
-            background: #808080;
-            padding: 8px;
-            border: 3px solid;
-            border-color: #ffffff #404040 #404040 #ffffff;
-            flex-wrap: wrap;
+            height: 600px;
+            background-color: #23262a;
         }
-        .cat-btn {
-            background: #d4d0c8;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 6px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #000;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        .cat-btn.active {
-            background: #0a2f6c;
-            color: white;
-            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
-        }
-        .palette {
-            background: #808080;
-            border: 3px solid;
-            border-color: #ffffff #404040 #404040 #ffffff;
-            padding: 8px;
-            height: 200px;
-            overflow-y: auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-content: flex-start;
-        }
-        .block {
-            background: #4a90e2;
-            color: white;
-            padding: 5px 10px;
-            border: 2px solid;
-            border-color: #ffffff #2a4b7a #2a4b7a #ffffff;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: grab;
-            user-select: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            box-shadow: 1px 1px 0 #000;
-        }
-        .block.motion { background: #4a90e2; }
-        .block.looks { background: #9b59b6; }
-        .block.sound { background: #e67e22; }
-        .block.event { background: #f1c40f; color: black; }
-        .block.control { background: #e74c3c; }
-        .block.sensing { background: #3498db; }
-        .block.operators { background: #2ecc71; }
-        .block.variables { background: #e67e22; }
-        .script-area {
-            background: #808080;
-            border: 3px solid;
-            border-color: #ffffff #404040 #404040 #ffffff;
-            padding: 10px;
-            min-height: 220px;
-            flex: 1;
-            overflow-y: auto;
+
+        /* Barra de herramientas izquierda (nodos / tiles) */
+        .toolbar-panel {
+            width: 200px;
+            background-color: #2b2f34;
+            border-right: 1px solid #1c1f23;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            padding: 16px 10px;
+            color: #d1d7e0;
         }
-        .script-block {
-            background: #4a90e2;
-            color: white;
-            padding: 6px 12px;
-            border: 2px solid;
-            border-color: #ffffff #2a4b7a #2a4b7a #ffffff;
-            font-size: 12px;
-            font-weight: bold;
+        .toolbar-panel h3 {
+            font-size: 15px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #9aa1ad;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #3d4248;
+            padding-bottom: 6px;
+        }
+
+        /* Paleta de tiles (estilo nodos de Godot) */
+        .tile-palette {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .tile-item {
+            background-color: #3a3f46;
+            border: 1px solid #4f555e;
+            border-radius: 4px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            color: #e5e9f0;
+            font-size: 14px;
+        }
+        .tile-item.selected {
+            background-color: #3d5a7c;
+            border-color: #6d95c0;
+            box-shadow: 0 0 0 2px rgba(91, 149, 224, 0.5);
+        }
+        .tile-item:hover {
+            background-color: #4a5059;
+            border-color: #6d7a8a;
+        }
+        .tile-color {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            border: 1px solid #1f2328;
+        }
+
+        /* Lienzo central (viewport) */
+        .canvas-area {
+            flex: 1;
+            background-color: #1b1e22;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
-        .script-block .delete {
-            background: #c0392b;
-            color: white;
-            border: 2px solid;
-            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
-            width: 22px;
-            height: 22px;
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 0 1px #4f555e, 0 8px 16px rgba(0,0,0,0.5);
+            background-color: #25292e;
+            cursor: crosshair;
+        }
+
+        /* Inspector derecho (propiedades) */
+        .inspector-panel {
+            width: 240px;
+            background-color: #2b2f34;
+            border-left: 1px solid #1c1f23;
+            padding: 16px 12px;
+            color: #d1d7e0;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: auto;
+            flex-direction: column;
+            gap: 16px;
         }
-        .script-block input, .script-block select {
-            background: white;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 2px 4px;
-            width: 60px;
-            color: #000;
+        .inspector-panel h3 {
+            font-size: 15px;
+            font-weight: 400;
+            color: #9aa1ad;
+            border-bottom: 1px solid #3d4248;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
         }
-        .bottom-buttons {
+        .property {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .bottom-buttons button {
-            flex: 1;
-            background: #d4d0c8;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            font-weight: bold;
+            flex-direction: column;
+            gap: 6px;
+            background-color: #202327;
             padding: 10px;
-            cursor: pointer;
+            border-radius: 4px;
+            border-left: 3px solid #5d8bc9;
+        }
+        .property label {
+            font-size: 13px;
+            color: #abb2bf;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .bottom-buttons button:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-            transform: translate(1px,1px);
+        .property-value {
+            background-color: #15171a;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #bdd4f0;
+            border: 1px solid #3f464e;
         }
-        .run {
-            background: #2d6ca3 !important;
+        button {
+            background-color: #3f4751;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 14px;
             color: white;
-            border-color: #6bb5f0 #0a2f6c #0a2f6c #6bb5f0 !important;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 2px solid #1e2227;
+            transition: background 0.1s;
+            text-align: left;
         }
+        button:hover {
+            background-color: #535e6b;
+        }
+        .scene-tree {
+            background-color: #202327;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid #3d4248;
+        }
+        .scene-tree div {
+            padding: 5px 8px;
+            margin: 2px 0;
+            border-left: 2px solid #5d8bc9;
+            background-color: #2a2f35;
+            color: #cdd9f0;
+        }
+
+        /* Barra de estado inferior */
+        .status-bar {
+            background-color: #26292e;
+            border-top: 1px solid #1b1d21;
+            padding: 6px 16px;
+            display: flex;
+            gap: 24px;
+            color: #9099a8;
+            font-size: 12px;
+        }
+        .status-bar .coord {
+            color: #8aa9d6;
+            font-weight: 600;
+        }
+
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="header">
-        <h1>🐱 SCRATCH 2008 - MÚLTIPLES SCRIPTS (250+ BLOQUES)</h1>
-        <button class="run" id="runBtn">▶ EJECUTAR TODOS</button>
+<div class="godot-editor">
+
+    <!-- Barra de menú superior (decorativa) -->
+    <div class="menu-bar">
+        <span>Archivo</span>
+        <span>Editar</span>
+        <span>Escena</span>
+        <span>Depurador</span>
+        <span>Proyecto</span>
+        <span>Ayuda</span>
     </div>
-    <div class="main-area">
-        <!-- IZQUIERDA: CANVAS + EDITOR DE SPRITES -->
-        <div class="canvas-panel">
-            <canvas id="gameCanvas" width="500" height="300"></canvas>
-            <div class="sprite-editor">
-                <h3>✏️ EDITOR DE SPRITES</h3>
-                <div class="editor-row">
-                    <label>Objeto:</label>
-                    <select id="spriteSelect">
-                        <option value="gato">Gato</option>
-                        <option value="enemigo">Enemigo</option>
-                    </select>
+
+    <!-- Área de trabajo principal -->
+    <div class="main-workspace">
+
+        <!-- Panel izquierdo: herramientas / paleta de tiles (nodos) -->
+        <div class="toolbar-panel">
+            <h3>🎨 Paleta de nodos</h3>
+            <div class="tile-palette" id="tilePalette">
+                <!-- Los elementos se generarán por JS, pero pondremos estructura base -->
+                <div class="tile-item" data-tile="1" id="tileGround">
+                    <div class="tile-color" style="background-color:#8b5a2b;"></div>
+                    <span>Suelo</span>
                 </div>
-                <div class="editor-row">
-                    <label>Pos X:</label>
-                    <input type="range" id="posX" min="20" max="480" value="100">
-                    <span id="posXVal">100</span>
+                <div class="tile-item" data-tile="2" id="tilePlatform">
+                    <div class="tile-color" style="background-color:#4f7942;"></div>
+                    <span>Plataforma</span>
                 </div>
-                <div class="editor-row">
-                    <label>Pos Y:</label>
-                    <input type="range" id="posY" min="20" max="280" value="150">
-                    <span id="posYVal">150</span>
+                <div class="tile-item" data-tile="3" id="tileEnemy">
+                    <div class="tile-color" style="background-color:#b22234;"></div>
+                    <span>Enemigo</span>
                 </div>
-                <div class="editor-row">
-                    <label>Color:</label>
-                    <select id="colorSelect">
-                        <option value="#f1c40f">Amarillo</option>
-                        <option value="#3498db">Azul</option>
-                        <option value="#2ecc71">Verde</option>
-                        <option value="#e74c3c">Rojo</option>
-                        <option value="#9b59b6">Morado</option>
-                    </select>
+                <div class="tile-item" data-tile="4" id="tilePlayer">
+                    <div class="tile-color" style="background-color:#2a6f97;"></div>
+                    <span>Jugador</span>
                 </div>
-                <div class="editor-row">
-                    <label>Tamaño %:</label>
-                    <input type="range" id="size" min="10" max="200" value="100">
-                    <span id="sizeVal">100</span>
-                </div>
-                <div class="editor-row">
-                    <label>Visible:</label>
-                    <input type="checkbox" id="visible" checked>
+                <div class="tile-item" data-tile="0" id="tileErase">
+                    <div class="tile-color" style="background-color:#3f464e; border:1px dashed #777;"></div>
+                    <span>Borrar</span>
                 </div>
             </div>
-            <div class="log" id="log">> Sistema listo. Crea scripts y arrastra bloques.</div>
+            <div style="margin-top: 20px;">
+                <button id="clearButton" style="width:100%;">🧹 Limpiar escena</button>
+            </div>
         </div>
 
-        <!-- DERECHA: GESTIÓN DE SCRIPTS + BLOQUES -->
-        <div class="blocks-panel">
-            <!-- Selector y gestión de scripts -->
-            <div class="script-manager">
-                <select id="scriptSelect"></select>
-                <button id="newScriptBtn">➕ Nuevo</button>
-                <button id="renameScriptBtn">✏️ Renombrar</button>
-                <button id="deleteScriptBtn">🗑️ Eliminar</button>
+        <!-- Lienzo central: nuestro "viewport" donde se edita el juego -->
+        <div class="canvas-area">
+            <canvas id="gameCanvas" width="640" height="480"></canvas>
+        </div>
+
+        <!-- Panel derecho: inspector de propiedades y jerarquía -->
+        <div class="inspector-panel">
+            <h3>📁 Escena</h3>
+            <div class="scene-tree">
+                <div>▶ NivelPrincipal (TileMap)</div>
+                <div style="margin-left:16px;">🟫 Suelo (16)</div>
+                <div style="margin-left:16px;">🟩 Plataformas (8)</div>
+                <div style="margin-left:16px;">👾 Enemigos (3)</div>
+                <div style="margin-left:16px;">🚩 Jugador (1)</div>
             </div>
 
-            <!-- Categorías de bloques -->
-            <div class="categories" id="categories">
-                <!-- Se genera con JS -->
+            <h3 style="margin-top:8px;">🔧 Inspector</h3>
+            <div class="property">
+                <label>Tile seleccionado</label>
+                <div class="property-value" id="selectedTileDisplay">Suelo</div>
             </div>
-            <div class="palette" id="palette"></div>
-            <div class="script-area" id="scriptArea"></div>
-            <div class="bottom-buttons">
-                <button id="resetBtn">↺ REINICIAR JUEGO</button>
-                <button id="clearBtn">🗑️ LIMPIAR SCRIPT</button>
+            <div class="property">
+                <label>Última celda</label>
+                <div class="property-value" id="lastCellDisplay">(0,0)</div>
             </div>
+            <div class="property">
+                <label>Tamaño del nivel</label>
+                <div class="property-value">20 x 15</div>
+            </div>
+            <button id="runButton">▶ Ejecutar proyecto (vista previa)</button>
         </div>
+    </div>
+
+    <!-- Barra de estado inferior con coordenadas en vivo -->
+    <div class="status-bar">
+        <span>🖱️ Posición: <span id="mouseCoords" class="coord">0, 0</span></span>
+        <span>💡 Click izquierdo: colocar | Click derecho: borrar</span>
+        <span>⚙️ Modo: edición de tiles</span>
     </div>
 </div>
 
 <script>
-    // ============================================================
-    // GENERACIÓN DE MÁS DE 250 BLOQUES (AHORA CON MÁS ROBUSTEZ)
-    // ============================================================
+    (function() {
+        // ---------- Configuración del mundo (tile map) ----------
+        const COLS = 20;            // 20 columnas (640/32)
+        const ROWS = 15;            // 15 filas (480/32)
+        const TILE_SIZE = 32;
 
-    const categoryColors = {
-        motion: '#4a90e2',
-        looks: '#9b59b6',
-        sound: '#e67e22',
-        event: '#f1c40f',
-        control: '#e74c3c',
-        sensing: '#3498db',
-        operators: '#2ecc71',
-        variables: '#e67e22'
-    };
+        // Matriz del nivel: 0 = vacío, 1 = suelo, 2 = plataforma, 3 = enemigo, 4 = jugador
+        let levelData = Array(ROWS).fill().map(() => Array(COLS).fill(0));
 
-    // ---------- MOVIMIENTO (40+) ----------
-    function generateMotionBlocks() {
-        let blocks = [];
-        const directions = ['arriba', 'abajo', 'izquierda', 'derecha', 'arriba-izquierda', 'arriba-derecha', 'abajo-izquierda', 'abajo-derecha'];
-        directions.forEach(dir => {
-            blocks.push({ name: `mover_${dir}`, text: `mover ${dir}`, params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' });
-        });
-        [1,5,10,20,50,100].forEach(pasos => {
-            blocks.push({ name: `mover_${pasos}`, text: `mover ${pasos} pasos`, params: ['objeto'], default: ['gato'], color: 'motion' });
-        });
-        [[0,0], [100,100], [200,150], [300,200], [400,100]].forEach(([x,y]) => {
-            blocks.push({ name: `ir_a_${x}_${y}`, text: `ir a (${x},${y})`, params: ['objeto'], default: ['gato'], color: 'motion' });
-        });
-        [0.5,1,2,3].forEach(seg => {
-            blocks.push({ name: `deslizar_${seg}s`, text: `deslizar ${seg}s a X`, params: ['objeto', 'destinoX'], default: ['gato', 200], color: 'motion' });
-        });
-        blocks.push({ name: 'rebotar_si_borde', text: 'rebotar si toca borde', params: ['objeto'], default: ['gato'], color: 'motion' });
-        [15,30,45,90,180].forEach(grados => {
-            blocks.push({ name: `girar_${grados}`, text: `girar ${grados} grados`, params: ['objeto'], default: ['gato'], color: 'motion' });
-        });
-        ['ratón', 'centro', 'enemigo'].forEach(dest => {
-            blocks.push({ name: `apuntar_hacia_${dest}`, text: `apuntar hacia ${dest}`, params: ['objeto'], default: ['gato'], color: 'motion' });
-        });
-        return blocks;
-    }
+        // Tile actual seleccionado para pintar (por defecto suelo = 1)
+        let currentTile = 1;  
 
-    // ---------- APARIENCIA (40+) ----------
-    function generateLooksBlocks() {
-        let blocks = [];
-        const colors = ['rojo', 'azul', 'verde', 'amarillo', 'morado', 'naranja', 'rosa', 'cian', 'blanco', 'negro'];
-        colors.forEach(c => {
-            blocks.push({ name: `cambiar_color_${c}`, text: `cambiar color a ${c}`, params: ['objeto'], default: ['gato'], color: 'looks' });
-        });
-        [50,75,100,125,150,200].forEach(sz => {
-            blocks.push({ name: `tamaño_${sz}`, text: `fijar tamaño ${sz}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
-        });
-        ['desvanecer', 'pixelar', 'brillo'].forEach(ef => {
-            [10,25,50,75].forEach(val => {
-                blocks.push({ name: `${ef}_${val}`, text: `${ef} ${val}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
-            });
-        });
-        blocks.push({ name: 'mostrar', text: 'mostrar', params: ['objeto'], default: ['gato'], color: 'looks' });
-        blocks.push({ name: 'ocultar', text: 'ocultar', params: ['objeto'], default: ['gato'], color: 'looks' });
-        ['Hola', 'Adiós', '...', '¡Genial!'].forEach(msg => {
-            blocks.push({ name: `decir_${msg}`, text: `decir "${msg}"`, params: [], default: [], color: 'looks' });
-        });
-        return blocks;
-    }
+        // Referencias a elementos DOM
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const selectedTileDisplay = document.getElementById('selectedTileDisplay');
+        const lastCellDisplay = document.getElementById('lastCellDisplay');
+        const mouseCoordsSpan = document.getElementById('mouseCoords');
+        const tileItems = document.querySelectorAll('.tile-item');
+        const clearBtn = document.getElementById('clearButton');
+        const runBtn = document.getElementById('runButton');
 
-    // ---------- SONIDO (25+) ----------
-    function generateSoundBlocks() {
-        let blocks = [];
-        const sounds = ['maullido', 'ladrido', 'explosión', 'salto', 'moneda', 'laser', 'campana', 'disparo'];
-        sounds.forEach(s => {
-            blocks.push({ name: `sonido_${s}`, text: `reproducir ${s}`, params: [], default: [], color: 'sound' });
-        });
-        [10,20,50,100].forEach(v => {
-            blocks.push({ name: `volumen_${v}`, text: `fijar volumen ${v}%`, params: [], default: [], color: 'sound' });
-        });
-        [1,2,3,4,5].forEach(t => {
-            blocks.push({ name: `tambor_${t}`, text: `tocar tambor ${t}`, params: [], default: [], color: 'sound' });
-        });
-        return blocks;
-    }
-
-    // ---------- EVENTOS (60+) ----------
-    function generateEventBlocks() {
-        let blocks = [];
-        'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
-            blocks.push({ name: `tecla_${letter}`, text: `al presionar tecla ${letter.toUpperCase()}`, params: [], default: [], color: 'event' });
-        });
-        ['inicio', 'saludo', 'pelea', 'victoria', 'derrota', 'nivel'].forEach(msg => {
-            blocks.push({ name: `evento_${msg}`, text: `al recibir ${msg}`, params: [], default: [], color: 'event' });
-            blocks.push({ name: `enviar_${msg}`, text: `enviar ${msg}`, params: [], default: [], color: 'event' });
-        });
-        return blocks;
-    }
-
-    // ---------- CONTROL (30+) ----------
-    function generateControlBlocks() {
-        let blocks = [];
-        [1,2,3,4,5,10,20,50,100].forEach(n => {
-            blocks.push({ name: `repetir_${n}`, text: `repetir ${n} veces`, params: [], default: [], color: 'control' });
-        });
-        ['vida > 50', 'vida < 20', 'tocando enemigo'].forEach(cond => {
-            blocks.push({ name: `si_${cond.replace(/ /g,'_')}`, text: `si ${cond} entonces`, params: [], default: [], color: 'control' });
-        });
-        [0.5,1,2,3,5].forEach(t => {
-            blocks.push({ name: `esperar_${t}s`, text: `esperar ${t} segundos`, params: [], default: [], color: 'control' });
-        });
-        blocks.push({ name: 'por_siempre', text: 'por siempre', params: [], default: [], color: 'control' });
-        blocks.push({ name: 'detener', text: 'detener programa', params: [], default: [], color: 'control' });
-        return blocks;
-    }
-
-    // ---------- SENSORES (30+) ----------
-    function generateSensingBlocks() {
-        let blocks = [];
-        ['gato', 'enemigo', 'ratón', 'borde'].forEach(obj => {
-            blocks.push({ name: `tocando_${obj}`, text: `¿tocando ${obj}?`, params: ['objeto'], default: ['gato'], color: 'sensing' });
-        });
-        ['gato', 'enemigo', 'ratón'].forEach(dest => {
-            blocks.push({ name: `distancia_a_${dest}`, text: `distancia a ${dest}`, params: ['objeto'], default: ['gato'], color: 'sensing' });
-        });
-        ['¿Nombre?', '¿Edad?', '¿Color favorito?'].forEach(p => {
-            blocks.push({ name: `preguntar_${p}`, text: `preguntar "${p}"`, params: [], default: [], color: 'sensing' });
-        });
-        ['gato', 'enemigo'].forEach(obj => {
-            blocks.push({ name: `posX_${obj}`, text: `posición X de ${obj}`, params: [], default: [], color: 'sensing' });
-            blocks.push({ name: `posY_${obj}`, text: `posición Y de ${obj}`, params: [], default: [], color: 'sensing' });
-        });
-        return blocks;
-    }
-
-    // ---------- OPERADORES (50+) ----------
-    function generateOperatorsBlocks() {
-        let blocks = [];
-        for (let a = 1; a <= 5; a++) {
-            for (let b = 1; b <= 5; b++) {
-                blocks.push({ name: `suma_${a}_${b}`, text: `${a} + ${b}`, params: [], default: [], color: 'operators' });
-                blocks.push({ name: `resta_${a}_${b}`, text: `${a} - ${b}`, params: [], default: [], color: 'operators' });
-                blocks.push({ name: `multiplica_${a}_${b}`, text: `${a} * ${b}`, params: [], default: [], color: 'operators' });
-                if (b !== 0) blocks.push({ name: `divide_${a}_${b}`, text: `${a} / ${b}`, params: [], default: [], color: 'operators' });
-            }
-        }
-        [[1,10], [1,100], [50,100], [0,1]].forEach(([min,max]) => {
-            blocks.push({ name: `aleatorio_${min}_${max}`, text: `aleatorio ${min} a ${max}`, params: [], default: [], color: 'operators' });
-        });
-        ['>', '<', '=', '≥', '≤'].forEach(op => {
-            blocks.push({ name: `comparar_${op}`, text: `${op}`, params: ['a','b'], default: [5,3], color: 'operators' });
-        });
-        ['y', 'o', 'no'].forEach(op => {
-            blocks.push({ name: `logico_${op}`, text: `${op}`, params: [], default: [], color: 'operators' });
-        });
-        return blocks;
-    }
-
-    // ---------- VARIABLES (30+) ----------
-    function generateVariablesBlocks() {
-        let blocks = [];
-        const varNames = ['puntaje', 'vida', 'energía', 'tiempo', 'nivel', 'monedas'];
-        varNames.forEach(v => {
-            blocks.push({ name: `crear_${v}`, text: `crear variable ${v}`, params: [], default: [], color: 'variables' });
-            blocks.push({ name: `cambiar_${v}_1`, text: `cambiar ${v} por 1`, params: [], default: [], color: 'variables' });
-            blocks.push({ name: `fijar_${v}_0`, text: `fijar ${v} a 0`, params: [], default: [], color: 'variables' });
-            [5,10,20,50,100].forEach(val => {
-                blocks.push({ name: `fijar_${v}_${val}`, text: `fijar ${v} a ${val}`, params: [], default: [], color: 'variables' });
-            });
-        });
-        return blocks;
-    }
-
-    // Unir todos los bloques
-    const allBlocks = [
-        ...generateMotionBlocks(),
-        ...generateLooksBlocks(),
-        ...generateSoundBlocks(),
-        ...generateEventBlocks(),
-        ...generateControlBlocks(),
-        ...generateSensingBlocks(),
-        ...generateOperatorsBlocks(),
-        ...generateVariablesBlocks()
-    ];
-    console.log('Total bloques generados:', allBlocks.length);
-
-    const blocksByCategory = {
-        motion: allBlocks.filter(b => b.color === 'motion'),
-        looks: allBlocks.filter(b => b.color === 'looks'),
-        sound: allBlocks.filter(b => b.color === 'sound'),
-        event: allBlocks.filter(b => b.color === 'event'),
-        control: allBlocks.filter(b => b.color === 'control'),
-        sensing: allBlocks.filter(b => b.color === 'sensing'),
-        operators: allBlocks.filter(b => b.color === 'operators'),
-        variables: allBlocks.filter(b => b.color === 'variables')
-    };
-
-    // ============================================================
-    // GESTIÓN DE MÚLTIPLES SCRIPTS
-    // ============================================================
-    let scripts = {
-        "Script 1": { blocks: [] }
-    };
-    let currentScriptName = "Script 1";
-
-    // ============================================================
-    // ESTADO DEL JUEGO (mejorado con más propiedades)
-    // ============================================================
-    let gameObjects = {
-        gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, size: 100, rotation: 0 },
-        enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, size: 100, rotation: 0 }
-    };
-    let variables = { puntaje: 0, vida: 100, energía: 50, tiempo: 60, nivel: 1, monedas: 0 };
-    let sonidos = {}; // no implementado realmente
-
-    // ============================================================
-    // FUNCIONES DE INTERFAZ (SCRATCH 2008)
-    // ============================================================
-    let currentCategory = 'motion';
-
-    function showCategory(cat) {
-        currentCategory = cat;
-        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        renderPalette();
-    }
-
-    function renderPalette() {
-        const palette = document.getElementById('palette');
-        const blocks = blocksByCategory[currentCategory] || [];
-        palette.innerHTML = '';
-        blocks.forEach(block => {
-            const div = document.createElement('div');
-            div.className = `block ${block.color}`;
-            div.setAttribute('draggable', 'true');
-            div.textContent = block.text;
-            div.dataset.name = block.name;
-            div.dataset.params = JSON.stringify(block.params || []);
-            div.dataset.default = JSON.stringify(block.default || []);
-            div.addEventListener('dragstart', handleDragStart);
-            palette.appendChild(div);
-        });
-    }
-
-    function handleDragStart(e) {
-        e.dataTransfer.setData('text/plain', JSON.stringify({
-            name: e.target.dataset.name,
-            params: JSON.parse(e.target.dataset.params),
-            default: JSON.parse(e.target.dataset.default)
-        }));
-        e.dataTransfer.effectAllowed = 'copy';
-    }
-
-    const scriptArea = document.getElementById('scriptArea');
-    scriptArea.addEventListener('dragover', e => e.preventDefault());
-    scriptArea.addEventListener('drop', e => {
-        e.preventDefault();
-        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        addBlockToScript(data);
-    });
-
-    function addBlockToScript(blockData) {
-        const newBlock = {
-            name: blockData.name,
-            params: blockData.default.slice(),
-            paramNames: blockData.params
+        // Mapa de nombre de tile para mostrar en inspector
+        const tileNames = {
+            0: 'Borrar / vacío',
+            1: 'Suelo (marrón)',
+            2: 'Plataforma (verde)',
+            3: 'Enemigo (rojo)',
+            4: 'Jugador (azul)'
         };
-        scripts[currentScriptName].blocks.push(newBlock);
-        renderScript();
-    }
 
-    function renderScript() {
-        scriptArea.innerHTML = '';
-        const blocks = scripts[currentScriptName].blocks || [];
-        blocks.forEach((block, index) => {
-            const blockDiv = document.createElement('div');
-            blockDiv.className = 'script-block';
-            const original = allBlocks.find(b => b.name === block.name) || { color: 'motion' };
-            blockDiv.style.backgroundColor = categoryColors[original.color] || '#4a90e2';
+        // Colores para dibujar (relleno)
+        const tileColors = {
+            0: '#2d3138',   // vacío gris oscuro
+            1: '#8b5a2b',   // suelo marrón
+            2: '#4f7942',   // plataforma verde
+            3: '#b22234',   // enemigo rojo
+            4: '#2a6f97'    // jugador azul
+        };
 
-            const originalBlock = allBlocks.find(b => b.name === block.name);
-            const textSpan = document.createElement('span');
-            textSpan.textContent = (originalBlock ? originalBlock.text : block.name) + ' ';
-            blockDiv.appendChild(textSpan);
+        // ---------- Inicializar selección visual de tile ----------
+        function updateSelectedTileUI(selectedValue) {
+            tileItems.forEach(item => {
+                const tileVal = parseInt(item.getAttribute('data-tile'), 10);
+                if (tileVal === selectedValue) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            // Actualizar texto del inspector
+            selectedTileDisplay.textContent = tileNames[selectedValue] || 'Desconocido';
+        }
 
-            if (block.paramNames) {
-                block.paramNames.forEach((paramName, i) => {
-                    if (paramName === 'objeto') {
-                        const select = document.createElement('select');
-                        select.innerHTML = `<option>gato</option><option>enemigo</option>`;
-                        select.value = block.params[i];
-                        select.onchange = (e) => { block.params[i] = e.target.value; };
-                        blockDiv.appendChild(select);
-                    } else {
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.value = block.params[i];
-                        input.style.width = '50px';
-                        input.onchange = (e) => { block.params[i] = e.target.value; };
-                        blockDiv.appendChild(input);
+        // Eventos para cada tile de la paleta
+        tileItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const tileVal = parseInt(item.getAttribute('data-tile'), 10);
+                currentTile = tileVal;
+                updateSelectedTileUI(currentTile);
+            });
+        });
+
+        // Seleccionar el tile por defecto (suelo) al cargar
+        updateSelectedTileUI(1);
+
+        // ---------- Dibujar el canvas completo ----------
+        function drawGridAndTiles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar celdas según levelData
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const tile = levelData[row][col];
+                    const x = col * TILE_SIZE;
+                    const y = row * TILE_SIZE;
+
+                    // Relleno del tile
+                    ctx.fillStyle = tileColors[tile] || '#2d3138';
+                    ctx.fillRect(x, y, TILE_SIZE - 1, TILE_SIZE - 1);
+
+                    // Pequeño detalle de textura (borde interno) para que parezca tile
+                    if (tile !== 0) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 5, 2);
                     }
-                    if (i < block.paramNames.length - 1) blockDiv.appendChild(document.createTextNode(' '));
-                });
+
+                    // Dibujar icono simple para enemigo/jugador (emojis aproximados con texto)
+                    if (tile === 3) { // enemigo
+                        ctx.font = '18px "Segoe UI", monospace';
+                        ctx.fillStyle = '#111';
+                        ctx.fillText('👾', x + 6, y + 24);
+                    } else if (tile === 4) { // jugador
+                        ctx.font = '18px "Segoe UI", monospace';
+                        ctx.fillStyle = '#111';
+                        ctx.fillText('🚶', x + 6, y + 24);
+                    }
+                }
             }
 
-            const del = document.createElement('span');
-            del.className = 'delete';
-            del.textContent = '✖';
-            del.onclick = () => {
-                scripts[currentScriptName].blocks.splice(index, 1);
-                renderScript();
-            };
-            blockDiv.appendChild(del);
-
-            scriptArea.appendChild(blockDiv);
-        });
-    }
-
-    // Gestión de scripts
-    function refreshScriptSelect() {
-        const select = document.getElementById('scriptSelect');
-        select.innerHTML = '';
-        for (let name in scripts) {
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
-            if (name === currentScriptName) option.selected = true;
-            select.appendChild(option);
-        }
-    }
-
-    function switchScript(name) {
-        if (scripts[name]) {
-            currentScriptName = name;
-            renderScript();
-            refreshScriptSelect();
-        }
-    }
-
-    document.getElementById('scriptSelect').addEventListener('change', (e) => {
-        switchScript(e.target.value);
-    });
-
-    document.getElementById('newScriptBtn').addEventListener('click', () => {
-        let newName = prompt('Nombre del nuevo script:', 'Script ' + (Object.keys(scripts).length + 1));
-        if (newName && !scripts[newName]) {
-            scripts[newName] = { blocks: [] };
-            currentScriptName = newName;
-            renderScript();
-            refreshScriptSelect();
-        } else if (scripts[newName]) {
-            alert('Ya existe un script con ese nombre.');
-        }
-    });
-
-    document.getElementById('renameScriptBtn').addEventListener('click', () => {
-        let newName = prompt('Nuevo nombre para el script:', currentScriptName);
-        if (newName && newName !== currentScriptName && !scripts[newName]) {
-            scripts[newName] = scripts[currentScriptName];
-            delete scripts[currentScriptName];
-            currentScriptName = newName;
-            renderScript();
-            refreshScriptSelect();
-        } else if (scripts[newName]) {
-            alert('Ya existe un script con ese nombre.');
-        }
-    });
-
-    document.getElementById('deleteScriptBtn').addEventListener('click', () => {
-        if (Object.keys(scripts).length <= 1) {
-            alert('No puedes eliminar el único script.');
-            return;
-        }
-        if (confirm(`¿Eliminar el script "${currentScriptName}"?`)) {
-            delete scripts[currentScriptName];
-            currentScriptName = Object.keys(scripts)[0];
-            renderScript();
-            refreshScriptSelect();
-        }
-    });
-
-    document.getElementById('clearBtn').addEventListener('click', () => {
-        scripts[currentScriptName].blocks = [];
-        renderScript();
-        addLog('Script limpiado');
-    });
-
-    // ============================================================
-    // EDITOR DE SPRITES
-    // ============================================================
-    const spriteSelect = document.getElementById('spriteSelect');
-    const posX = document.getElementById('posX');
-    const posY = document.getElementById('posY');
-    const posXVal = document.getElementById('posXVal');
-    const posYVal = document.getElementById('posYVal');
-    const colorSelect = document.getElementById('colorSelect');
-    const sizeSlider = document.getElementById('size');
-    const sizeVal = document.getElementById('sizeVal');
-    const visibleCheck = document.getElementById('visible');
-
-    function updateSpriteEditor() {
-        const objName = spriteSelect.value;
-        const obj = gameObjects[objName];
-        if (!obj) return;
-        posX.value = obj.x;
-        posY.value = obj.y;
-        posXVal.textContent = obj.x;
-        posYVal.textContent = obj.y;
-        if (obj.color === '#f1c40f') colorSelect.value = '#f1c40f';
-        else if (obj.color === '#3498db') colorSelect.value = '#3498db';
-        else if (obj.color === '#2ecc71') colorSelect.value = '#2ecc71';
-        else if (obj.color === '#e74c3c') colorSelect.value = '#e74c3c';
-        else if (obj.color === '#9b59b6') colorSelect.value = '#9b59b6';
-        sizeSlider.value = obj.size;
-        sizeVal.textContent = obj.size;
-        visibleCheck.checked = obj.visible;
-    }
-
-    spriteSelect.addEventListener('change', updateSpriteEditor);
-    posX.addEventListener('input', () => {
-        posXVal.textContent = posX.value;
-        gameObjects[spriteSelect.value].x = parseInt(posX.value);
-        drawGame();
-    });
-    posY.addEventListener('input', () => {
-        posYVal.textContent = posY.value;
-        gameObjects[spriteSelect.value].y = parseInt(posY.value);
-        drawGame();
-    });
-    colorSelect.addEventListener('change', () => {
-        gameObjects[spriteSelect.value].color = colorSelect.value;
-        drawGame();
-    });
-    sizeSlider.addEventListener('input', () => {
-        sizeVal.textContent = sizeSlider.value;
-        gameObjects[spriteSelect.value].size = parseInt(sizeSlider.value);
-        drawGame();
-    });
-    visibleCheck.addEventListener('change', () => {
-        gameObjects[spriteSelect.value].visible = visibleCheck.checked;
-        drawGame();
-    });
-
-    // ============================================================
-    // DIBUJO Y EJECUCIÓN (MEJORADO CON MÁS COMANDOS)
-    // ============================================================
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const logDiv = document.getElementById('log');
-
-    function addLog(msg) {
-        logDiv.innerHTML += '<br>> ' + msg;
-        logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    function drawGame() {
-        ctx.fillStyle = '#2c3e50';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        for (let name in gameObjects) {
-            let obj = gameObjects[name];
-            if (!obj.visible) continue;
-            ctx.save();
-            ctx.translate(obj.x, obj.y);
-            ctx.rotate(obj.rotation || 0);
-            ctx.fillStyle = obj.color;
+            // Dibujar líneas de cuadrícula (estilo Godot, sutiles)
             ctx.beginPath();
-            ctx.arc(0, 0, 15 * (obj.size/100), 0, 2*Math.PI);
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#4f555e';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= COLS; i++) {
+                ctx.moveTo(i * TILE_SIZE, 0);
+                ctx.lineTo(i * TILE_SIZE, canvas.height);
+            }
+            for (let i = 0; i <= ROWS; i++) {
+                ctx.moveTo(0, i * TILE_SIZE);
+                ctx.lineTo(canvas.width, i * TILE_SIZE);
+            }
             ctx.stroke();
-            ctx.restore();
-            ctx.fillStyle = '#fff';
-            ctx.font = '12px monospace';
-            ctx.fillText(name, obj.x-20, obj.y-20);
-        }
-    }
 
-    // Manejadores de comandos (para facilitar la ejecución)
-    const commandHandlers = {
-        // Movimiento
-        mover: (block) => {
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (!obj) return;
-            let pasos = block.params[1] ? Number(block.params[1]) : 10;
-            if (block.name.includes('derecha')) obj.x += pasos;
-            else if (block.name.includes('izquierda')) obj.x -= pasos;
-            else if (block.name.includes('abajo')) obj.y += pasos;
-            else if (block.name.includes('arriba')) obj.y -= pasos;
-            else if (block.name.includes('arriba-izquierda')) { obj.x -= pasos; obj.y -= pasos; }
-            else if (block.name.includes('arriba-derecha')) { obj.x += pasos; obj.y -= pasos; }
-            else if (block.name.includes('abajo-izquierda')) { obj.x -= pasos; obj.y += pasos; }
-            else if (block.name.includes('abajo-derecha')) { obj.x += pasos; obj.y += pasos; }
-            else { // mover_X pasos (solo número)
-                obj.x += pasos;
-            }
-        },
-        ir_a: (block) => {
-            let partes = block.name.split('_');
-            if (partes.length >= 4) {
-                let x = parseInt(partes[2]), y = parseInt(partes[3]);
-                let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-                if (obj) { obj.x = x; obj.y = y; }
-            }
-        },
-        girar: (block) => {
-            let grados = parseInt(block.name.split('_')[1]);
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (obj) obj.rotation += grados * Math.PI/180;
-        },
-        apuntar_hacia: (block) => {
-            let destino = block.name.split('_')[2];
-            // Simulado: solo mensaje
-            addLog(`🔄 Apuntando hacia ${destino}`);
-        },
-        // Apariencia
-        cambiar_color: (block) => {
-            let color = block.name.split('_')[2];
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (obj) {
-                const colormap = {
-                    'rojo': '#e74c3c', 'azul': '#3498db', 'verde': '#2ecc71',
-                    'amarillo': '#f1c40f', 'morado': '#9b59b6', 'naranja': '#e67e22',
-                    'rosa': '#ff69b4', 'cian': '#00ffff', 'blanco': '#ffffff', 'negro': '#000000'
-                };
-                obj.color = colormap[color] || obj.color;
-            }
-        },
-        tamaño: (block) => {
-            let sz = parseInt(block.name.split('_')[1]);
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (obj) obj.size = sz;
-        },
-        mostrar: (block) => {
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (obj) obj.visible = true;
-        },
-        ocultar: (block) => {
-            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
-            if (obj) obj.visible = false;
-        },
-        decir: (block) => {
-            let msg = block.name.split('_')[1];
-            addLog(`🗣️ ${msg}`);
-        },
-        // Sonido
-        sonido: (block) => {
-            let snd = block.name.split('_')[1];
-            addLog(`🔊 Sonido: ${snd}`);
-        },
-        volumen: (block) => {
-            let vol = block.name.split('_')[1];
-            addLog(`🔊 Volumen fijado a ${vol}%`);
-        },
-        tambor: (block) => {
-            let t = block.name.split('_')[1];
-            addLog(`🥁 Tambor ${t}`);
-        },
-        // Variables
-        fijar: (block) => {
-            let partes = block.name.split('_');
-            if (partes[1] === 'vida' && partes[2]) variables.vida = parseInt(partes[2]);
-            if (partes[1] === 'puntaje' && partes[2]) variables.puntaje = parseInt(partes[2]);
-            if (partes[1] === 'energía' && partes[2]) variables.energía = parseInt(partes[2]);
-            if (partes[1] === 'tiempo' && partes[2]) variables.tiempo = parseInt(partes[2]);
-            if (partes[1] === 'nivel' && partes[2]) variables.nivel = parseInt(partes[2]);
-            if (partes[1] === 'monedas' && partes[2]) variables.monedas = parseInt(partes[2]);
-            addLog(`📊 Variable ${partes[1]} = ${partes[2]}`);
-        },
-        cambiar: (block) => {
-            let partes = block.name.split('_');
-            if (partes[1] === 'vida') variables.vida += parseInt(partes[2] || 1);
-            addLog(`📊 Variable ${partes[1]} += ${partes[2] || 1}`);
-        },
-        // Control
-        esperar: (block) => {
-            let seg = block.name.split('_')[1].replace('s','');
-            addLog(`⏱️ Esperando ${seg} segundos (simulado)`);
-        },
-        // Sensores
-        distancia_a: (block) => {
-            let dest = block.name.split('_')[2];
-            addLog(`📏 Distancia a ${dest} (simulado)`);
-        },
-        // Operadores
-        suma: (block) => {
-            addLog(`🧮 Resultado de suma: (simulado)`);
+            // Resaltar coordenadas 0,0 (origen)
+            ctx.fillStyle = '#8aa9d6';
+            ctx.font = 'bold 10px monospace';
+            ctx.fillText('(0,0)', 4, 16);
         }
-    };
 
-    function ejecutarBloque(block) {
-        addLog(`Ejecutando: ${block.name} (${block.params.join(', ')})`);
-        const cmd = block.name;
-        // Buscar un manejador por el prefijo
-        let handled = false;
-        for (let key in commandHandlers) {
-            if (cmd.startsWith(key)) {
-                commandHandlers[key](block);
-                handled = true;
-                break;
+        // ---------- Convertir coordenadas del ratón a celda ----------
+        function getCellFromMouse(event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;   // relación píxeles físicos / canvas
+            const scaleY = canvas.height / rect.height;
+
+            const mouseX = (event.clientX - rect.left) * scaleX;
+            const mouseY = (event.clientY - rect.top) * scaleY;
+
+            const col = Math.floor(mouseX / TILE_SIZE);
+            const row = Math.floor(mouseY / TILE_SIZE);
+
+            if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+                return { row, col };
+            }
+            return null;
+        }
+
+        // ---------- Actualizar la celda bajo el ratón (pintar/borrar) ----------
+        function handleCanvasMouseDown(event) {
+            event.preventDefault(); // Evitar arrastrar imagen o seleccionar
+            const cell = getCellFromMouse(event);
+            if (!cell) return;
+
+            const { row, col } = cell;
+            let newTile = currentTile;
+
+            // Botón derecho (botón 2) para borrar (tile 0)
+            if (event.button === 2) {
+                newTile = 0;
+            }
+
+            // Si el tile actual es "borrar" (0) también se asigna 0
+            if (currentTile === 0) newTile = 0;
+
+            // Actualizar matriz
+            levelData[row][col] = newTile;
+
+            // Actualizar display de última celda
+            lastCellDisplay.textContent = `(${col}, ${row})`;
+
+            // Redibujar
+            drawGridAndTiles();
+        }
+
+        // Mostrar coordenadas del ratón en la barra de estado
+        function handleCanvasMouseMove(event) {
+            const cell = getCellFromMouse(event);
+            if (cell) {
+                mouseCoordsSpan.textContent = `${cell.col}, ${cell.row}`;
+            } else {
+                mouseCoordsSpan.textContent = '-,-';
             }
         }
-        if (!handled) {
-            addLog(`ℹ️ Comando "${cmd}" no implementado en detalle, pero se ignora.`);
-        }
-        drawGame();
-        updateSpriteEditor();
-    }
 
-    function ejecutarTodosLosScripts() {
-        addLog('--- INICIO EJECUCIÓN (TODOS LOS SCRIPTS) ---');
-        for (let scriptName in scripts) {
-            addLog(`> Ejecutando script: ${scriptName}`);
-            const blocks = scripts[scriptName].blocks;
-            for (let block of blocks) {
-                ejecutarBloque(block);
-            }
-        }
-        addLog('--- FIN EJECUCIÓN ---');
-    }
+        // Prevenir menú contextual en el canvas (para que funcione botón derecho)
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    function resetGame() {
-        gameObjects = {
-            gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, size: 100, rotation: 0 },
-            enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, size: 100, rotation: 0 }
-        };
-        variables = { puntaje: 0, vida: 100, energía: 50, tiempo: 60, nivel: 1, monedas: 0 };
-        drawGame();
-        updateSpriteEditor();
-        addLog('Juego reiniciado');
-    }
+        // Eventos del ratón
+        canvas.addEventListener('mousedown', handleCanvasMouseDown);
+        canvas.addEventListener('mousemove', handleCanvasMouseMove);
 
-    // ============================================================
-    // INICIALIZACIÓN
-    // ============================================================
-    window.onload = () => {
-        // Crear botones de categorías
-        const cats = document.getElementById('categories');
-        const catList = [
-            { id: 'motion', name: 'MOVIMIENTO', color: '#4a90e2' },
-            { id: 'looks', name: 'APARIENCIA', color: '#9b59b6' },
-            { id: 'sound', name: 'SONIDO', color: '#e67e22' },
-            { id: 'event', name: 'EVENTOS', color: '#f1c40f' },
-            { id: 'control', name: 'CONTROL', color: '#e74c3c' },
-            { id: 'sensing', name: 'SENSORES', color: '#3498db' },
-            { id: 'operators', name: 'OPERADORES', color: '#2ecc71' },
-            { id: 'variables', name: 'VARIABLES', color: '#e67e22' }
-        ];
-        catList.forEach(cat => {
-            const btn = document.createElement('button');
-            btn.className = 'cat-btn';
-            btn.style.backgroundColor = cat.color;
-            btn.textContent = cat.name;
-            btn.onclick = () => showCategory(cat.id);
-            cats.appendChild(btn);
+        // ---------- Botón limpiar: pone todo a 0 ----------
+        clearBtn.addEventListener('click', () => {
+            levelData = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            drawGridAndTiles();
+            lastCellDisplay.textContent = '(0,0)';
         });
-        document.querySelector('.cat-btn').classList.add('active');
-        renderPalette();
-        refreshScriptSelect();
-        renderScript();
-        drawGame();
-        updateSpriteEditor();
 
-        document.getElementById('runBtn').addEventListener('click', ejecutarTodosLosScripts);
-        document.getElementById('resetBtn').addEventListener('click', resetGame);
-    };
+        // ---------- Botón ejecutar: muestra un resumen del nivel (simulación) ----------
+        runBtn.addEventListener('click', () => {
+            const counts = {1:0, 2:0, 3:0, 4:0};
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const val = levelData[r][c];
+                    if (val in counts) counts[val]++;
+                }
+            }
+            alert(`📊 Vista previa del juego:\nSuelo: ${counts[1]} tiles\nPlataformas: ${counts[2]}\nEnemigos: ${counts[3]}\nJugador: ${counts[4]}\n\n(Godot estilo: nivel listo para exportar)`);
+        });
+
+        // ---------- Ejemplo de nivel precargado (para que no empiece vacío) ----------
+        function loadExampleLevel() {
+            // Suelo base (fila 13 y 14)
+            for (let c = 0; c < COLS; c++) {
+                levelData[13][c] = 1;   // suelo
+                levelData[14][c] = 1;
+            }
+            // Algunas plataformas
+            levelData[10][5] = 2; levelData[10][6] = 2; levelData[10][7] = 2;
+            levelData[8][12] = 2; levelData[8][13] = 2; levelData[8][14] = 2;
+            // Enemigos
+            levelData[12][4] = 3; levelData[12][15] = 3;
+            // Jugador
+            levelData[12][8] = 4;
+            drawGridAndTiles();
+        }
+
+        // Cargar ejemplo al inicio
+        loadExampleLevel();
+
+        // ---------- Pequeña animación o actualización final (por si acaso) ----------
+        // (ya se dibuja en loadExampleLevel)
+
+        // También exponemos levelData globalmente (por si alguien quiere debug)
+        window.levelData = levelData;
+    })();
 </script>
 </body>
 </html>
