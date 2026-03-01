@@ -1,550 +1,431 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Programación en el laberinto · juego custom</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-        }
-        body {
-            background: linear-gradient(145deg, #1e2b3a 0%, #0f1a24 100%);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .game-container {
-            max-width: 650px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 3rem 3rem 2rem 2rem;
-            padding: 2rem 1.5rem 2rem 1.5rem;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
-            border: 1px solid #4b6e8c;
-        }
-        h1 {
-            text-align: center;
-            margin: 0 0 0.5rem 0;
-            font-weight: 600;
-            font-size: 2.1rem;
-            letter-spacing: 1px;
-            color: #ffd966;
-            text-shadow: 0 3px 0 #7a4d00, 0 5px 10px #00000080;
-            word-break: break-word;
-        }
-        .sub {
-            text-align: center;
-            color: #b0d4f0;
-            margin-top: -0.2rem;
-            margin-bottom: 1.5rem;
-            font-style: italic;
-            font-weight: 300;
-            border-bottom: 1px dashed #3e607b;
-            padding-bottom: 0.5rem;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.7rem;
-            aspect-ratio: 1 / 1;
-            max-width: 350px;
-            margin: 0 auto 1.5rem auto;
-            background: #21384b;
-            padding: 1rem;
-            border-radius: 2.5rem;
-            box-shadow: inset 0 -3px 0 #0d1b26, 0 15px 20px #00000060;
-        }
-        .cell {
-            background: #2f4b65;
-            border-radius: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            font-weight: 600;
-            aspect-ratio: 1 / 1;
-            box-shadow: inset 0 -4px 0 #1b3140, 0 0 0 2px #2c4d66;
-            color: #fff9e6;
-            text-shadow: 0 2px 0 #00000070;
-            transition: 0.1s ease;
-        }
-        .cell.player-cell {
-            background: #f7c45a;
-            box-shadow: inset 0 -4px 0 #b57c2a, 0 0 0 3px #ffecaa;
-            color: #1e2b3a;
-        }
-        .wall {
-            background: #3d2e24;
-            box-shadow: inset 0 -4px 0 #241b15, 0 0 0 2px #684e3a;
-            color: #ae8f76;
-        }
-        .info-panel {
-            background: #14222e;
-            border-radius: 3rem;
-            padding: 1.5rem 1.2rem;
-            box-shadow: inset 0 2px 6px #00000080, 0 8px 0 #0b151f;
-            border: 1px solid #42749b;
-        }
-        .command-section-title {
-            color: #c7e5ff;
-            font-weight: 500;
-            letter-spacing: 1px;
-            margin: 0 0 0.8rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.3rem;
-            border-left: 6px solid #ffb347;
-            padding-left: 1rem;
-        }
-        .commands-list {
-            background: #0f1c28;
-            border-radius: 2.5rem;
-            min-height: 4rem;
-            padding: 0.8rem 1.2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            border: 1px solid #31658c;
-            box-shadow: inset 0 2px 5px #000000;
-        }
-        .command-chip {
-            background: #2f5575;
-            border-radius: 3rem;
-            padding: 0.4rem 0.9rem 0.4rem 1.3rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.7rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: white;
-            box-shadow: 0 3px 0 #173248, inset 0 0 0 1px #7fa9cc;
-        }
-        .command-chip button {
-            background: #ac3e3e;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-            line-height: 1;
-            border-radius: 50%;
-            width: 1.7rem;
-            height: 1.7rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #631d1d;
-            transition: 0.1s ease;
-            padding: 0;
-        }
-        .command-chip button:hover {
-            background: #c55a5a;
-            transform: scale(1.05);
-        }
-        .command-chip button:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-        .add-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.8rem;
-            margin: 1.2rem 0 1rem 0;
-        }
-        .btn {
-            background: #f0d9b0;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 0.8rem 1.5rem;
-            border-radius: 3rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            box-shadow: 0 5px 0 #a07948, 0 8px 12px #00000040;
-            cursor: pointer;
-            transition: 0.08s linear;
-            color: #1e2b3a;
-            border: 1px solid #ffecb3;
-        }
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #a07948, 0 5px 10px #00000040;
-        }
-        .btn-primary {
-            background: #ffb854;
-            box-shadow: 0 5px 0 #b16f1d;
-            color: #1e2b1e;
-        }
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-            margin: 1.5rem 0 0.5rem;
-        }
-        .message {
-            background: #07121c;
-            border-radius: 4rem;
-            padding: 0.9rem 1.8rem;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #cce6ff;
-            border: 1px solid #2b6599;
-            margin-top: 1.5rem;
-            box-shadow: inset 0 2px 5px black;
-            min-height: 4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .footer-dir {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            margin: 1rem 0 0.2rem;
-            color: #9bc2e6;
-            font-size: 1.2rem;
-        }
-        .badge {
-            background: #31658c;
-            border-radius: 2rem;
-            padding: 0.2rem 1.2rem;
-            font-weight: 600;
-            color: #ffdd9e;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Programación 2008</title>
+  <style>
+    /* ===== ESTÉTICA 2008 ===== 
+       - Degradados intensos (glossy)
+       - Bordes redondeados (webkit-mask no, pero border-radius ya existía)
+       - Sombras pronunciadas
+       - Sensación "Web 2.0", burbujas, reflejos
+       - Fuentes como Tahoma, Verdana, Lucida Grande
+       - Colores brillantes: azules, plateados, destellos blancos
+    */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box; /* aunque en 2008 se usaba más el border tradicional, lo incluimos por claridad */
+    }
+
+    body {
+      background: #7799bb; /* fondo azul grisáceo típico de fondos de escritorio XP */
+      background-image: radial-gradient(circle at 20% 30%, #b0c4de, #4f6f8f);
+      font-family: 'Tahoma', 'Lucida Grande', 'Verdana', sans-serif;
+      padding: 30px 0 50px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* contenedor principal — parece una ventana de software de la época */
+    .ventana-2008 {
+      width: 900px;
+      max-width: 95%;
+      background: #e8eef4;           /* gris azulado claro base */
+      border: 2px solid #ffffff;
+      outline: 1px solid #3a5f7a;    /* doble borde para efecto elevado */
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 1px 4px #ffffff;
+      padding: 18px 20px 20px 20px;
+      backdrop-filter: blur(1px);     /* un toque extra, aunque no era común, le da brillo */
+    }
+
+    /* Cabecera con reflejo propio (inspirado en reproductores de la época) */
+    .cabecera {
+      margin-bottom: 18px;
+      position: relative;
+      border-bottom: 1px solid #b3c9db;
+      padding-bottom: 8px;
+    }
+
+    .cabecera h1 {
+      font-size: 32px;
+      font-weight: bold;
+      color: #2a3f5e;
+      text-shadow: 2px 2px 0 #d0e0f0, 3px 3px 3px rgba(0,0,0,0.2);
+      letter-spacing: -0.5px;
+      font-family: 'Arial Black', 'Gadget', sans-serif;
+      display: inline-block;
+      background: linear-gradient(to bottom, #eef5fc, #c2d4e8);
+      padding: 0 15px 5px 10px;
+      border-radius: 30px 10px 10px 30px;
+      border: 1px solid #acc3db;
+      box-shadow: inset 0 1px 3px white, 0 3px 5px rgba(0,0,0,0.2);
+    }
+
+    .cabecera h1 span {
+      font-size: 18px;
+      color: #ffd966;
+      text-shadow: 1px 1px 0 #a64d00;
+      background: #2f5575;
+      padding: 3px 12px;
+      border-radius: 30px;
+      margin-left: 15px;
+      border: 1px solid #ffbf47;
+      box-shadow: inset 0 1px 2px #f9e5b3, 0 2px 3px #0f1f2f;
+      display: inline-block;
+    }
+
+    /* Slogan / badge "web 2.0" */
+    .badge {
+      float: right;
+      background: #c00c0c;
+      color: #fff9d7;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 5px 12px;
+      border-radius: 30px 5px 30px 5px;
+      border: 1px solid #febb8f;
+      box-shadow: 0 3px 5px #3a2e2e, inset 0 1px 5px #fdd3a2;
+      text-transform: uppercase;
+      margin-top: 8px;
+      transform: rotate(1deg);
+    }
+
+    /* Área de edición: parece un bloque con brillo */
+    .editor-box {
+      background: #dae5f0;
+      border: 2px inset #aabbcc;
+      border-radius: 8px;
+      padding: 12px 12px 8px 12px;
+      margin: 15px 0 10px 0;
+      box-shadow: inset 1px 1px 5px #48647c, 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .etiqueta {
+      display: block;
+      font-weight: bold;
+      color: #163856;
+      text-shadow: 0 1px 0 white;
+      margin-bottom: 6px;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: linear-gradient(to right, #c7daf0, transparent);
+      padding: 2px 0 2px 8px;
+      border-left: 5px solid #1e6fa8;
+    }
+
+    /* textarea — con aspecto de monitor clásico */
+    textarea#codigo {
+      width: 100%;
+      background: #f0f5fd;
+      border: 3px inset #5f7a9a;
+      padding: 10px;
+      font-family: 'Courier New', 'Courier', monospace;
+      font-size: 15px;
+      color: #001c33;
+      resize: vertical;
+      box-shadow: inset 2px 2px 8px #2f4965, 0 2px 2px #a1b9d4;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+
+    /* barra de herramientas con botones GLOSSY (muy 2008) */
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      margin: 18px 0 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .btn-glossy {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      outline: none;
+      flex: 0 1 auto;
+    }
+
+    .btn-glossy .inner {
+      display: block;
+      padding: 10px 32px;
+      background: #3a7bb5; /* fallback */
+      background: linear-gradient(to bottom, #60b0f0, #1d5c9e);
+      border: 2px solid #d7eaff;
+      border-radius: 40px 12px 40px 12px; /* asimetría intencional */
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 2px 3px #0b1f33;
+      box-shadow: 0 5px 0 #10324f, 0 8px 12px rgba(0,0,0,0.3), inset 0 2px 5px #c5e2ff;
+      transition: all 0.1s ease;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    /* efecto glossy extra con pseudo-elemento :after (brillo superior) */
+    .btn-glossy .inner::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.1));
+      border-radius: 40px 12px 0 0;
+      pointer-events: none;
+    }
+
+    .btn-glossy:active .inner {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #10324f, 0 5px 8px rgba(0,0,0,0.3);
+    }
+
+    /* botón secundario (limpiar) con tono plateado */
+    #clear .inner {
+      background: linear-gradient(to bottom, #a5b8cb, #5b6f87);
+      box-shadow: 0 5px 0 #2b3b4b, 0 8px 12px rgba(0,0,0,0.3), inset 0 2px 5px #e1edfa;
+      text-shadow: 0 2px 3px #141c28;
+    }
+
+    /* Consola de salida */
+    .console-box {
+      background: #cbd7e6;
+      border: 2px ridge #778caa;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: inset 1px 1px 4px #2a3d55, 0 4px 6px #1f3143;
+    }
+
+    #output {
+      background: #fafcfd;
+      border: 3px inset #506886;
+      min-height: 150px;
+      max-height: 300px;
+      overflow: auto;
+      padding: 10px;
+      font-family: 'Courier New', 'Courier', monospace;
+      font-size: 14px;
+      color: #031a2b;
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 2px #d5e3f0, inset 2px 2px 8px #3f4f64;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* footer vintage */
+    .footer-2008 {
+      margin-top: 20px;
+      text-align: right;
+      font-size: 13px;
+      color: #2e4b6b;
+      text-shadow: 0 1px 0 #b7cde0;
+      border-top: 1px dashed #7089a5;
+      padding-top: 6px;
+      font-style: italic;
+    }
+
+    .footer-2008 span {
+      background: #27435f;
+      color: #eaf3fc;
+      padding: 2px 10px;
+      border-radius: 20px 0 20px 0;
+    }
+
+    /* pequeños detalles extra */
+    .reflejo {
+      width: 120px;
+      height: 12px;
+      background: linear-gradient(to right, transparent, white, transparent);
+      margin-top: -12px;
+      margin-left: 40px;
+      opacity: 0.4;
+      border-radius: 50%;
+    }
+
+  </style>
 </head>
 <body>
-<div class="game-container">
-    <h1>⚙️ LABERINTO CODE</h1>
-    <div class="sub">construye tu programa → alcanza la ★</div>
+<div class="ventana-2008">
 
-    <!-- cuadrícula 5x5 -->
-    <div class="grid" id="gridContainer"></div>
+  <!-- CABECERA con destellos y badge -->
+  <div class="cabecera">
+    <h1>PROG-2008 <span>beta</span></h1>
+    <div class="badge">web 2.0 · glossy</div>
+    <div class="reflejo"></div>
+    <div style="clear:both"></div>
+  </div>
 
-    <!-- indicador de dirección actual (extra) -->
-    <div class="footer-dir">
-        <span>🤖 dirección:</span>
-        <span class="badge" id="directionBadge">→</span>
-    </div>
+  <!-- EDITOR DE CÓDIGO -->
+  <div class="editor-box">
+    <label class="etiqueta">✎ Editor de código JavaScript (estilo 2008)</label>
+    <textarea id="codigo" rows="8">// Escribe tu código retro...
+console.log("★ Hola desde 2008 ★");
 
-    <div class="info-panel">
-        <div class="command-section-title">
-            <span>📜 TUS INSTRUCCIONES</span>
-            <span style="font-size:0.9rem; background:#0e2a3b; padding:0.2rem 1rem; border-radius:40px;" id="cmdCount">0</span>
-        </div>
+var suma = 20 + 8;
+console.log("suma =", suma);
 
-        <!-- lista de comandos agregados -->
-        <div id="commandsList" class="commands-list">
-            <!-- se llena dinámicamente -->
-        </div>
+// Objeto molón
+var usuario = { nombre: "RetroMan", año: 2008 };
+console.log("Usuario:", usuario);
 
-        <!-- botones para agregar comandos -->
-        <div class="add-buttons">
-            <button class="btn" id="addForward">⬆️ ADELANTE</button>
-            <button class="btn" id="addLeft">↪️ IZQUIERDA</button>
-            <button class="btn" id="addRight">↩️ DERECHA</button>
-        </div>
+// Un loop con estilo
+for (var i=1; i<=3; i++) {
+  console.log("  > iteración", i);
+}
 
-        <!-- acciones principales -->
-        <div class="action-buttons">
-            <button class="btn btn-primary" id="runBtn">▶️ EJECUTAR</button>
-            <button class="btn" id="resetGameBtn">🔄 REINICIAR</button>
-            <button class="btn" id="clearCommandsBtn">🗑️ BORRAR TODO</button>
-        </div>
-    </div>
+// Si quieres probar un error, descomenta:
+// console.log(variableNoDefinida);</textarea>
+  </div>
 
-    <!-- área de mensajes (feedback) -->
-    <div id="message" class="message">
-        ⚡ Coloca instrucciones y pulsa EJECUTAR
-    </div>
+  <!-- BARRA DE BOTONES GLOSSY -->
+  <div class="toolbar">
+    <button class="btn-glossy" id="run">
+      <span class="inner">▶ EJECUTAR</span>
+    </button>
+    <button class="btn-glossy" id="clear">
+      <span class="inner">⌧ LIMPIAR CONSOLA</span>
+    </button>
+  </div>
+
+  <!-- CONSOLA DE SALIDA -->
+  <div class="console-box">
+    <label class="etiqueta">📟 Consola de salida (output)</label>
+    <div id="output"></div>
+    <div style="margin-top:6px; font-size:12px; color:#2d4968; text-align:right">[listo]</div>
+  </div>
+
+  <!-- PIE DE PÁGINA con sabor a 2008 -->
+  <div class="footer-2008">
+    <span>ⓒ 2008 Tecnología punta · Todos los derechos reservados</span>
+  </div>
+
 </div>
 
+<!-- ========== SISTEMA DE PROGRAMACIÓN (JavaScript) ========== -->
 <script>
-    (function() {
-        // ----- CONFIGURACIÓN DEL JUEGO -----
-        const SIZE = 5;  // grid 5x5
-        // Muros fijos (paredes) para dar reto
-        const WALLS = [
-            { x: 2, y: 1 },
-            { x: 2, y: 2 },
-            { x: 3, y: 2 },
-            // { x: 1, y: 3 }, // se puede descomentar para más muros
-        ];
-        const GOAL = { x: 4, y: 4 };  // meta fija
+  (function() {
+    // ---- ELEMENTOS DEL DOM ----
+    var outputEl = document.getElementById('output');
+    var runBtn = document.getElementById('run');
+    var clearBtn = document.getElementById('clear');
+    var codeEl = document.getElementById('codigo');
 
-        // Estado del jugador
-        let player = { x: 0, y: 0 };
-        let direction = 0;        // 0: derecha, 1: abajo, 2: izquierda, 3: arriba
+    // ---- GUARDAMOS LOS CONSOLAS ORIGINALES (por si acaso) ----
+    var originalLog = console.log;
+    var originalError = console.error;
+    var originalWarn = console.warn;
 
-        // Programa del jugador (lista de comandos)
-        let commands = [];        // cada elemento: 'forward', 'left', 'right'
-
-        // Elementos del DOM
-        const gridEl = document.getElementById('gridContainer');
-        const commandsListEl = document.getElementById('commandsList');
-        const messageEl = document.getElementById('message');
-        const directionBadge = document.getElementById('directionBadge');
-        const cmdCountSpan = document.getElementById('cmdCount');
-
-        // Mapeo de dirección a símbolo
-        const DIR_SYMBOLS = ['→', '↓', '←', '↑'];
-
-        // ----- FUNCIONES DE ACTUALIZACIÓN DE INTERFAZ -----
-
-        // Dibuja la cuadrícula según estado actual (jugador, meta, muros)
-        function renderGrid() {
-            gridEl.innerHTML = '';
-            for (let row = 0; row < SIZE; row++) {
-                for (let col = 0; col < SIZE; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-
-                    // Comprobar si es muro
-                    const isWall = WALLS.some(w => w.x === col && w.y === row);
-                    if (isWall) {
-                        cell.classList.add('wall');
-                        cell.textContent = '█';
-                    } else {
-                        // Determinar si es la posición del jugador
-                        if (player.x === col && player.y === row) {
-                            cell.classList.add('player-cell');
-                            cell.textContent = DIR_SYMBOLS[direction];  // mostramos dirección
-                        }
-                        // Si no es jugador, pero es la meta
-                        else if (GOAL.x === col && GOAL.y === row) {
-                            cell.textContent = '★';
-                            cell.style.color = '#ffd966';
-                        } else {
-                            // Celda vacía
-                            cell.textContent = '·';
-                            cell.style.color = '#5c7f9c';
-                        }
-                    }
-                    gridEl.appendChild(cell);
-                }
-            }
-            // Actualizar badge de dirección
-            directionBadge.textContent = DIR_SYMBOLS[direction];
+    // ---- SOBREESCRIBIMOS CONSOLA PARA CAPTURAR TODO EN EL DIV DE SALIDA (estilo 2008) ----
+    console.log = function() {
+      var args = Array.prototype.slice.call(arguments).map(function(arg) {
+        if (arg === null) return 'null';
+        if (arg === undefined) return 'undefined';
+        if (typeof arg === 'object') {
+          try {
+            return JSON.stringify(arg);
+          } catch (e) {
+            return arg.toString();
+          }
         }
+        return arg;
+      }).join(' ');
+      outputEl.innerHTML += args + '<br>';
+      // Llamada opcional a la consola original (comentada para no ensuciar)
+      // originalLog.apply(console, arguments);
+    };
 
-        // Renderiza la lista de comandos (con botones de eliminar)
-        function renderCommands() {
-            commandsListEl.innerHTML = '';
-            if (commands.length === 0) {
-                commandsListEl.style.justifyContent = 'center';
-                const emptyMsg = document.createElement('span');
-                emptyMsg.textContent = '✖️ ninguna instrucción';
-                emptyMsg.style.color = '#6f8fa8';
-                emptyMsg.style.fontStyle = 'italic';
-                commandsListEl.appendChild(emptyMsg);
-            } else {
-                commandsListEl.style.justifyContent = 'flex-start';
-                commands.forEach((cmd, index) => {
-                    const chip = document.createElement('span');
-                    chip.className = 'command-chip';
-                    let texto = '';
-                    if (cmd === 'forward') texto = '⬆️ Adelante';
-                    else if (cmd === 'left') texto = '↪️ Izquierda';
-                    else if (cmd === 'right') texto = '↩️ Derecha';
-
-                    chip.innerHTML = `${texto} <button class="remove-cmd" data-index="${index}">✕</button>`;
-                    commandsListEl.appendChild(chip);
-                });
-
-                // Agregar eventos a los botones de eliminar (usamos delegación más simple)
-                document.querySelectorAll('.remove-cmd').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const idx = btn.getAttribute('data-index');
-                        if (idx !== null) removeCommand(parseInt(idx));
-                    });
-                });
-            }
-            // actualizar contador
-            cmdCountSpan.textContent = commands.length;
+    console.error = function() {
+      var args = Array.prototype.slice.call(arguments).map(function(arg) {
+        if (arg === null) return 'null';
+        if (arg === undefined) return 'undefined';
+        if (typeof arg === 'object') {
+          try {
+            return JSON.stringify(arg);
+          } catch (e) {
+            return arg.toString();
+          }
         }
+        return arg;
+      }).join(' ');
+      outputEl.innerHTML += '<span style="color:#b00; background:#fee; padding:0 4px; border-radius:4px;">⛔ ERROR: ' + args + '</span><br>';
+      // originalError.apply(console, arguments);
+    };
 
-        // Mostrar mensaje al usuario
-        function setMessage(text, esExito = false, esError = false) {
-            messageEl.textContent = text;
-            if (esExito) messageEl.style.background = '#1f5130';
-            else if (esError) messageEl.style.background = '#631f1f';
-            else messageEl.style.background = '#07121c';
+    // Para warnings (opcional) los mostramos en naranja
+    console.warn = function() {
+      var args = Array.prototype.slice.call(arguments).map(function(arg) {
+        if (typeof arg === 'object') {
+          try { return JSON.stringify(arg); } catch(e) { return arg.toString(); }
         }
+        return arg;
+      }).join(' ');
+      outputEl.innerHTML += '<span style="color:#a35d00; background:#fff1cf; padding:0 4px; border-radius:4px;">⚠️ ADVERTENCIA: ' + args + '</span><br>';
+      // originalWarn.apply(console, arguments);
+    };
 
-        // ----- LÓGICA DE COMANDOS -----
+    // Capturamos errores globales no atrapados (típico de ventanas emergentes)
+    window.onerror = function(mensaje, url, linea) {
+      outputEl.innerHTML += '<span style="color:white; background:#c22; padding:2px 8px; border-radius:12px; font-weight:bold;">❌ Error fatality: ' + mensaje + ' (línea ' + linea + ')</span><br>';
+      return true; // Prevenimos el diálogo nativo
+    };
 
-        function addCommand(cmdType) {
-            commands.push(cmdType);
-            renderCommands();
-            setMessage('➕ instrucción añadida', false, false);
-        }
+    // ---- FUNCIÓN EJECUTAR (RUN) ----
+    function ejecutar() {
+      outputEl.innerHTML = ''; // Limpiamos la consola
 
-        function removeCommand(index) {
-            if (index >= 0 && index < commands.length) {
-                commands.splice(index, 1);
-                renderCommands();
-                setMessage('❌ instrucción eliminada', false, false);
-            }
-        }
+      var codigo = codeEl.value;
 
-        function clearCommands() {
-            commands = [];
-            renderCommands();
-            setMessage('📭 programa borrado', false, false);
-        }
+      // Pequeño guiño retro: si el código está vacío, mostramos un mensaje ochentero
+      if (codigo.trim() === '') {
+        console.log('¡Escribe algo, colega!');
+        return;
+      }
 
-        // Reiniciar jugador a posición inicial (0,0) y dirección derecha
-        function resetGame() {
-            player = { x: 0, y: 0 };
-            direction = 0;  // derecha
-            // No borramos comandos automáticamente (depende del botón)
-            renderGrid();
-            setMessage('🔄 Juego reiniciado. ¡Puedes programar!', false, false);
-        }
+      try {
+        // Usamos window.eval para que el código se ejecute en el ámbito global
+        // pero con nuestra consola personalizada. 
+        window.eval(codigo);
+      } catch (e) {
+        console.error(e.name + ': ' + e.message);
+      }
+    }
 
-        // Función que ejecuta el programa actual desde la posición actual
-        function runProgram() {
-            if (commands.length === 0) {
-                setMessage('⚠️ Agrega algunas instrucciones primero', false, true);
-                return;
-            }
+    // ---- FUNCIÓN LIMPIAR CONSOLA ----
+    function limpiarConsola() {
+      outputEl.innerHTML = '';
+      // Añadimos un pequeño mensaje de "limpiado" con efecto consola vintage
+      outputEl.innerHTML = '> Consola limpiada. Listo para recibir órdenes.\n';
+    }
 
-            // Copiar estado actual para simular
-            let simX = player.x;
-            let simY = player.y;
-            let simDir = direction;
+    // ---- ASIGNAR EVENTOS ----
+    runBtn.addEventListener('click', ejecutar);
+    clearBtn.addEventListener('click', limpiarConsola);
 
-            // Definir movimientos según dirección
-            const dx = [1, 0, -1, 0];  // derecha, abajo, izquierda, arriba (columna x)
-            const dy = [0, 1, 0, -1];  // fila y
+    // ---- ATAJO TECLADO: Ctrl + Enter para ejecutar (como en los IDEs de la época) ----
+    codeEl.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        ejecutar();
+      }
+    });
 
-            let mensaje = '';
-            let exito = false;
-            let choque = false;
-            let metaAlcanzada = false;
+    // ---- MENSAJE INICIAL EN LA CONSOLA (para que no esté vacía) ----
+    outputEl.innerHTML = '> Sistema de programación 2008 listo.\n> Haz clic en "EJECUTAR" o pulsa Ctrl+Enter.\n';
 
-            // Recorrer instrucciones
-            for (let i = 0; i < commands.length; i++) {
-                const cmd = commands[i];
-
-                if (cmd === 'left') {
-                    simDir = (simDir + 3) % 4;  // gira izquierda
-                }
-                else if (cmd === 'right') {
-                    simDir = (simDir + 1) % 4;  // gira derecha
-                }
-                else if (cmd === 'forward') {
-                    // calcular nueva posición
-                    const newX = simX + dx[simDir];
-                    const newY = simY + dy[simDir];
-
-                    // verificar límites
-                    if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE) {
-                        mensaje = `🧱 ¡Instrucción ${i+1} se sale del tablero!`;
-                        choque = true;
-                        break;
-                    }
-
-                    // verificar muro
-                    const chocaMuro = WALLS.some(w => w.x === newX && w.y === newY);
-                    if (chocaMuro) {
-                        mensaje = `💥 ¡Instrucción ${i+1} choca contra un muro!`;
-                        choque = true;
-                        break;
-                    }
-
-                    // mover
-                    simX = newX;
-                    simY = newY;
-
-                    // comprobar si llegó a la meta
-                    if (simX === GOAL.x && simY === GOAL.y) {
-                        metaAlcanzada = true;
-                        mensaje = `🏆 ¡GENIAL! Has alcanzado la estrella ★`;
-                        exito = true;
-                        break;  // termina programa porque ganó
-                    }
-                }
-            }
-
-            // Si no hubo choque ni meta, pero termina el ciclo
-            if (!choque && !metaAlcanzada) {
-                mensaje = `📌 Programa terminado. No llegaste a la meta.`;
-            }
-
-            // Actualizar estado real del jugador con el resultado de la simulación
-            // (si hubo choque, el jugador se queda en la última posición válida antes del choque)
-            player.x = simX;
-            player.y = simY;
-            direction = simDir;
-
-            // Reflejar cambios en la cuadrícula
-            renderGrid();
-
-            // Mostrar mensaje apropiado
-            if (exito) setMessage(mensaje, true, false);
-            else if (choque) setMessage(mensaje, false, true);
-            else setMessage(mensaje, false, false);
-
-            // (Opcional) Si se ganó, podemos celebrar, pero no reseteamos automáticamente.
-        }
-
-        // ----- INICIALIZACIÓN Y EVENTOS -----
-
-        function initGame() {
-            // Asegurar que muros no estén sobre la meta o inicio
-            // (por si acaso se modifica WALLS, comprobación simple)
-            if (WALLS.some(w => (w.x === GOAL.x && w.y === GOAL.y) || (w.x === 0 && w.y === 0))) {
-                console.warn("Revisa WALLS: no debe cubrir inicio(0,0) ni meta(4,4)");
-            }
-
-            renderGrid();
-            renderCommands();
-            setMessage('⚡ Crea tu algoritmo y ejecuta', false, false);
-        }
-
-        // Event listeners
-        document.getElementById('addForward').addEventListener('click', () => addCommand('forward'));
-        document.getElementById('addLeft').addEventListener('click', () => addCommand('left'));
-        document.getElementById('addRight').addEventListener('click', () => addCommand('right'));
-
-        document.getElementById('runBtn').addEventListener('click', runProgram);
-
-        document.getElementById('resetGameBtn').addEventListener('click', () => {
-            resetGame();
-            // Por diseño, no borramos comandos al resetear. (opcional, así el programa se conserva)
-            // Si se desea borrar también comandos, descomentar:
-            // clearCommands(); 
-            // Pero lo dejamos sin borrar: el jugador puede reutilizar programa.
-        });
-
-        document.getElementById('clearCommandsBtn').addEventListener('click', () => {
-            clearCommands();
-        });
-
-        // Llamar a la inicialización
-        initGame();
-
-        // (opcional) Botón de reset también podría borrar? prefiero que no, pero damos la opción.
-        // Añadimos un pequeño extra: si se desea borrar y resetear a la vez, se usa reiniciar + borrar.
-        // Perfecto.
-
-        // Extra: mostrar goal y dirección cada vez
-    })();
+    // ---- un pequeño detalle de bienvenida ----
+    console.log('✓ Consola interactiva capturada. Bienvenido al pasado.');
+  })();
 </script>
+
+<!-- degradado extra para darle más autenticidad 2008 (efectos de luz) -->
+<div style="position:fixed; bottom:10px; left:10px; opacity:0.2; filter:blur(2px);">✪ 2008 ✪</div>
 </body>
 </html>
