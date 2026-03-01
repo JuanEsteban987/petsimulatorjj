@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Sistema de Inputs</title>
+    <title>Juego de Programación - Edición Extrema 2008</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,65 +11,143 @@
         }
         
         body {
-            background: #1a1e2a;
+            background: #003399;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            background-image: radial-gradient(circle at 10% 20%, #0066ff, #000066);
         }
         
         .game-container {
             display: flex;
-            gap: 20px;
-            max-width: 1400px;
+            gap: 15px;
+            max-width: 1600px;
             width: 100%;
+            border: 4px solid #e4e4e4;
+            border-radius: 8px;
+            padding: 15px;
+            background: #ece9d8;
+            box-shadow: inset -2px -2px 0 #0a0a0a, inset 2px 2px 0 #ffffff;
         }
         
         /* Panel izquierdo - Canvas del juego */
         .game-area {
             flex: 2;
-            background: #0f1219;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 0 #090b10;
+            background: #d4d0c8;
+            border-radius: 5px;
+            padding: 15px;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
         }
         
         canvas {
             width: 100%;
             height: 400px;
-            background: #1e2433;
-            border-radius: 8px;
+            background: #000000;
+            border-radius: 0px;
             display: block;
-            border: 3px solid #2d3445;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            image-rendering: pixelated;
         }
         
-        /* Panel derecho - Control y código */
+        /* Log de mensajes */
+        .log-area {
+            background: #000000;
+            color: #00ff00;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 8px;
+            margin-top: 10px;
+            height: 80px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        /* Panel derecho */
         .code-panel {
             flex: 1.2;
-            background: #0f1219;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 0 #090b10;
-            color: #fff;
+            background: #d4d0c8;
+            border-radius: 5px;
+            padding: 15px;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            color: #000000;
             overflow-y: auto;
-            max-height: 600px;
+            max-height: 800px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 10px;
+            background: #bfbfbf;
+            padding: 5px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+        
+        .tab {
+            flex: 1;
+            background: #d4d0c8;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            color: #000000;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .tab.active {
+            background: #0a2f6c;
+            color: white;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .code-input {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            background: #bfbfbf;
+            padding: 10px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+        
+        .code-input label {
+            display: block;
+            background: #0a2f6c;
+            color: white;
+            padding: 3px 8px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            border: 2px solid;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+            text-transform: uppercase;
         }
         
         textarea {
             width: 100%;
-            height: 300px;
-            background: #1e2433;
-            border: 3px solid #2d3445;
-            border-radius: 8px;
-            color: #b4e1fd;
+            height: 200px;
+            background: #000000;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            color: #00ff00;
             font-size: 14px;
-            padding: 12px;
+            padding: 10px;
             resize: vertical;
             font-family: 'Courier New', monospace;
             line-height: 1.5;
@@ -77,216 +155,165 @@
         
         textarea:focus {
             outline: none;
-            border-color: #4fa3e3;
+            border-color: #ffcc00;
+        }
+        
+        .object-creator {
+            background: #bfbfbf;
+            padding: 10px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            margin-bottom: 15px;
+        }
+        
+        .object-creator input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #ffffff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            font-family: 'Courier New', monospace;
         }
         
         .button-group {
             display: flex;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 8px;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
         
         button {
             flex: 1;
-            background: #2d3445;
-            border: none;
-            border-bottom: 4px solid #1a1e2a;
-            color: white;
-            font-size: 14px;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            color: #000000;
+            font-size: 12px;
             font-weight: bold;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 10px;
             cursor: pointer;
-            transition: all 0.1s;
             font-family: 'Courier New', monospace;
-            min-width: 100px;
+            min-width: 80px;
+            text-transform: uppercase;
         }
         
         button:hover {
-            background: #3d455a;
-            border-bottom-width: 2px;
-            transform: translateY(2px);
+            background: #e4e0d8;
+        }
+        
+        button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            transform: translate(1px, 1px);
         }
         
         button.execute {
-            background: #4fa3e3;
-            border-bottom-color: #2d6ca3;
-        }
-        
-        button.execute:hover {
-            background: #6bb5f0;
-        }
-        
-        button.reset {
-            background: #d45b5b;
-            border-bottom-color: #8b3a3a;
-        }
-        
-        button.reset:hover {
-            background: #e06f6f;
-        }
-        
-        .manual {
-            background: #1e2433;
-            border-radius: 8px;
-            padding: 15px;
-            border: 3px solid #2d3445;
-            margin-top: 15px;
-        }
-        
-        .manual h3 {
-            margin: 0 0 15px 0;
-            color: #b4e1fd;
-            font-size: 18px;
-            text-align: center;
-            border-bottom: 2px solid #2d3445;
-            padding-bottom: 8px;
-        }
-        
-        .command-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .command-item {
-            background: #0f1219;
-            border-radius: 6px;
-            padding: 10px;
-            border-left: 4px solid #4fa3e3;
-        }
-        
-        .command-name {
-            color: #ffb86b;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .command-example {
-            background: #2d3445;
-            padding: 6px;
-            border-radius: 4px;
-            color: #b4e1fd;
-            font-size: 12px;
-            margin: 5px 0;
-            font-family: monospace;
-        }
-        
-        .command-desc {
-            color: #9aa5b8;
-            font-size: 11px;
-            line-height: 1.4;
-        }
-        
-        .new-command {
-            border-left-color: #ffb86b;
-            background: #1a1e2a;
-        }
-        
-        .object-list, .variable-list {
-            margin-top: 15px;
-            background: #0f1219;
-            border-radius: 6px;
-            padding: 10px;
-        }
-        
-        .object-title, .variable-title {
-            color: #ffb86b;
-            font-weight: bold;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .badge {
-            background: #4fa3e3;
+            background: #2d6ca3;
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
+            border-color: #6bb5f0 #0a2f6c #0a2f6c #6bb5f0;
         }
         
-        .object-item, .variable-item {
-            background: #1e2433;
+        button.save {
+            background: #6b8e23;
+            color: white;
+            border-color: #8cb04e #2d4d1a #2d4d1a #8cb04e;
+        }
+        
+        button.load {
+            background: #b8860b;
+            color: white;
+            border-color: #eeb422 #6b4d1a #6b4d1a #eeb422;
+        }
+        
+        .object-list {
+            background: #bfbfbf;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
             padding: 8px;
-            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .object-item {
+            background: #d4d0c8;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 8px;
             margin-bottom: 5px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 3px solid transparent;
+            cursor: pointer;
         }
         
-        .object-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            display: inline-block;
+        .object-item:hover {
+            background: #e4e0d8;
         }
         
-        .object-shape {
-            width: 16px;
-            height: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: auto;
+        .object-item.selected {
+            background: #0a2f6c;
+            color: white;
         }
         
-        .variable-value {
-            background: #2d3445;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .object-item.selected .object-name {
+            color: #ffcc00;
+        }
+        
+        .object-name {
             font-weight: bold;
-            color: #ffb86b;
+            margin-bottom: 5px;
         }
         
-        .error-message {
-            background: #d45b5b;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-size: 13px;
-            display: none;
-            animation: shake 0.3s;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        
-        .success-message {
-            background: #4fa3e3;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-size: 13px;
-            display: none;
-        }
-        
-        .info-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
+        .object-script {
+            font-size: 11px;
+            color: #006600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .key-hint {
-            background: #2d3445;
-            color: #b4e1fd;
-            padding: 5px 10px;
-            border-radius: 4px;
+            background: #000000;
+            color: #00ff00;
+            padding: 8px;
             font-size: 12px;
             text-align: center;
-            margin-top: 5px;
+            margin-top: 8px;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            text-transform: uppercase;
+        }
+        
+        .error-message {
+            background: #c86b6b;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 13px;
+            display: none;
+            border: 3px solid;
+            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
+            font-weight: bold;
+        }
+        
+        .success-message {
+            background: #6b8e6b;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 13px;
+            display: none;
+            border: 3px solid;
+            border-color: #99cc99 #2d6c2d #2d6c2d #99cc99;
+            font-weight: bold;
+        }
+        
+        .command-stats {
+            background: #0a2f6c;
+            color: white;
+            padding: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 11px;
+            border: 2px solid;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
         }
     </style>
 </head>
@@ -295,133 +322,139 @@
         <!-- Área del juego -->
         <div class="game-area">
             <canvas id="gameCanvas" width="700" height="400"></canvas>
+            <div class="log-area" id="logArea">
+                > Sistema listo. Presiona EJECUTAR.
+            </div>
             <div class="key-hint">
-                ⌨️ Teclas activas: A, B, C, D (cuando el juego está inicializado)
+                ⌨️ TECLAS ACTIVAS: A-Z (CUANDO EL JUEGO ESTÁ INICIALIZADO)
             </div>
         </div>
         
         <!-- Panel de código -->
         <div class="code-panel">
-            <div class="code-input">
-                <textarea id="codeEditor" placeholder="Escribe tu código aquí...">// COMANDOS DISPONIBLES:
-// crearobjeto:"nombre"
-// sprite:"objeto":"forma":"color"
-// mover:"objeto":"pasos"
-// var:"nombre":"tipo":"objeto"
-// varset:"nombre":"numero"
-// posset:"objeto":"x":"y"
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('main')">📝 PRINCIPAL</div>
+                <div class="tab" onclick="switchTab('objects')">📦 OBJETOS</div>
+                <div class="tab" onclick="switchTab('scripts')">📜 SCRIPTS</div>
+            </div>
+            
+            <!-- Pestaña Principal -->
+            <div id="tab-main" class="tab-content active">
+                <div class="code-input">
+                    <label>CÓDIGO PRINCIPAL (35+ COMANDOS)</label>
+                    <textarea id="mainCode" placeholder="Código principal...">// ========================================
+// COMANDOS DISPONIBLES (35+)
+// ========================================
+// CREACIÓN: crearobjeto, crearpermanente, duplicar, eliminar
+// MOVIMIENTO: movx, movy, posset, movimientoaleatorio
+// SPRITE: sprite, tamano, rotar, coloraleatorio
+// VARIABLES: var, varset, sumarvar, restarvar, multvar, divvar, modvar, potvar, raizvar
+// COMPARACION: mayorque, menorque, igualque
+// UTILIDAD: aleatorio, distancia, texto, sonido, fondo
+// CONTROL: si, repetir, esperar (simulado)
+// FÍSICA: gravedad, saltar
+// ========================================
 
-// EJEMPLO DE INPUTS:
-input:"A"
-    mover:"heroe":"-30"
-    varset:"vida_enemigo":"-10"
-finish
-
-input:"B"
-    mover:"heroe":"30"
-    varset:"vida_enemigo":"-20"
-finish
-
-input:"C"
-    varset:"vida_heroe":"+20"
-    crearobjeto:"ayuda"
-    sprite:"ayuda":"circulo":"verde"
-finish
-
-// Código principal (se ejecuta al iniciar)
+// Crear objetos
 crearobjeto:"heroe"
 sprite:"heroe":"circulo":"azul"
 var:"vida_heroe":"Vida":"heroe"
+posset:"heroe":"100":"200"
 
 crearobjeto:"enemigo"
 sprite:"enemigo":"cubo":"rojo"
 var:"vida_enemigo":"Vida":"enemigo"
+posset:"enemigo":"500":"200"
 
-// Posicionar objetos
-posset:"heroe":"100":"200"
-posset:"enemigo":"400":"200"</textarea>
+// Ejemplo de comandos nuevos
+texto:"Juego iniciado"
+fondo:"#000033"
+tamano:"heroe":"1.5"
+coloraleatorio:"enemigo"</textarea>
+                </div>
             </div>
             
+            <!-- Pestaña Objetos Permanentes -->
+            <div id="tab-objects" class="tab-content">
+                <div class="object-creator">
+                    <label>CREAR OBJETO PERMANENTE</label>
+                    <input type="text" id="newObjName" placeholder="Nombre del objeto">
+                    <input type="text" id="newObjShape" placeholder="Forma (cubo/circulo)">
+                    <input type="text" id="newObjColor" placeholder="Color (rojo, azul, etc)">
+                    <div class="button-group">
+                        <button onclick="createPermanentObject()">➕ CREAR</button>
+                    </div>
+                </div>
+                
+                <div class="object-list" id="permanentObjectsList">
+                    <div class="object-title">OBJETOS PERMANENTES</div>
+                    <div id="permanentObjectsContainer">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pestaña Scripts -->
+            <div id="tab-scripts" class="tab-content">
+                <div class="code-input">
+                    <label>SCRIPT DE INPUTS (TECLAS A-Z)</label>
+                    <textarea id="scriptsCode" placeholder="input:&#34;A&#34;
+    movx:&#34;heroe&#34;:&#34;-30&#34;
+    varset:&#34;vida_enemigo&#34;:&#34;-10&#34;
+finish
+
+input:&#34;B&#34;
+    movx:&#34;heroe&#34;:&#34;30&#34;
+    varset:&#34;vida_enemigo&#34;:&#34;-20&#34;
+finish
+
+input:&#34;C&#34;
+    varset:&#34;vida_heroe&#34;:&#34;+20&#34;
+    crearobjeto:&#34;ayuda&#34;
+    sprite:&#34;ayuda&#34;:&#34;circulo&#34;:&#34;verde&#34;
+finish">// INPUTS CON NUEVOS COMANDOS
+input:"A"
+    movx:"heroe":"-30"
+    varset:"vida_enemigo":"-10"
+    texto:"Atacando a la izquierda"
+finish
+
+input:"B"
+    movx:"heroe":"30"
+    varset:"vida_enemigo":"-20"
+    sonido:"explosion"
+finish
+
+input:"C"
+    varset:"vida_heroe":"+20"
+    duplicar:"heroe":"clon"
+    coloraleatorio:"clon"
+finish</textarea>
+                </div>
+            </div>
+            
+            <!-- Botones de control -->
             <div class="button-group">
-                <button class="execute" onclick="executeCode()">▶ EJECUTAR TODO</button>
-                <button class="reset" onclick="resetGame()">↺ REINICIAR</button>
-                <button onclick="addExample()">📋 EJEMPLO</button>
+                <button class="execute" onclick="executeGame()">▶ EJECUTAR</button>
+                <button onclick="resetGame()">↺ REINICIAR</button>
+                <button class="save" onclick="saveGame()">💾 GUARDAR</button>
+                <button class="load" onclick="loadGame()">📂 CARGAR</button>
             </div>
             
             <div id="errorDisplay" class="error-message"></div>
             <div id="successDisplay" class="success-message"></div>
             
-            <!-- Info Panel -->
-            <div class="info-panel">
-                <!-- Objetos activos -->
-                <div class="object-list" id="objectList">
-                    <div class="object-title">
-                        📦 OBJETOS
-                        <span class="badge" id="objectCount">0</span>
-                    </div>
-                    <div id="objectsContainer" style="max-height: 150px; overflow-y: auto;">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-                
-                <!-- Variables activas -->
-                <div class="variable-list" id="variableList">
-                    <div class="variable-title">
-                        🔢 VARIABLES
-                        <span class="badge" id="variableCount">0</span>
-                    </div>
-                    <div id="variablesContainer" style="max-height: 150px; overflow-y: auto;">
-                        <!-- Se llena dinámicamente -->
-                    </div>
+            <!-- Info de objetos activos -->
+            <div class="object-list">
+                <div class="object-title">OBJETOS ACTIVOS</div>
+                <div id="activeObjectsContainer" style="max-height: 150px; overflow-y: auto;">
+                    <!-- Se llena dinámicamente -->
                 </div>
             </div>
             
-            <!-- Manual de comandos -->
-            <div class="manual">
-                <h3>📚 MANUAL DE COMANDOS</h3>
-                <div class="command-list">
-                    <div class="command-item new-command">
-                        <div class="command-name">🎯 POSSET</div>
-                        <div class="command-example">posset:"objeto":"x":"y"</div>
-                        <div class="command-desc">Establece la posición exacta del objeto en coordenadas X e Y</div>
-                    </div>
-                    
-                    <div class="command-item new-command">
-                        <div class="command-name">⌨️ INPUT</div>
-                        <div class="command-example">input:"TECLA"<br>    comando1<br>    comando2<br>finish</div>
-                        <div class="command-desc">Define un bloque de código para una tecla (A, B, C, etc)</div>
-                    </div>
-                    
-                    <div class="command-item">
-                        <div class="command-name">📌 CREAR OBJETO</div>
-                        <div class="command-example">crearobjeto:"nombre"</div>
-                        <div class="command-desc">Crea un nuevo objeto en el escenario</div>
-                    </div>
-                    
-                    <div class="command-item">
-                        <div class="command-name">🎨 SPRITE</div>
-                        <div class="command-example">sprite:"objeto":"forma":"color"</div>
-                        <div class="command-desc">Define forma (cubo/circulo) y color</div>
-                    </div>
-                    
-                    <div class="command-item">
-                        <div class="command-name">➡️ MOVER</div>
-                        <div class="command-example">mover:"objeto":"pasos"</div>
-                        <div class="command-desc">Mueve el objeto horizontalmente</div>
-                    </div>
-                    
-                    <div class="command-item">
-                        <div class="command-name">🔷 VAR</div>
-                        <div class="command-example">var:"nombre":"tipo":"objeto"</div>
-                        <div class="command-desc">Crea variable (Vida/node) vinculada a objeto</div>
-                    </div>
-                    
-                    <div class="command-item">
-                        <div class="command-name">🔶 VARSET</div>
-                        <div class="command-example">varset:"nombre":"numero"</div>
-                        <div class="command-desc">Cambia valor de variable (+20, -10, etc)</div>
-                    </div>
-                </div>
+            <!-- Estadísticas de comandos -->
+            <div class="command-stats">
+                ⚡ 35+ COMANDOS DISPONIBLES - CREA, TRANSFORMA, PROGRAMAR
             </div>
         </div>
     </div>
@@ -430,12 +463,20 @@ posset:"enemigo":"400":"200"</textarea>
         // Configuración del canvas
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const logArea = document.getElementById('logArea');
         
         // Estado del juego
-        let gameObjects = {};
+        let gameObjects = {}; // Objetos temporales
+        let permanentObjects = {}; // Objetos permanentes (guardados)
         let gameVariables = {};
         let nextPosition = 50;
         let gameInitialized = false;
+        
+        // Cargar objetos permanentes del localStorage
+        let savedPermanentObjects = localStorage.getItem('permanentObjects');
+        if (savedPermanentObjects) {
+            permanentObjects = JSON.parse(savedPermanentObjects);
+        }
         
         // Input handlers
         let inputHandlers = {
@@ -456,186 +497,138 @@ posset:"enemigo":"400":"200"</textarea>
             'negro': '#000000'
         };
         
-        // Función para dibujar en el canvas
-        function drawGame() {
-            // Limpiar canvas
-            ctx.fillStyle = '#1e2433';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Dibujar grid
-            ctx.strokeStyle = '#2d3445';
-            ctx.lineWidth = 1;
-            for(let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#2d3445';
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            
-            // Dibujar ejes de referencia
-            ctx.strokeStyle = '#4fa3e3';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(0, 200);
-            ctx.lineTo(canvas.width, 200);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(350, 0);
-            ctx.lineTo(350, canvas.height);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Dibujar cada objeto
-            Object.keys(gameObjects).forEach(key => {
-                const obj = gameObjects[key];
-                
-                if (obj.vida <= 0) return;
-                
-                ctx.save();
-                ctx.translate(obj.x, obj.y);
-                
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetY = 3;
-                ctx.fillStyle = obj.color;
-                
-                if (obj.shape === 'circulo') {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 20, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetY = 0;
-                    ctx.stroke();
-                } else {
-                    ctx.fillRect(-20, -20, 40, 40);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetY = 0;
-                    ctx.strokeRect(-20, -20, 40, 40);
-                }
-                
-                ctx.restore();
-                
-                // Nombre del objeto
-                ctx.save();
-                ctx.font = 'bold 12px Courier New';
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowColor = '#000000';
-                ctx.shadowBlur = 4;
-                ctx.shadowOffsetY = 2;
-                ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
-                
-                // Coordenadas
-                ctx.font = '10px Courier New';
-                ctx.fillStyle = '#b4e1fd';
-                ctx.fillText(`(${obj.x},${obj.y})`, obj.x - 25, obj.y - 45);
-                
-                // Barra de vida
-                const vidaVar = Object.values(gameVariables).find(v => 
-                    v.type === 'Vida' && v.object === obj.name
-                );
-                
-                if (vidaVar) {
-                    const vidaPercent = (obj.vida / 100) * 100;
-                    
-                    ctx.fillStyle = '#2d3445';
-                    ctx.fillRect(obj.x - 30, obj.y - 20, 60, 8);
-                    
-                    ctx.fillStyle = vidaPercent > 50 ? '#4FA3E3' : '#D45B5B';
-                    ctx.fillRect(obj.x - 30, obj.y - 20, 60 * (vidaPercent/100), 8);
-                    
-                    ctx.font = '9px Courier New';
-                    ctx.fillStyle = '#ffffff';
-                    ctx.shadowBlur = 2;
-                    ctx.fillText(`${obj.vida}HP`, obj.x - 25, obj.y - 25);
-                }
-                
-                ctx.restore();
-            });
+        // Función para añadir mensaje al log
+        function addLog(message) {
+            logArea.innerHTML += '<br>> ' + message;
+            logArea.scrollTop = logArea.scrollHeight;
         }
         
-        // Actualizar listas
-        function updateLists() {
-            const objectsContainer = document.getElementById('objectsContainer');
-            const variablesContainer = document.getElementById('variablesContainer');
-            const objectCount = document.getElementById('objectCount');
-            const variableCount = document.getElementById('variableCount');
+        // Cambiar pestañas
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            if (!objectsContainer || !variablesContainer) return;
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+        
+        // Crear objeto permanente
+        function createPermanentObject() {
+            const name = document.getElementById('newObjName').value.trim();
+            const shape = document.getElementById('newObjShape').value.trim().toLowerCase();
+            const color = document.getElementById('newObjColor').value.trim().toLowerCase();
             
-            let objectsHtml = '';
-            let objetosVisibles = 0;
+            if (!name || !shape || !color) {
+                showError('Completa todos los campos');
+                return;
+            }
             
-            Object.keys(gameObjects).forEach(key => {
-                const obj = gameObjects[key];
-                if (obj.vida <= 0) return;
-                
-                objetosVisibles++;
-                const colorPreview = `<span class="object-color" style="background: ${obj.color};"></span>`;
-                const shapeIcon = obj.shape === 'circulo' ? '⚪' : '⬜';
-                const vidaClass = obj.vida < 50 ? 'vida-baja' : '';
-                
-                objectsHtml += `<div class="object-item ${vidaClass}">
-                    ${colorPreview}
-                    <span style="flex:1;">${obj.name}</span>
-                    <span class="object-shape">${shapeIcon}</span>
-                    <span style="font-size:10px;">${obj.vida}HP</span>
+            if (shape !== 'cubo' && shape !== 'circulo') {
+                showError('La forma debe ser "cubo" o "circulo"');
+                return;
+            }
+            
+            const finalColor = colorExamples[color] || color;
+            
+            permanentObjects[name] = {
+                name: name,
+                shape: shape,
+                color: finalColor,
+                x: 100,
+                y: 200,
+                vida: 100,
+                scale: 1,
+                rotation: 0
+            };
+            
+            // Guardar en localStorage
+            localStorage.setItem('permanentObjects', JSON.stringify(permanentObjects));
+            
+            // Limpiar inputs
+            document.getElementById('newObjName').value = '';
+            document.getElementById('newObjShape').value = '';
+            document.getElementById('newObjColor').value = '';
+            
+            updatePermanentObjectsList();
+            showSuccess(`✅ Objeto permanente "${name}" creado`);
+            addLog(`Objeto permanente "${name}" creado.`);
+        }
+        
+        // Actualizar lista de objetos permanentes
+        function updatePermanentObjectsList() {
+            const container = document.getElementById('permanentObjectsContainer');
+            if (!container) return;
+            
+            let html = '';
+            Object.keys(permanentObjects).forEach(key => {
+                const obj = permanentObjects[key];
+                html += `<div class="object-item" onclick="selectPermanentObject('${key}')">
+                    <div class="object-name">${obj.name}</div>
+                    <div class="object-script">${obj.shape} - ${obj.color}</div>
                 </div>`;
             });
             
-            if (objectsHtml === '') {
-                objectsHtml = '<div style="color: #666; text-align: center; padding: 10px;">No hay objetos</div>';
+            if (html === '') {
+                html = '<div style="padding: 10px; text-align: center;">No hay objetos permanentes</div>';
             }
             
-            objectsContainer.innerHTML = objectsHtml;
-            objectCount.textContent = objetosVisibles;
-            
-            let variablesHtml = '';
-            let variablesActivas = 0;
-            
-            Object.keys(gameVariables).forEach(key => {
-                const var_data = gameVariables[key];
-                variablesActivas++;
-                
-                variablesHtml += `<div class="variable-item">
-                    <span style="color:${var_data.type === 'Vida' ? '#ffb86b' : '#4fa3e3'}">🔷</span>
-                    <span style="flex:1;">${var_data.name}</span>
-                    <span class="variable-value">${var_data.value}</span>
-                    <span style="font-size:9px; color:#666;">→ ${var_data.object}</span>
-                </div>`;
-            });
-            
-            if (variablesHtml === '') {
-                variablesHtml = '<div style="color: #666; text-align: center; padding: 10px;">No hay variables</div>';
+            container.innerHTML = html;
+        }
+        
+        // Seleccionar objeto permanente
+        function selectPermanentObject(name) {
+            showSuccess(`Objeto "${name}" seleccionado`);
+            addLog(`Objeto permanente "${name}" seleccionado.`);
+        }
+        
+        // Evaluar condición simple (ej: "vida_heroe>50" o "vida_heroe==vida_enemigo")
+        function evaluateCondition(condition) {
+            // Buscar operadores
+            const operators = ['>=', '<=', '==', '!=', '>', '<'];
+            for (let op of operators) {
+                if (condition.includes(op)) {
+                    let parts = condition.split(op);
+                    if (parts.length === 2) {
+                        let left = parts[0].trim();
+                        let right = parts[1].trim();
+                        
+                        // Obtener valores izquierdo
+                        let leftVal;
+                        if (gameVariables[left]) {
+                            leftVal = gameVariables[left].value;
+                        } else if (gameObjects[left]) {
+                            leftVal = gameObjects[left].vida; // por defecto vida
+                        } else {
+                            leftVal = parseFloat(left);
+                        }
+                        
+                        // Obtener valor derecho
+                        let rightVal;
+                        if (gameVariables[right]) {
+                            rightVal = gameVariables[right].value;
+                        } else if (gameObjects[right]) {
+                            rightVal = gameObjects[right].vida;
+                        } else {
+                            rightVal = parseFloat(right);
+                        }
+                        
+                        if (isNaN(leftVal) || isNaN(rightVal)) return false;
+                        
+                        switch(op) {
+                            case '>': return leftVal > rightVal;
+                            case '<': return leftVal < rightVal;
+                            case '>=': return leftVal >= rightVal;
+                            case '<=': return leftVal <= rightVal;
+                            case '==': return leftVal == rightVal;
+                            case '!=': return leftVal != rightVal;
+                        }
+                    }
+                }
             }
-            
-            variablesContainer.innerHTML = variablesHtml;
-            variableCount.textContent = variablesActivas;
+            return false;
         }
         
-        // Mostrar mensajes
-        function showSuccess(message) {
-            const successDisplay = document.getElementById('successDisplay');
-            successDisplay.textContent = message;
-            successDisplay.style.display = 'block';
-            setTimeout(() => {
-                successDisplay.style.display = 'none';
-            }, 2000);
-        }
-        
-        function showError(message) {
-            const errorDisplay = document.getElementById('errorDisplay');
-            errorDisplay.textContent = message;
-            errorDisplay.style.display = 'block';
-        }
-        
-        // Procesar comando individual
+        // Procesar comando individual (versión extendida)
         function processCommand(command, fromInput = false) {
             command = command.trim();
             
@@ -651,6 +644,9 @@ posset:"enemigo":"400":"200"</textarea>
                 p.trim().replace(/^"|"$/g, '')
             );
             
+            // ============================================
+            // COMANDOS DE CREACIÓN Y ELIMINACIÓN
+            // ============================================
             switch(cmd) {
                 case 'crearobjeto':
                     if (params.length < 1) throw new Error('crearobjeto necesita un nombre');
@@ -663,12 +659,61 @@ posset:"enemigo":"400":"200"</textarea>
                         y: 200,
                         shape: 'cubo',
                         color: '#FFFFFF',
-                        vida: 100
+                        vida: 100,
+                        scale: 1,
+                        rotation: 0
                     };
                     nextPosition += 70;
                     if (nextPosition > 600) nextPosition = 50;
+                    addLog(`Objeto "${name}" creado.`);
                     break;
                     
+                case 'crearpermanente':
+                    if (params.length < 1) throw new Error('crearpermanente necesita un nombre');
+                    const permName = params[0];
+                    if (permanentObjects[permName]) {
+                        const permObj = permanentObjects[permName];
+                        gameObjects[permName + '_' + Date.now()] = {
+                            name: permName,
+                            x: nextPosition,
+                            y: 200,
+                            shape: permObj.shape,
+                            color: permObj.color,
+                            vida: 100,
+                            scale: permObj.scale || 1,
+                            rotation: permObj.rotation || 0
+                        };
+                        nextPosition += 70;
+                        addLog(`Instancia de objeto permanente "${permName}" creada.`);
+                    } else {
+                        throw new Error(`Objeto permanente "${permName}" no encontrado`);
+                    }
+                    break;
+                    
+                case 'duplicar':
+                    if (params.length < 2) throw new Error('duplicar necesita: objeto, nuevo_nombre');
+                    const origObj = params[0];
+                    const newName = params[1];
+                    if (!gameObjects[origObj]) throw new Error(`Objeto "${origObj}" no encontrado`);
+                    if (gameObjects[newName]) throw new Error(`Ya existe un objeto "${newName}"`);
+                    
+                    gameObjects[newName] = JSON.parse(JSON.stringify(gameObjects[origObj]));
+                    gameObjects[newName].name = newName;
+                    gameObjects[newName].x += 30; // desplazar un poco
+                    addLog(`Objeto "${origObj}" duplicado como "${newName}".`);
+                    break;
+                    
+                case 'eliminar':
+                    if (params.length < 1) throw new Error('eliminar necesita: objeto');
+                    const delObj = params[0];
+                    if (!gameObjects[delObj]) throw new Error(`Objeto "${delObj}" no encontrado`);
+                    gameObjects[delObj].vida = 0;
+                    addLog(`Objeto "${delObj}" eliminado.`);
+                    break;
+                    
+                // ============================================
+                // COMANDOS DE SPRITE Y TRANSFORMACIÓN
+                // ============================================
                 case 'sprite':
                     if (params.length < 3) throw new Error('sprite necesita: objeto, forma, color');
                     const spriteObj = params[0];
@@ -689,19 +734,64 @@ posset:"enemigo":"400":"200"</textarea>
                     gameObjects[spriteObj].color = color;
                     break;
                     
-                case 'mover':
-                    if (params.length < 2) throw new Error('mover necesita: objeto, pasos');
-                    const moveObj = params[0];
-                    let steps = parseInt(params[1]);
+                case 'tamano':
+                    if (params.length < 2) throw new Error('tamano necesita: objeto, escala');
+                    const sizeObj = params[0];
+                    const scale = parseFloat(params[1]);
+                    if (!gameObjects[sizeObj]) throw new Error(`Objeto "${sizeObj}" no encontrado`);
+                    if (isNaN(scale)) throw new Error('Escala debe ser un número');
+                    gameObjects[sizeObj].scale = scale;
+                    addLog(`Objeto "${sizeObj}" escala cambiada a ${scale}.`);
+                    break;
                     
-                    if (!gameObjects[moveObj]) throw new Error(`Objeto "${moveObj}" no encontrado`);
-                    if (gameObjects[moveObj].vida <= 0) throw new Error(`Objeto "${moveObj}" destruido`);
-                    if (isNaN(steps)) throw new Error('Pasos debe ser un número');
+                case 'rotar':
+                    if (params.length < 2) throw new Error('rotar necesita: objeto, grados');
+                    const rotObj = params[0];
+                    const grados = parseFloat(params[1]);
+                    if (!gameObjects[rotObj]) throw new Error(`Objeto "${rotObj}" no encontrado`);
+                    if (isNaN(grados)) throw new Error('Grados debe ser un número');
+                    gameObjects[rotObj].rotation = (grados * Math.PI / 180); // convertir a radianes
+                    addLog(`Objeto "${rotObj}" rotado ${grados} grados.`);
+                    break;
                     
-                    gameObjects[moveObj].x += steps;
+                case 'coloraleatorio':
+                    if (params.length < 1) throw new Error('coloraleatorio necesita: objeto');
+                    const randColorObj = params[0];
+                    if (!gameObjects[randColorObj]) throw new Error(`Objeto "${randColorObj}" no encontrado`);
+                    const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                    gameObjects[randColorObj].color = randomColor;
+                    addLog(`Color aleatorio asignado a "${randColorObj}".`);
+                    break;
                     
-                    if (gameObjects[moveObj].x < 30) gameObjects[moveObj].x = 30;
-                    if (gameObjects[moveObj].x > canvas.width - 30) gameObjects[moveObj].x = canvas.width - 30;
+                // ============================================
+                // COMANDOS DE MOVIMIENTO
+                // ============================================
+                case 'movx':
+                    if (params.length < 2) throw new Error('movx necesita: objeto, pasos');
+                    const moveXObj = params[0];
+                    let stepsX = parseInt(params[1]);
+                    
+                    if (!gameObjects[moveXObj]) throw new Error(`Objeto "${moveXObj}" no encontrado`);
+                    if (gameObjects[moveXObj].vida <= 0) throw new Error(`Objeto "${moveXObj}" destruido`);
+                    if (isNaN(stepsX)) throw new Error('Pasos debe ser un número');
+                    
+                    gameObjects[moveXObj].x += stepsX;
+                    if (gameObjects[moveXObj].x < 30) gameObjects[moveXObj].x = 30;
+                    if (gameObjects[moveXObj].x > canvas.width - 30) gameObjects[moveXObj].x = canvas.width - 30;
+                    break;
+                    
+                case 'movy':
+                    if (params.length < 2) throw new Error('movy necesita: objeto, pasos');
+                    const moveYObj = params[0];
+                    let stepsY = parseInt(params[1]);
+                    
+                    if (!gameObjects[moveYObj]) throw new Error(`Objeto "${moveYObj}" no encontrado`);
+                    if (gameObjects[moveYObj].vida <= 0) throw new Error(`Objeto "${moveYObj}" destruido`);
+                    if (isNaN(stepsY)) throw new Error('Pasos debe ser un número');
+                    
+                    gameObjects[moveYObj].y += stepsY;
+                    if (gameObjects[moveYObj].y < 30) gameObjects[moveYObj].y = 30;
+                    if (gameObjects[moveYObj].y > canvas.height - 30) gameObjects[moveYObj].y = canvas.height - 30;
                     break;
                     
                 case 'posset':
@@ -714,11 +804,22 @@ posset:"enemigo":"400":"200"</textarea>
                     if (gameObjects[posObj].vida <= 0) throw new Error(`Objeto "${posObj}" destruido`);
                     if (isNaN(newX) || isNaN(newY)) throw new Error('Coordenadas deben ser números');
                     
-                    // Limitar dentro del canvas
                     gameObjects[posObj].x = Math.max(30, Math.min(canvas.width - 30, newX));
                     gameObjects[posObj].y = Math.max(30, Math.min(canvas.height - 30, newY));
                     break;
                     
+                case 'movimientoaleatorio':
+                    if (params.length < 1) throw new Error('movimientoaleatorio necesita: objeto');
+                    const randMoveObj = params[0];
+                    if (!gameObjects[randMoveObj]) throw new Error(`Objeto "${randMoveObj}" no encontrado`);
+                    gameObjects[randMoveObj].x = Math.random() * (canvas.width - 60) + 30;
+                    gameObjects[randMoveObj].y = Math.random() * (canvas.height - 60) + 30;
+                    addLog(`Objeto "${randMoveObj}" movido a posición aleatoria.`);
+                    break;
+                    
+                // ============================================
+                // COMANDOS DE VARIABLES (extendidos)
+                // ============================================
                 case 'var':
                     if (params.length < 3) throw new Error('var necesita: nombre, tipo, objeto');
                     const varName = params[0];
@@ -759,7 +860,6 @@ posset:"enemigo":"400":"200"</textarea>
                     const variable = gameVariables[setVarName];
                     let newValue;
                     
-                    // Permitir operaciones relativas
                     if (setValue.startsWith('+')) {
                         newValue = variable.value + parseInt(setValue.substring(1));
                     } else if (setValue.startsWith('-')) {
@@ -779,16 +879,209 @@ posset:"enemigo":"400":"200"</textarea>
                             
                             if (obj.vida <= 0) {
                                 obj.vida = 0;
-                                
-                                // Eliminar variables asociadas
                                 Object.keys(gameVariables).forEach(key => {
                                     if (gameVariables[key].object === obj.name) {
                                         delete gameVariables[key];
                                     }
                                 });
+                                addLog(`Objeto "${obj.name}" destruido por falta de vida.`);
                             }
                         }
                     }
+                    break;
+                    
+                // Operaciones aritméticas sobre variables
+                case 'sumarvar':
+                    if (params.length < 2) throw new Error('sumarvar necesita: variable, valor');
+                    const sumVar = params[0];
+                    const sumVal = parseFloat(params[1]);
+                    if (!gameVariables[sumVar]) throw new Error(`Variable "${sumVar}" no encontrada`);
+                    if (isNaN(sumVal)) throw new Error('Valor debe ser número');
+                    gameVariables[sumVar].value += sumVal;
+                    break;
+                    
+                case 'restarvar':
+                    if (params.length < 2) throw new Error('restarvar necesita: variable, valor');
+                    const restVar = params[0];
+                    const restVal = parseFloat(params[1]);
+                    if (!gameVariables[restVar]) throw new Error(`Variable "${restVar}" no encontrada`);
+                    if (isNaN(restVal)) throw new Error('Valor debe ser número');
+                    gameVariables[restVar].value -= restVal;
+                    break;
+                    
+                case 'multvar':
+                    if (params.length < 2) throw new Error('multvar necesita: variable, valor');
+                    const multVar = params[0];
+                    const multVal = parseFloat(params[1]);
+                    if (!gameVariables[multVar]) throw new Error(`Variable "${multVar}" no encontrada`);
+                    if (isNaN(multVal)) throw new Error('Valor debe ser número');
+                    gameVariables[multVar].value *= multVal;
+                    break;
+                    
+                case 'divvar':
+                    if (params.length < 2) throw new Error('divvar necesita: variable, valor');
+                    const divVar = params[0];
+                    const divVal = parseFloat(params[1]);
+                    if (!gameVariables[divVar]) throw new Error(`Variable "${divVar}" no encontrada`);
+                    if (isNaN(divVal) || divVal === 0) throw new Error('Valor inválido');
+                    gameVariables[divVar].value /= divVal;
+                    break;
+                    
+                case 'modvar':
+                    if (params.length < 2) throw new Error('modvar necesita: variable, valor');
+                    const modVar = params[0];
+                    const modVal = parseFloat(params[1]);
+                    if (!gameVariables[modVar]) throw new Error(`Variable "${modVar}" no encontrada`);
+                    if (isNaN(modVal)) throw new Error('Valor debe ser número');
+                    gameVariables[modVar].value %= modVal;
+                    break;
+                    
+                case 'potvar':
+                    if (params.length < 2) throw new Error('potvar necesita: variable, exponente');
+                    const potVar = params[0];
+                    const potVal = parseFloat(params[1]);
+                    if (!gameVariables[potVar]) throw new Error(`Variable "${potVar}" no encontrada`);
+                    if (isNaN(potVal)) throw new Error('Exponente debe ser número');
+                    gameVariables[potVar].value = Math.pow(gameVariables[potVar].value, potVal);
+                    break;
+                    
+                case 'raizvar':
+                    if (params.length < 1) throw new Error('raizvar necesita: variable');
+                    const raizVar = params[0];
+                    if (!gameVariables[raizVar]) throw new Error(`Variable "${raizVar}" no encontrada`);
+                    gameVariables[raizVar].value = Math.sqrt(gameVariables[raizVar].value);
+                    break;
+                    
+                // ============================================
+                // COMANDOS DE COMPARACIÓN (guardan 1 o 0 en variable)
+                // ============================================
+                case 'mayorque':
+                    if (params.length < 3) throw new Error('mayorque necesita: var1, var2, resultado');
+                    const mq1 = params[0];
+                    const mq2 = params[1];
+                    const mqRes = params[2];
+                    let val1 = gameVariables[mq1] ? gameVariables[mq1].value : parseFloat(mq1);
+                    let val2 = gameVariables[mq2] ? gameVariables[mq2].value : parseFloat(mq2);
+                    if (isNaN(val1) || isNaN(val2)) throw new Error('Valores no numéricos');
+                    gameVariables[mqRes] = { name: mqRes, type: 'node', object: 'system', value: val1 > val2 ? 1 : 0 };
+                    break;
+                    
+                case 'menorque':
+                    if (params.length < 3) throw new Error('menorque necesita: var1, var2, resultado');
+                    const men1 = params[0];
+                    const men2 = params[1];
+                    const menRes = params[2];
+                    let v1 = gameVariables[men1] ? gameVariables[men1].value : parseFloat(men1);
+                    let v2 = gameVariables[men2] ? gameVariables[men2].value : parseFloat(men2);
+                    if (isNaN(v1) || isNaN(v2)) throw new Error('Valores no numéricos');
+                    gameVariables[menRes] = { name: menRes, type: 'node', object: 'system', value: v1 < v2 ? 1 : 0 };
+                    break;
+                    
+                case 'igualque':
+                    if (params.length < 3) throw new Error('igualque necesita: var1, var2, resultado');
+                    const ig1 = params[0];
+                    const ig2 = params[1];
+                    const igRes = params[2];
+                    let iv1 = gameVariables[ig1] ? gameVariables[ig1].value : parseFloat(ig1);
+                    let iv2 = gameVariables[ig2] ? gameVariables[ig2].value : parseFloat(ig2);
+                    if (isNaN(iv1) || isNaN(iv2)) throw new Error('Valores no numéricos');
+                    gameVariables[igRes] = { name: igRes, type: 'node', object: 'system', value: iv1 == iv2 ? 1 : 0 };
+                    break;
+                    
+                // ============================================
+                // COMANDOS UTILITARIOS
+                // ============================================
+                case 'aleatorio':
+                    if (params.length < 3) throw new Error('aleatorio necesita: variable, min, max');
+                    const randVar = params[0];
+                    const min = parseInt(params[1]);
+                    const max = parseInt(params[2]);
+                    if (isNaN(min) || isNaN(max)) throw new Error('min y max deben ser números');
+                    const randVal = Math.floor(Math.random() * (max - min + 1)) + min;
+                    gameVariables[randVar] = { name: randVar, type: 'node', object: 'system', value: randVal };
+                    addLog(`Variable aleatoria "${randVar}" = ${randVal}`);
+                    break;
+                    
+                case 'distancia':
+                    if (params.length < 3) throw new Error('distancia necesita: obj1, obj2, variable_resultado');
+                    const dObj1 = params[0];
+                    const dObj2 = params[1];
+                    const dVar = params[2];
+                    if (!gameObjects[dObj1] || !gameObjects[dObj2]) throw new Error('Objetos no encontrados');
+                    const dx = gameObjects[dObj1].x - gameObjects[dObj2].x;
+                    const dy = gameObjects[dObj1].y - gameObjects[dObj2].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    gameVariables[dVar] = { name: dVar, type: 'node', object: 'system', value: Math.round(dist) };
+                    addLog(`Distancia entre ${dObj1} y ${dObj2}: ${Math.round(dist)}`);
+                    break;
+                    
+                case 'texto':
+                    if (params.length < 1) throw new Error('texto necesita: mensaje');
+                    addLog(params[0]);
+                    break;
+                    
+                case 'sonido':
+                    if (params.length < 1) throw new Error('sonido necesita: tipo');
+                    addLog(`🔊 SONIDO: ${params[0]}`);
+                    break;
+                    
+                case 'fondo':
+                    if (params.length < 1) throw new Error('fondo necesita: color');
+                    // El color se aplicará en drawGame (cambiamos el color de fondo del canvas)
+                    // Lo guardamos en una variable global
+                    window.backgroundColor = params[0];
+                    addLog(`Fondo cambiado a ${params[0]}`);
+                    break;
+                    
+                // ============================================
+                // COMANDOS DE FÍSICA SIMULADA
+                // ============================================
+                case 'gravedad':
+                    if (params.length < 1) throw new Error('gravedad necesita: objeto');
+                    const gravObj = params[0];
+                    if (!gameObjects[gravObj]) throw new Error(`Objeto "${gravObj}" no encontrado`);
+                    gameObjects[gravObj].y += 15; // caída
+                    if (gameObjects[gravObj].y > canvas.height - 30) gameObjects[gravObj].y = canvas.height - 30;
+                    addLog(`Aplicando gravedad a "${gravObj}"`);
+                    break;
+                    
+                case 'saltar':
+                    if (params.length < 1) throw new Error('saltar necesita: objeto');
+                    const saltObj = params[0];
+                    if (!gameObjects[saltObj]) throw new Error(`Objeto "${saltObj}" no encontrado`);
+                    gameObjects[saltObj].y -= 25; // salto
+                    if (gameObjects[saltObj].y < 30) gameObjects[saltObj].y = 30;
+                    addLog(`"${saltObj}" salta!`);
+                    break;
+                    
+                // ============================================
+                // COMANDOS DE CONTROL DE FLUJO
+                // ============================================
+                case 'si':
+                    if (params.length < 2) throw new Error('si necesita: condición, comando');
+                    const condition = params[0];
+                    const trueCommand = params[1];
+                    if (evaluateCondition(condition)) {
+                        // Ejecutar el comando (puede ser múltiple? por ahora simple)
+                        processCommand(trueCommand, fromInput);
+                    }
+                    break;
+                    
+                case 'repetir':
+                    if (params.length < 2) throw new Error('repetir necesita: veces, comando');
+                    const veces = parseInt(params[0]);
+                    const repCommand = params[1];
+                    if (isNaN(veces) || veces < 0) throw new Error('Número de veces inválido');
+                    for (let i = 0; i < veces; i++) {
+                        processCommand(repCommand, fromInput);
+                    }
+                    addLog(`Comando repetido ${veces} veces.`);
+                    break;
+                    
+                case 'esperar':
+                    // Simulación: no hacemos nada, solo mensaje
+                    if (params.length < 1) throw new Error('esperar necesita: segundos');
+                    addLog(`Esperando ${params[0]} segundos (simulado).`);
                     break;
                     
                 default:
@@ -814,12 +1107,10 @@ posset:"enemigo":"400":"200"</textarea>
                 }
                 
                 if (line.toLowerCase().startsWith('input:')) {
-                    // Guardar input anterior si existe
                     if (currentInput) {
                         inputHandlers[currentInput] = [...currentCommands];
                     }
                     
-                    // Nuevo input
                     const params = line.substring(line.indexOf(':') + 1).split(':').map(p => 
                         p.trim().replace(/^"|"$/g, '')
                     );
@@ -834,75 +1125,86 @@ posset:"enemigo":"400":"200"</textarea>
                     }
                 }
                 else if (currentInput && line !== '') {
-                    // Es parte del bloque input
                     currentCommands.push(line);
                 }
                 
                 i++;
             }
             
-            // Guardar último input si no tiene finish
             if (currentInput && currentCommands.length > 0) {
                 inputHandlers[currentInput] = [...currentCommands];
             }
         }
         
-        // Ejecutar código completo
-        function executeCode() {
-            // Limpiar todo el estado
+        // Ejecutar juego
+        function executeGame() {
+            // Limpiar objetos temporales
             gameObjects = {};
             gameVariables = {};
             nextPosition = 50;
+            window.backgroundColor = '#000000'; // reset fondo
             
             // Limpiar handlers
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
             }
             
-            const code = document.getElementById('codeEditor').value;
-            const lines = code.split('\n');
-            const errorDisplay = document.getElementById('errorDisplay');
+            const mainCode = document.getElementById('mainCode').value;
+            const scriptsCode = document.getElementById('scriptsCode').value;
             
+            // Parsear inputs
+            parseInputBlocks(scriptsCode);
+            
+            // Ejecutar código principal
+            const lines = mainCode.split('\n');
+            const errorDisplay = document.getElementById('errorDisplay');
             errorDisplay.style.display = 'none';
             
-            // Primero parsear inputs
-            parseInputBlocks(code);
-            
-            // Ejecutar líneas que no son de input
-            let i = 0;
-            let inInputBlock = false;
-            
-            while (i < lines.length) {
-                let line = lines[i].trim();
-                
-                if (line.startsWith('//')) {
-                    i++;
-                    continue;
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    processCommand(lines[i]);
+                } catch (error) {
+                    errorDisplay.textContent = `Error en línea ${i + 1}: ${error.message}`;
+                    errorDisplay.style.display = 'block';
+                    break;
                 }
-                
-                if (line.toLowerCase().startsWith('input:')) {
-                    inInputBlock = true;
-                }
-                else if (line.toLowerCase() === 'finish') {
-                    inInputBlock = false;
-                }
-                else if (!inInputBlock && line !== '') {
-                    try {
-                        processCommand(line);
-                    } catch (error) {
-                        errorDisplay.textContent = `Error en línea ${i + 1}: ${error.message}`;
-                        errorDisplay.style.display = 'block';
-                        break;
-                    }
-                }
-                
-                i++;
             }
             
             gameInitialized = true;
             drawGame();
-            updateLists();
-            showSuccess('✅ Código ejecutado! Presiona A, B, C, etc');
+            updateActiveObjectsList();
+            showSuccess('✅ JUEGO INICIALIZADO');
+            addLog('--- EJECUCIÓN INICIADA ---');
+        }
+        
+        // Guardar juego
+        function saveGame() {
+            const gameData = {
+                mainCode: document.getElementById('mainCode').value,
+                scriptsCode: document.getElementById('scriptsCode').value,
+                permanentObjects: permanentObjects
+            };
+            
+            localStorage.setItem('savedGame', JSON.stringify(gameData));
+            showSuccess('💾 JUEGO GUARDADO');
+            addLog('Juego guardado.');
+        }
+        
+        // Cargar juego
+        function loadGame() {
+            const saved = localStorage.getItem('savedGame');
+            if (saved) {
+                const gameData = JSON.parse(saved);
+                document.getElementById('mainCode').value = gameData.mainCode;
+                document.getElementById('scriptsCode').value = gameData.scriptsCode;
+                permanentObjects = gameData.permanentObjects || {};
+                localStorage.setItem('permanentObjects', JSON.stringify(permanentObjects));
+                updatePermanentObjectsList();
+                showSuccess('📂 JUEGO CARGADO');
+                addLog('Juego cargado.');
+            } else {
+                showError('No hay juego guardado');
+            }
         }
         
         // Reiniciar todo
@@ -911,129 +1213,194 @@ posset:"enemigo":"400":"200"</textarea>
             gameVariables = {};
             nextPosition = 50;
             gameInitialized = false;
+            window.backgroundColor = '#000000';
             
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
             }
             
             drawGame();
-            updateLists();
-            showSuccess('🔄 Todo reiniciado');
+            updateActiveObjectsList();
+            logArea.innerHTML = '> Sistema listo. Presiona EJECUTAR.';
+            showSuccess('🔄 TODO REINICIADO');
+        }
+        
+        // Dibujar en canvas (con transformaciones)
+        function drawGame() {
+            ctx.fillStyle = window.backgroundColor || '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = '#003300';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#003300';
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            
+            for(let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#003300';
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Dibujar objetos
+            Object.keys(gameObjects).forEach(key => {
+                const obj = gameObjects[key];
+                
+                if (obj.vida <= 0) return;
+                
+                ctx.save();
+                ctx.translate(obj.x, obj.y);
+                ctx.rotate(obj.rotation || 0);
+                ctx.scale(obj.scale || 1, obj.scale || 1);
+                ctx.fillStyle = obj.color;
+                
+                if (obj.shape === 'circulo') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else {
+                    ctx.fillRect(-20, -20, 40, 40);
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-20, -20, 40, 40);
+                }
+                
+                ctx.restore();
+                
+                // Nombre
+                ctx.save();
+                ctx.font = 'bold 12px Courier New';
+                ctx.fillStyle = '#00ff00';
+                ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
+                
+                // Coordenadas
+                ctx.font = '10px Courier New';
+                ctx.fillStyle = '#ffff00';
+                ctx.fillText(`(${obj.x},${obj.y})`, obj.x - 25, obj.y - 45);
+                
+                // Vida
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(obj.x - 30, obj.y - 20, 60, 8);
+                ctx.fillStyle = obj.vida > 50 ? '#00ff00' : '#ff0000';
+                ctx.fillRect(obj.x - 30, obj.y - 20, 60 * (obj.vida/100), 8);
+                
+                ctx.restore();
+            });
+        }
+        
+        // Actualizar lista de objetos activos
+        function updateActiveObjectsList() {
+            const container = document.getElementById('activeObjectsContainer');
+            if (!container) return;
+            
+            let html = '';
+            Object.keys(gameObjects).forEach(key => {
+                const obj = gameObjects[key];
+                if (obj.vida <= 0) return;
+                
+                html += `<div class="object-item">
+                    <div class="object-name">${obj.name}</div>
+                    <div>${obj.shape} | ${obj.vida}HP | (${obj.x},${obj.y})</div>
+                </div>`;
+            });
+            
+            if (html === '') {
+                html = '<div style="padding: 10px; text-align: center;">No hay objetos activos</div>';
+            }
+            
+            container.innerHTML = html;
         }
         
         // Ejecutar input por tecla
         function executeInput(tecla) {
             if (!gameInitialized) {
-                showError('❌ Primero ejecuta el código');
+                showError('❌ PRIMERO EJECUTA EL CÓDIGO');
                 return;
             }
             
             const commands = inputHandlers[tecla] || [];
             
             if (commands.length === 0) {
-                showError(`⚠️ No hay código para tecla ${tecla.toUpperCase()}`);
+                showError(`⚠️ NO HAY CÓDIGO PARA TECLA ${tecla.toUpperCase()}`);
                 return;
             }
-            
-            const errorDisplay = document.getElementById('errorDisplay');
             
             for (let i = 0; i < commands.length; i++) {
                 try {
                     processCommand(commands[i], true);
                 } catch (error) {
-                    errorDisplay.textContent = `Error en tecla ${tecla.toUpperCase()}: ${error.message}`;
-                    errorDisplay.style.display = 'block';
+                    showError(`Error en tecla ${tecla.toUpperCase()}: ${error.message}`);
                     break;
                 }
             }
             
             drawGame();
-            updateLists();
+            updateActiveObjectsList();
         }
         
-        // Detectar teclas - CORREGIDO: ahora solo previene cuando el juego está inicializado
-        // y NO estamos escribiendo en el textarea
+        // Mostrar mensajes
+        function showSuccess(message) {
+            const successDisplay = document.getElementById('successDisplay');
+            successDisplay.textContent = message;
+            successDisplay.style.display = 'block';
+            setTimeout(() => {
+                successDisplay.style.display = 'none';
+            }, 2000);
+        }
+        
+        function showError(message) {
+            const errorDisplay = document.getElementById('errorDisplay');
+            errorDisplay.textContent = message;
+            errorDisplay.style.display = 'block';
+        }
+        
+        // Detectar teclas
         document.addEventListener('keydown', function(e) {
             const key = e.key.toLowerCase();
             const activeElement = document.activeElement;
             const isTextArea = activeElement && activeElement.tagName === 'TEXTAREA';
             
-            // Solo procesar teclas de la A a la Z
             if (key.match(/^[a-z]$/)) {
-                // Si estamos en el textarea, no prevenir y no ejecutar el juego
                 if (isTextArea) {
-                    return; // Dejar que el texto se escriba normalmente
+                    return;
                 }
-                
-                // Si no estamos en textarea, ejecutar el input del juego
                 e.preventDefault();
                 executeInput(key);
             }
         });
         
-        // Añadir ejemplo completo
-        function addExample() {
-            document.getElementById('codeEditor').value = 
-                '// 🎮 SISTEMA DE INPUTS\n' +
-                '// ----------------------------------------\n\n' +
-                '// DEFINICIÓN DE INPUTS\n' +
-                'input:"A"\n' +
-                '    // Mover héroe izquierda\n' +
-                '    mover:"heroe":"-30"\n' +
-                '    // Ataque suave\n' +
-                '    varset:"vida_enemigo":"-10"\n' +
-                'finish\n\n' +
-                'input:"B"\n' +
-                '    // Mover héroe derecha\n' +
-                '    mover:"heroe":"30"\n' +
-                '    // Ataque fuerte\n' +
-                '    varset:"vida_enemigo":"-25"\n' +
-                'finish\n\n' +
-                'input:"C"\n' +
-                '    // Curar héroe\n' +
-                '    varset:"vida_heroe":"+20"\n' +
-                '    // Crear ayuda\n' +
-                '    crearobjeto:"ayuda"\n' +
-                '    sprite:"ayuda":"circulo":"verde"\n' +
-                '    posset:"ayuda":"200":"150"\n' +
-                'finish\n\n' +
-                'input:"D"\n' +
-                '    // Teletransportar\n' +
-                '    posset:"heroe":"350":"200"\n' +
-                '    varset:"vida_enemigo":"-50"\n' +
-                'finish\n\n' +
-                '// ----------------------------------------\n' +
-                '// CÓDIGO PRINCIPAL\n' +
-                'crearobjeto:"heroe"\n' +
-                'sprite:"heroe":"circulo":"azul"\n' +
-                'var:"vida_heroe":"Vida":"heroe"\n\n' +
-                'crearobjeto:"enemigo"\n' +
-                'sprite:"enemigo":"cubo":"rojo"\n' +
-                'var:"vida_enemigo":"Vida":"enemigo"\n\n' +
-                '// Posicionar objetos\n' +
-                'posset:"heroe":"100":"200"\n' +
-                'posset:"enemigo":"500":"200"';
-            
-            showSuccess('📋 Ejemplo cargado!');
-        }
-        
         // Inicializar
         window.onload = function() {
+            updatePermanentObjectsList();
             resetGame();
             
-            // Event listener para Ctrl+Enter
-            document.getElementById('codeEditor').addEventListener('keydown', function(e) {
+            // Ctrl+Enter para ejecutar
+            document.getElementById('mainCode').addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     e.preventDefault();
-                    executeCode();
+                    executeGame();
                 }
             });
         };
         
-        // Hacer funciones globales
-        window.executeCode = executeCode;
+        // Funciones globales
+        window.switchTab = switchTab;
+        window.createPermanentObject = createPermanentObject;
+        window.selectPermanentObject = selectPermanentObject;
+        window.executeGame = executeGame;
         window.resetGame = resetGame;
-        window.addExample = addExample;
+        window.saveGame = saveGame;
+        window.loadGame = loadGame;
     </script>
 </body>
 </html>
