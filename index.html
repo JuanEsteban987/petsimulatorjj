@@ -3,719 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Bloques Estilo Scratch</title>
+    <title>Scratch Blocks - Juego de Programación</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial', sans-serif;
         }
-        
         body {
-            background: #003399;
+            margin: 0;
+            padding: 20px;
+            background: #4a6b8f;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            background-image: radial-gradient(circle at 10% 20%, #0066ff, #000066);
         }
-        
         .game-container {
-            display: flex;
-            gap: 15px;
-            max-width: 1600px;
-            width: 100%;
-            border: 4px solid #e4e4e4;
-            border-radius: 8px;
-            padding: 15px;
-            background: #ece9d8;
-            box-shadow: inset -2px -2px 0 #0a0a0a, inset 2px 2px 0 #ffffff;
-        }
-        
-        /* Panel izquierdo - Canvas del juego */
-        .game-area {
-            flex: 2;
-            background: #d4d0c8;
-            border-radius: 5px;
-            padding: 15px;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-        }
-        
-        canvas {
-            width: 100%;
-            height: 400px;
-            background: #000000;
-            border-radius: 0px;
-            display: block;
-            border: 3px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            image-rendering: pixelated;
-        }
-        
-        .log-area {
-            background: #000000;
-            color: #00ff00;
-            border: 3px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 8px;
-            margin-top: 10px;
-            height: 60px;
-            overflow-y: auto;
-            font-size: 12px;
-        }
-        
-        /* Panel derecho - Bloques */
-        .code-panel {
-            flex: 1.2;
-            background: #d4d0c8;
-            border-radius: 5px;
-            padding: 15px;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            color: #000000;
-            overflow-y: auto;
-            max-height: 800px;
+            width: 1300px;
+            max-width: 100%;
+            background: #f0f0f0;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
-        
-        /* Selector de categorías */
-        .category-tabs {
+        /* Cabecera */
+        .header {
+            background: #3a5e8c;
+            color: white;
+            padding: 10px 20px;
             display: flex;
-            gap: 2px;
-            margin-bottom: 10px;
-            background: #bfbfbf;
-            padding: 5px;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header button {
+            background: #ffcc00;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        /* Área principal: canvas y bloques */
+        .main-area {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            background: #f0f0f0;
+        }
+        /* Panel izquierdo: canvas del juego */
+        .canvas-panel {
+            flex: 2;
+            background: #d9e3f0;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            width: 100%;
+            height: 300px;
+            background: #1e2a3a;
+            border-radius: 10px;
+            display: block;
+            border: 3px solid #2c3e50;
+        }
+        .log {
+            background: #1e2a3a;
+            color: #0f0;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 5px;
+            height: 80px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        /* Panel derecho: bloques */
+        .blocks-panel {
+            flex: 3;
+            background: #e5e5e5;
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        /* Categorías */
+        .categories {
+            display: flex;
+            gap: 5px;
+            background: #ccc;
+            padding: 8px;
+            border-radius: 10px;
             flex-wrap: wrap;
         }
-        
-        .category-tab {
-            background: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            color: #000000;
-            padding: 5px 8px;
-            cursor: pointer;
+        .cat-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
             font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-        
-        .category-tab.active {
-            background: #0a2f6c;
-            color: white;
-            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
-        }
-        
-        /* Panel de bloques disponibles */
-        .blocks-palette {
-            background: #bfbfbf;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 10px;
-            margin-bottom: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .block-item {
-            background: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 8px;
-            margin-bottom: 5px;
             cursor: pointer;
-            font-size: 12px;
+            color: white;
+            transition: transform 0.1s;
+        }
+        .cat-btn:hover { transform: scale(1.05); }
+        .cat-btn.active { box-shadow: 0 0 0 3px black; }
+        /* Paleta de bloques */
+        .palette {
+            background: #d5d5d5;
+            border-radius: 10px;
+            padding: 10px;
+            height: 220px;
+            overflow-y: auto;
             display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+        }
+        /* Bloques individuales (en paleta y en script) */
+        .block {
+            background: #4a90e2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #2a4b7a;
+            cursor: grab;
+            user-select: none;
+            display: inline-flex;
             align-items: center;
             gap: 5px;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: box-shadow 0.1s;
         }
-        
-        .block-item:hover {
-            background: #e4e0d8;
+        .block:active {
+            cursor: grabbing;
+            box-shadow: 0 2px 0 #2a4b7a;
+            transform: translateY(2px);
         }
-        
-        .block-color {
-            width: 20px;
-            height: 20px;
-            background: #4fa3e3;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-        }
-        
-        .block-text {
-            flex: 1;
-        }
-        
+        .block.motion { background: #4a90e2; }
+        .block.looks { background: #9b59b6; }
+        .block.sound { background: #e67e22; }
+        .block.event { background: #f1c40f; color: black; }
+        .block.control { background: #e74c3c; }
+        .block.sensing { background: #3498db; }
+        .block.operators { background: #2ecc71; }
+        .block.variables { background: #e67e22; }
         /* Área de script (bloques encajados) */
         .script-area {
-            background: #bfbfbf;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 10px;
+            background: #b5b5b5;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 250px;
             flex: 1;
-            min-height: 200px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
         }
-        
         .script-block {
-            background: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 8px;
-            margin-bottom: 5px;
-            font-size: 12px;
+            background: #4a90e2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #2a4b7a;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
             position: relative;
+            margin-bottom: 2px;
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        
-        .script-block .delete-btn {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            background: #d45b5b;
+        .script-block .delete {
+            background: #c0392b;
             color: white;
-            border: 2px solid;
-            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
+            border-radius: 50%;
             width: 20px;
             height: 20px;
-            text-align: center;
-            line-height: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .script-block .delete-btn:hover {
-            background: #e06f6f;
-        }
-        
-        .block-input {
-            background: #ffffff;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            width: 50px;
-            padding: 2px;
-            font-size: 11px;
-        }
-        
-        .button-group {
             display: flex;
-            gap: 8px;
-            margin: 10px 0;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            flex: 1;
-            background: #d4d0c8;
-            border: 3px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            color: #000000;
-            font-size: 12px;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            padding: 8px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            min-width: 70px;
-            text-transform: uppercase;
+            margin-left: auto;
         }
-        
-        button:hover {
-            background: #e4e0d8;
+        .script-block input {
+            width: 50px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            padding: 2px 5px;
+            color: black;
         }
-        
-        button:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-            transform: translate(1px, 1px);
+        .script-block select {
+            background: white;
+            border: none;
+            border-radius: 5px;
+            padding: 2px 5px;
         }
-        
-        button.execute {
-            background: #2d6ca3;
+        .bottom-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+        }
+        .bottom-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            background: #2c3e50;
             color: white;
-            border-color: #6bb5f0 #0a2f6c #0a2f6c #6bb5f0;
+            cursor: pointer;
         }
-        
-        .object-list {
-            background: #bfbfbf;
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 8px;
-            max-height: 120px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-        
-        .object-item {
-            background: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 4px;
-            margin-bottom: 2px;
-            font-size: 11px;
-        }
-        
-        .error-message {
-            background: #c86b6b;
-            color: white;
-            padding: 8px;
-            margin: 5px 0;
-            font-size: 12px;
-            display: none;
-            border: 3px solid;
-            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
-        }
-        
-        .success-message {
-            background: #6b8e6b;
-            color: white;
-            padding: 8px;
-            margin: 5px 0;
-            font-size: 12px;
-            display: none;
-            border: 3px solid;
-            border-color: #99cc99 #2d6c2d #2d6c2d #99cc99;
+        .bottom-buttons .run {
+            background: #27ae60;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <!-- Área del juego -->
-        <div class="game-area">
-            <canvas id="gameCanvas" width="700" height="400"></canvas>
-            <div class="log-area" id="logArea">
-                > Sistema listo. Presiona EJECUTAR.
-            </div>
+<div class="game-container">
+    <div class="header">
+        <h1>🐱 Scratch Blocks - Juego de Programación</h1>
+        <button id="runBtn">▶ EJECUTAR</button>
+    </div>
+    <div class="main-area">
+        <!-- Panel izquierdo: canvas y log -->
+        <div class="canvas-panel">
+            <canvas id="gameCanvas" width="500" height="300"></canvas>
+            <div class="log" id="log">> Listo</div>
         </div>
-        
-        <!-- Panel de bloques -->
-        <div class="code-panel">
-            <div class="category-tabs">
-                <div class="category-tab active" onclick="showCategory('movimiento')">MOVIMIENTO</div>
-                <div class="category-tab" onclick="showCategory('apariencia')">APARIENCIA</div>
-                <div class="category-tab" onclick="showCategory('variables')">VARIABLES</div>
-                <div class="category-tab" onclick="showCategory('control')">CONTROL</div>
-                <div class="category-tab" onclick="showCategory('utilidades')">UTILIDADES</div>
+        <!-- Panel derecho: bloques -->
+        <div class="blocks-panel">
+            <!-- Categorías -->
+            <div class="categories" id="categories">
+                <button class="cat-btn" style="background:#4a90e2;" onclick="showCategory('motion')">Movimiento</button>
+                <button class="cat-btn" style="background:#9b59b6;" onclick="showCategory('looks')">Apariencia</button>
+                <button class="cat-btn" style="background:#e67e22;" onclick="showCategory('sound')">Sonido</button>
+                <button class="cat-btn" style="background:#f1c40f; color:black;" onclick="showCategory('event')">Eventos</button>
+                <button class="cat-btn" style="background:#e74c3c;" onclick="showCategory('control')">Control</button>
+                <button class="cat-btn" style="background:#3498db;" onclick="showCategory('sensing')">Sensores</button>
+                <button class="cat-btn" style="background:#2ecc71;" onclick="showCategory('operators')">Operadores</button>
+                <button class="cat-btn" style="background:#e67e22;" onclick="showCategory('variables')">Variables</button>
             </div>
-            
-            <!-- Bloques disponibles por categoría -->
-            <div class="blocks-palette" id="blocksPalette">
-                <!-- Se llena dinámicamente -->
-            </div>
-            
+            <!-- Paleta de bloques (se llena con JS) -->
+            <div class="palette" id="palette"></div>
             <!-- Área de script (bloques encajados) -->
-            <div class="script-area" id="scriptArea">
-                <!-- Los bloques del script se generan aquí -->
-            </div>
-            
-            <!-- Botones de control -->
-            <div class="button-group">
-                <button class="execute" onclick="executeBlocks()">▶ EJECUTAR</button>
-                <button onclick="resetGame()">↺ REINICIAR</button>
-                <button onclick="clearScript()">🗑️ LIMPIAR</button>
-            </div>
-            
-            <div id="errorDisplay" class="error-message"></div>
-            <div id="successDisplay" class="success-message"></div>
-            
-            <!-- Lista de objetos activos -->
-            <div class="object-list">
-                <div class="object-title">OBJETOS ACTIVOS</div>
-                <div id="activeObjectsContainer"></div>
+            <div class="script-area" id="scriptArea"></div>
+            <!-- Botones inferiores -->
+            <div class="bottom-buttons">
+                <button id="resetBtn">↺ Reiniciar</button>
+                <button id="clearBtn">🗑️ Limpiar</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Configuración del canvas
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const logArea = document.getElementById('logArea');
-        
-        // Estado del juego
-        let gameObjects = {};
-        let gameVariables = {};
-        let nextPosition = 50;
-        let gameInitialized = false;
-        let backgroundColor = '#000000';
-        
-        // Colores predefinidos
-        const colorExamples = {
-            'rojo': '#D45B5B',
-            'azul': '#4FA3E3',
-            'verde': '#6BBF6B',
-            'amarillo': '#F1C40F',
-            'morado': '#9B59B6',
-            'naranja': '#FFB86B',
-            'blanco': '#FFFFFF',
-            'negro': '#000000'
+<script>
+    // ============================================================
+    // CONFIGURACIÓN DE BLOQUES (más de 50)
+    // ============================================================
+    const blocksData = {
+        motion: [
+            { name: 'mover_x', text: 'mover en X', params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' },
+            { name: 'mover_y', text: 'mover en Y', params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' },
+            { name: 'ir_a', text: 'ir a posición', params: ['objeto', 'x', 'y'], default: ['gato', 100, 100], color: 'motion' },
+            { name: 'movimiento_aleatorio', text: 'ir a posición aleatoria', params: ['objeto'], default: ['gato'], color: 'motion' },
+            { name: 'deslizar', text: 'deslizar en X', params: ['objeto', 'seg', 'pasos'], default: ['gato', 1, 50], color: 'motion' },
+            { name: 'rebotar', text: 'rebotar si toca borde', params: ['objeto'], default: ['gato'], color: 'motion' },
+            { name: 'girar', text: 'girar grados', params: ['objeto', 'grados'], default: ['gato', 15], color: 'motion' },
+            { name: 'apuntar', text: 'apuntar hacia', params: ['objeto', 'direccion'], default: ['gato', 'enemigo'], color: 'motion' }
+        ],
+        looks: [
+            { name: 'decir', text: 'decir', params: ['mensaje'], default: ['Hola!'], color: 'looks' },
+            { name: 'pensar', text: 'pensar', params: ['mensaje'], default: ['...'], color: 'looks' },
+            { name: 'cambiar_color', text: 'cambiar color', params: ['objeto', 'color'], default: ['gato', 'rojo'], color: 'looks' },
+            { name: 'color_aleatorio', text: 'color aleatorio', params: ['objeto'], default: ['gato'], color: 'looks' },
+            { name: 'cambiar_tamaño', text: 'cambiar tamaño', params: ['objeto', 'porcentaje'], default: ['gato', 10], color: 'looks' },
+            { name: 'fijar_tamaño', text: 'fijar tamaño %', params: ['objeto', 'porcentaje'], default: ['gato', 100], color: 'looks' },
+            { name: 'mostrar', text: 'mostrar', params: ['objeto'], default: ['gato'], color: 'looks' },
+            { name: 'ocultar', text: 'ocultar', params: ['objeto'], default: ['gato'], color: 'looks' }
+        ],
+        sound: [
+            { name: 'reproducir_sonido', text: 'reproducir sonido', params: ['sonido'], default: ['maullido'], color: 'sound' },
+            { name: 'tocar_tambor', text: 'tocar tambor', params: ['ritmo'], default: ['1'], color: 'sound' },
+            { name: 'subir_volumen', text: 'subir volumen', params: ['valor'], default: [10], color: 'sound' },
+            { name: 'bajar_volumen', text: 'bajar volumen', params: ['valor'], default: [10], color: 'sound' },
+            { name: 'silenciar', text: 'silenciar', params: [], default: [], color: 'sound' }
+        ],
+        event: [
+            { name: 'al_presionar_tecla', text: 'al presionar tecla', params: ['tecla'], default: ['espacio'], color: 'event' },
+            { name: 'al_hacer_click', text: 'al hacer click en objeto', params: ['objeto'], default: ['gato'], color: 'event' },
+            { name: 'al_iniciar', text: 'al iniciar', params: [], default: [], color: 'event' },
+            { name: 'enviar_mensaje', text: 'enviar mensaje', params: ['mensaje'], default: ['evento1'], color: 'event' },
+            { name: 'cuando_reciba', text: 'cuando reciba mensaje', params: ['mensaje'], default: ['evento1'], color: 'event' }
+        ],
+        control: [
+            { name: 'esperar', text: 'esperar segundos', params: ['seg'], default: [1], color: 'control' },
+            { name: 'repetir', text: 'repetir veces', params: ['veces', 'bloque'], default: [10, 'movimiento'], color: 'control' },
+            { name: 'por_siempre', text: 'por siempre', params: [], default: [], color: 'control' },
+            { name: 'si_entonces', text: 'si ... entonces', params: ['condicion', 'bloque'], default: ['true', 'movimiento'], color: 'control' },
+            { name: 'si_sino', text: 'si ... sino', params: ['condicion', 'bloque1', 'bloque2'], default: ['true', 'movimiento', 'esperar'], color: 'control' },
+            { name: 'detener_programa', text: 'detener programa', params: [], default: [], color: 'control' }
+        ],
+        sensing: [
+            { name: 'tocando_objeto', text: '¿tocando objeto?', params: ['objeto1', 'objeto2'], default: ['gato', 'enemigo'], color: 'sensing' },
+            { name: 'distancia_a', text: 'distancia a', params: ['objeto1', 'objeto2'], default: ['gato', 'enemigo'], color: 'sensing' },
+            { name: 'preguntar', text: 'preguntar y esperar', params: ['pregunta'], default: ['¿Cómo te llamas?'], color: 'sensing' },
+            { name: 'respuesta', text: 'respuesta', params: [], default: [], color: 'sensing' },
+            { name: 'posicion_x', text: 'posición X de', params: ['objeto'], default: ['gato'], color: 'sensing' },
+            { name: 'posicion_y', text: 'posición Y de', params: ['objeto'], default: ['gato'], color: 'sensing' }
+        ],
+        operators: [
+            { name: 'suma', text: 'suma', params: ['a', 'b'], default: [1, 2], color: 'operators' },
+            { name: 'resta', text: 'resta', params: ['a', 'b'], default: [5, 3], color: 'operators' },
+            { name: 'multiplica', text: 'multiplica', params: ['a', 'b'], default: [2, 3], color: 'operators' },
+            { name: 'divide', text: 'divide', params: ['a', 'b'], default: [10, 2], color: 'operators' },
+            { name: 'aleatorio', text: 'número aleatorio', params: ['min', 'max'], default: [1, 10], color: 'operators' },
+            { name: 'mayor_que', text: 'mayor que', params: ['a', 'b'], default: [5, 3], color: 'operators' },
+            { name: 'menor_que', text: 'menor que', params: ['a', 'b'], default: [3, 5], color: 'operators' },
+            { name: 'igual', text: 'igual', params: ['a', 'b'], default: [5, 5], color: 'operators' },
+            { name: 'y', text: 'y', params: ['cond1', 'cond2'], default: [true, false], color: 'operators' },
+            { name: 'o', text: 'o', params: ['cond1', 'cond2'], default: [true, false], color: 'operators' },
+            { name: 'no', text: 'no', params: ['cond'], default: [false], color: 'operators' }
+        ],
+        variables: [
+            { name: 'crear_variable', text: 'crear variable', params: ['nombre', 'valor'], default: ['puntaje', 0], color: 'variables' },
+            { name: 'cambiar_variable', text: 'cambiar variable', params: ['nombre', 'valor'], default: ['puntaje', 1], color: 'variables' },
+            { name: 'fijar_variable', text: 'fijar variable', params: ['nombre', 'valor'], default: ['puntaje', 10], color: 'variables' },
+            { name: 'mostrar_variable', text: 'mostrar variable', params: ['nombre'], default: ['puntaje'], color: 'variables' },
+            { name: 'ocultar_variable', text: 'ocultar variable', params: ['nombre'], default: ['puntaje'], color: 'variables' },
+            { name: 'incrementar', text: 'incrementar', params: ['nombre'], default: ['puntaje'], color: 'variables' },
+            { name: 'decrementar', text: 'decrementar', params: ['nombre'], default: ['puntaje'], color: 'variables' }
+        ]
+    };
+
+    // ============================================================
+    // ESTADO DEL JUEGO
+    // ============================================================
+    let gameObjects = {
+        gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, tamaño: 100 },
+        enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, tamaño: 100 }
+    };
+    let variables = { puntaje: 0 };
+    let scriptBlocks = []; // bloques en el área de script
+
+    // ============================================================
+    // FUNCIONES DE INTERFAZ
+    // ============================================================
+    let currentCategory = 'motion';
+
+    function showCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        renderPalette();
+    }
+
+    function renderPalette() {
+        const palette = document.getElementById('palette');
+        const blocks = blocksData[currentCategory] || [];
+        palette.innerHTML = '';
+        blocks.forEach(block => {
+            const div = document.createElement('div');
+            div.className = `block ${block.color}`;
+            div.setAttribute('draggable', 'true');
+            div.textContent = block.text;
+            div.dataset.name = block.name;
+            div.dataset.params = JSON.stringify(block.params);
+            div.dataset.default = JSON.stringify(block.default);
+            div.addEventListener('dragstart', handleDragStart);
+            palette.appendChild(div);
+        });
+    }
+
+    // Arrastrar bloques desde la paleta
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+            name: e.target.dataset.name,
+            params: JSON.parse(e.target.dataset.params),
+            default: JSON.parse(e.target.dataset.default)
+        }));
+        e.dataTransfer.effectAllowed = 'copy';
+    }
+
+    // Área de script: permitir soltar
+    const scriptArea = document.getElementById('scriptArea');
+    scriptArea.addEventListener('dragover', e => e.preventDefault());
+    scriptArea.addEventListener('drop', e => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        addBlockToScript(data);
+    });
+
+    function addBlockToScript(blockData) {
+        const newBlock = {
+            name: blockData.name,
+            params: blockData.default.slice(),
+            paramNames: blockData.params
         };
-        
-        // Objetos permanentes (simulados)
-        let permanentObjects = {
-            'heroe': { name: 'heroe', shape: 'circulo', color: '#4FA3E3' },
-            'enemigo': { name: 'enemigo', shape: 'cubo', color: '#D45B5B' }
-        };
-        
-        // Bloques disponibles por categoría
-        const blocksData = {
-            movimiento: [
-                { name: 'movx', text: 'mover en X', params: ['objeto', 'pasos'], default: ['heroe', '10'] },
-                { name: 'movy', text: 'mover en Y', params: ['objeto', 'pasos'], default: ['heroe', '10'] },
-                { name: 'posset', text: 'ir a posición', params: ['objeto', 'x', 'y'], default: ['heroe', '100', '200'] },
-                { name: 'movimientoaleatorio', text: 'posición aleatoria', params: ['objeto'], default: ['heroe'] }
-            ],
-            apariencia: [
-                { name: 'sprite', text: 'cambiar forma/color', params: ['objeto', 'forma', 'color'], default: ['heroe', 'circulo', 'azul'] },
-                { name: 'tamano', text: 'cambiar tamaño', params: ['objeto', 'escala'], default: ['heroe', '1.5'] },
-                { name: 'rotar', text: 'rotar', params: ['objeto', 'grados'], default: ['heroe', '90'] },
-                { name: 'coloraleatorio', text: 'color aleatorio', params: ['objeto'], default: ['heroe'] },
-                { name: 'texto', text: 'decir', params: ['mensaje'], default: ['Hola'] }
-            ],
-            variables: [
-                { name: 'var', text: 'crear variable', params: ['nombre', 'tipo', 'objeto'], default: ['vida', 'Vida', 'heroe'] },
-                { name: 'varset', text: 'asignar variable', params: ['nombre', 'valor'], default: ['vida', '100'] },
-                { name: 'sumarvar', text: 'sumar a variable', params: ['nombre', 'valor'], default: ['vida', '5'] },
-                { name: 'restarvar', text: 'restar a variable', params: ['nombre', 'valor'], default: ['vida', '5'] }
-            ],
-            control: [
-                { name: 'si', text: 'si condición', params: ['condicion', 'comando'], default: ['vida_heroe>50', 'movx:heroe:10'] },
-                { name: 'repetir', text: 'repetir', params: ['veces', 'comando'], default: ['3', 'sonido:explosion'] },
-                { name: 'esperar', text: 'esperar', params: ['segundos'], default: ['1'] },
-                { name: 'input', text: 'definir tecla', params: ['tecla'], default: ['A'] } // especial
-            ],
-            utilidades: [
-                { name: 'crearobjeto', text: 'crear objeto', params: ['nombre'], default: ['nuevo'] },
-                { name: 'duplicar', text: 'duplicar objeto', params: ['original', 'copia'], default: ['heroe', 'clon'] },
-                { name: 'eliminar', text: 'eliminar objeto', params: ['objeto'], default: ['enemigo'] },
-                { name: 'aleatorio', text: 'número aleatorio', params: ['variable', 'min', 'max'], default: ['rand', '1', '10'] },
-                { name: 'distancia', text: 'distancia entre', params: ['obj1', 'obj2', 'variable'], default: ['heroe', 'enemigo', 'dist'] },
-                { name: 'sonido', text: 'reproducir sonido', params: ['tipo'], default: ['explosion'] },
-                { name: 'fondo', text: 'cambiar fondo', params: ['color'], default: ['#003366'] }
-            ]
-        };
-        
-        // Script actual (lista de bloques)
-        let currentScript = [];
-        
-        // Categoría activa
-        let currentCategory = 'movimiento';
-        
-        // Mostrar categoría
-        function showCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            renderBlocksPalette();
-        }
-        
-        // Renderizar bloques de la categoría actual
-        function renderBlocksPalette() {
-            const palette = document.getElementById('blocksPalette');
-            const blocks = blocksData[currentCategory] || [];
-            let html = '';
-            blocks.forEach(block => {
-                let color = '#4fa3e3';
-                if (currentCategory === 'movimiento') color = '#4fa3e3';
-                else if (currentCategory === 'apariencia') color = '#9b59b6';
-                else if (currentCategory === 'variables') color = '#e67e22';
-                else if (currentCategory === 'control') color = '#f1c40f';
-                else if (currentCategory === 'utilidades') color = '#2ecc71';
-                
-                html += `
-                    <div class="block-item" onclick="addBlockToScript('${block.name}')">
-                        <div class="block-color" style="background: ${color};"></div>
-                        <div class="block-text">${block.text}</div>
-                    </div>
-                `;
-            });
-            palette.innerHTML = html;
-        }
-        
-        // Añadir bloque al script
-        function addBlockToScript(blockName) {
-            // Buscar el bloque en todas las categorías
-            let blockData = null;
+        scriptBlocks.push(newBlock);
+        renderScript();
+    }
+
+    function renderScript() {
+        scriptArea.innerHTML = '';
+        scriptBlocks.forEach((block, index) => {
+            const blockDiv = document.createElement('div');
+            blockDiv.className = 'script-block';
+            // Buscar el color del bloque en blocksData
+            let colorClass = 'motion';
             for (let cat in blocksData) {
-                const found = blocksData[cat].find(b => b.name === blockName);
-                if (found) {
-                    blockData = found;
-                    break;
-                }
+                const found = blocksData[cat].find(b => b.name === block.name);
+                if (found) { colorClass = found.color; break; }
             }
-            if (!blockData) return;
-            
-            // Crear una instancia del bloque con valores por defecto
-            const blockInstance = {
-                name: blockData.name,
-                params: [...blockData.default],
-                paramDefs: blockData.params
-            };
-            currentScript.push(blockInstance);
-            renderScript();
-        }
-        
-        // Renderizar script
-        function renderScript() {
-            const scriptArea = document.getElementById('scriptArea');
-            let html = '';
-            currentScript.forEach((block, index) => {
-                // Determinar color según tipo (simplificado)
-                let color = '#4fa3e3';
-                // Podríamos buscar la categoría pero por simplicidad usamos un color fijo
-                
-                // Crear inputs para los parámetros
-                let paramsHtml = '';
-                block.params.forEach((val, i) => {
-                    paramsHtml += `<input class="block-input" type="text" value="${val}" onchange="updateBlockParam(${index}, ${i}, this.value)">`;
-                    if (i < block.params.length - 1) paramsHtml += ' ';
-                });
-                
-                html += `
-                    <div class="script-block" style="border-left: 5px solid ${color};">
-                        <span style="font-weight:bold;">${block.name}</span> 
-                        ${paramsHtml}
-                        <div class="delete-btn" onclick="removeBlock(${index})">X</div>
-                    </div>
-                `;
-            });
-            if (currentScript.length === 0) {
-                html = '<div style="color: #666; text-align: center; padding: 20px;">Arrastra bloques aquí</div>';
-            }
-            scriptArea.innerHTML = html;
-        }
-        
-        // Actualizar parámetro de un bloque
-        function updateBlockParam(blockIndex, paramIndex, value) {
-            currentScript[blockIndex].params[paramIndex] = value;
-        }
-        
-        // Eliminar bloque
-        function removeBlock(index) {
-            currentScript.splice(index, 1);
-            renderScript();
-        }
-        
-        // Limpiar script
-        function clearScript() {
-            currentScript = [];
-            renderScript();
-        }
-        
-        // Función para añadir log
-        function addLog(message) {
-            logArea.innerHTML += '<br>> ' + message;
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-        
-        // Ejecutar los bloques
-        function executeBlocks() {
-            // Reiniciar el estado del juego (opcional, podemos mantener o reiniciar)
-            gameObjects = {};
-            gameVariables = {};
-            nextPosition = 50;
-            backgroundColor = '#000000';
-            
-            // Crear objetos por defecto para que haya algo (podríamos permitir crearlos desde bloques)
-            // Creamos un héroe y enemigo por defecto
-            gameObjects['heroe'] = { name: 'heroe', x: 100, y: 200, shape: 'circulo', color: '#4FA3E3', vida: 100, scale: 1, rotation: 0 };
-            gameObjects['enemigo'] = { name: 'enemigo', x: 500, y: 200, shape: 'cubo', color: '#D45B5B', vida: 100, scale: 1, rotation: 0 };
-            gameVariables['vida_heroe'] = { name: 'vida_heroe', type: 'Vida', object: 'heroe', value: 100 };
-            gameVariables['vida_enemigo'] = { name: 'vida_enemigo', type: 'Vida', object: 'enemigo', value: 100 };
-            
-            gameInitialized = true;
-            
-            // Ejecutar cada bloque en orden
-            for (let i = 0; i < currentScript.length; i++) {
-                const block = currentScript[i];
-                try {
-                    executeBlock(block);
-                } catch (error) {
-                    showError(`Error en bloque ${i+1}: ${error.message}`);
-                    break;
-                }
-            }
-            
-            drawGame();
-            updateActiveObjectsList();
-            addLog('--- EJECUCIÓN DE BLOQUES ---');
-        }
-        
-        // Ejecutar un bloque individual
-        function executeBlock(block) {
-            const cmd = block.name;
-            const params = block.params;
-            
-            // Simular la ejecución llamando a processCommand con el comando de texto
-            // Construimos el comando de texto a partir del bloque
-            let commandStr = cmd;
-            for (let p of params) {
-                commandStr += ':"' + p + '"';
-            }
-            
-            // Usamos la función processCommand existente (adaptada)
-            // Copiamos la función processCommand del código anterior, pero aquí la simplificamos
-            processCommand(commandStr);
-        }
-        
-        // Función processCommand simplificada (solo algunos comandos para demo)
-        function processCommand(commandStr) {
-            // Similar a la anterior pero con menos comandos para mantener el ejemplo manejable
-            // Aquí pondríamos toda la lógica de los comandos, pero para no alargar, solo algunos ejemplos
-            // En la práctica, copiaríamos la función completa de la versión anterior.
-            // Por brevedad, simularemos algunos comandos.
-            const parts = commandStr.split(':');
-            const cmd = parts[0].toLowerCase();
-            const args = parts.slice(1).map(s => s.replace(/^"|"$/g, ''));
-            
-            switch(cmd) {
-                case 'movx':
-                    if (gameObjects[args[0]]) gameObjects[args[0]].x += parseInt(args[1]);
-                    break;
-                case 'movy':
-                    if (gameObjects[args[0]]) gameObjects[args[0]].y += parseInt(args[1]);
-                    break;
-                case 'posset':
-                    if (gameObjects[args[0]]) {
-                        gameObjects[args[0]].x = parseInt(args[1]);
-                        gameObjects[args[0]].y = parseInt(args[2]);
-                    }
-                    break;
-                case 'sprite':
-                    if (gameObjects[args[0]]) {
-                        gameObjects[args[0]].shape = args[1];
-                        gameObjects[args[0]].color = colorExamples[args[2]] || args[2];
-                    }
-                    break;
-                case 'texto':
-                    addLog(args[0]);
-                    break;
-                case 'crearobjeto':
-                    let name = args[0];
-                    gameObjects[name] = { name, x: nextPosition, y: 200, shape: 'cubo', color: '#FFFFFF', vida: 100, scale: 1, rotation: 0 };
-                    nextPosition += 70;
-                    break;
-                default:
-                    // Ignorar otros por ahora
-                    break;
-            }
-        }
-        
-        // Dibujar canvas
-        function drawGame() {
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.strokeStyle = '#003300';
-            ctx.lineWidth = 1;
-            for(let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#003300';
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            
-            for(let i = 0; i < canvas.height; i += 50) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#003300';
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-            
-            Object.keys(gameObjects).forEach(key => {
-                const obj = gameObjects[key];
-                if (obj.vida <= 0) return;
-                
-                ctx.save();
-                ctx.translate(obj.x, obj.y);
-                ctx.rotate(obj.rotation || 0);
-                ctx.scale(obj.scale || 1, obj.scale || 1);
-                ctx.fillStyle = obj.color;
-                
-                if (obj.shape === 'circulo') {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 20, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+            blockDiv.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--${colorClass}`) || '#4a90e2';
+
+            // Texto del bloque
+            const textSpan = document.createElement('span');
+            textSpan.textContent = block.name.replace(/_/g,' ') + ' ';
+            blockDiv.appendChild(textSpan);
+
+            // Parámetros editables
+            block.paramNames.forEach((paramName, i) => {
+                if (paramName === 'objeto') {
+                    const select = document.createElement('select');
+                    select.innerHTML = `<option>gato</option><option>enemigo</option>`;
+                    select.value = block.params[i];
+                    select.onchange = (e) => { block.params[i] = e.target.value; };
+                    blockDiv.appendChild(select);
+                } else if (paramName === 'color') {
+                    const select = document.createElement('select');
+                    select.innerHTML = `<option>rojo</option><option>azul</option><option>verde</option><option>amarillo</option>`;
+                    select.value = block.params[i];
+                    select.onchange = (e) => { block.params[i] = e.target.value; };
+                    blockDiv.appendChild(select);
                 } else {
-                    ctx.fillRect(-20, -20, 40, 40);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(-20, -20, 40, 40);
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = block.params[i];
+                    input.onchange = (e) => { block.params[i] = e.target.value; };
+                    blockDiv.appendChild(input);
                 }
-                
-                ctx.restore();
-                
-                ctx.save();
-                ctx.font = 'bold 12px Courier New';
-                ctx.fillStyle = '#00ff00';
-                ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
-                ctx.restore();
+                if (i < block.paramNames.length - 1) blockDiv.appendChild(document.createTextNode(' '));
             });
+
+            // Botón eliminar
+            const del = document.createElement('span');
+            del.className = 'delete';
+            del.textContent = '✖';
+            del.onclick = () => { scriptBlocks.splice(index, 1); renderScript(); };
+            blockDiv.appendChild(del);
+
+            scriptArea.appendChild(blockDiv);
+        });
+    }
+
+    // ============================================================
+    // EJECUCIÓN DE BLOQUES (simulada)
+    // ============================================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const logDiv = document.getElementById('log');
+
+    function addLog(msg) {
+        logDiv.innerHTML += '<br>> ' + msg;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function drawGame() {
+        ctx.fillStyle = '#1e2a3a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let name in gameObjects) {
+            let obj = gameObjects[name];
+            if (!obj.visible) continue;
+            ctx.save();
+            ctx.translate(obj.x, obj.y);
+            ctx.fillStyle = obj.color;
+            ctx.beginPath();
+            ctx.arc(0, 0, 15 * (obj.tamaño/100), 0, 2*Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px monospace';
+            ctx.fillText(name, obj.x-20, obj.y-20);
         }
-        
-        // Actualizar lista de objetos
-        function updateActiveObjectsList() {
-            const container = document.getElementById('activeObjectsContainer');
-            let html = '';
-            Object.keys(gameObjects).forEach(key => {
-                const obj = gameObjects[key];
-                if (obj.vida > 0) {
-                    html += `<div class="object-item">${obj.name} (${obj.x},${obj.y})</div>`;
+    }
+
+    function ejecutarBloque(block) {
+        // Simulación de comandos (solo algunos ejemplos)
+        addLog(`Ejecutando: ${block.name} con parámetros ${block.params.join(', ')}`);
+        switch (block.name) {
+            case 'mover_x':
+                let objX = gameObjects[block.params[0]];
+                if (objX) objX.x += Number(block.params[1]);
+                break;
+            case 'mover_y':
+                let objY = gameObjects[block.params[0]];
+                if (objY) objY.y += Number(block.params[1]);
+                break;
+            case 'ir_a':
+                let objA = gameObjects[block.params[0]];
+                if (objA) {
+                    objA.x = Number(block.params[1]);
+                    objA.y = Number(block.params[2]);
                 }
-            });
-            container.innerHTML = html;
+                break;
+            case 'cambiar_color':
+                let objC = gameObjects[block.params[0]];
+                if (objC) {
+                    let col = block.params[1];
+                    if (col === 'rojo') objC.color = '#e74c3c';
+                    else if (col === 'azul') objC.color = '#3498db';
+                    else if (col === 'verde') objC.color = '#2ecc71';
+                    else if (col === 'amarillo') objC.color = '#f1c40f';
+                }
+                break;
+            case 'decir':
+                addLog(`🗣️ ${block.params[0]}`);
+                break;
+            case 'esperar':
+                // Simulamos espera con un mensaje
+                addLog(`⏱️ Esperando ${block.params[0]} segundos`);
+                break;
+            default:
+                // Otros comandos se ignoran por simplicidad
+                break;
         }
-        
-        // Reiniciar juego
-        function resetGame() {
-            gameObjects = {};
-            gameVariables = {};
-            nextPosition = 50;
-            gameInitialized = false;
-            backgroundColor = '#000000';
-            drawGame();
-            updateActiveObjectsList();
-            logArea.innerHTML = '> Sistema listo. Presiona EJECUTAR.';
+        drawGame();
+    }
+
+    function ejecutarTodo() {
+        addLog('--- INICIO EJECUCIÓN ---');
+        for (let block of scriptBlocks) {
+            ejecutarBloque(block);
         }
-        
-        // Mensajes
-        function showSuccess(msg) {
-            const el = document.getElementById('successDisplay');
-            el.textContent = msg;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 2000);
-        }
-        
-        function showError(msg) {
-            const el = document.getElementById('errorDisplay');
-            el.textContent = msg;
-            el.style.display = 'block';
-        }
-        
-        // Inicializar
-        window.onload = function() {
-            renderBlocksPalette();
-            resetGame();
+        addLog('--- FIN EJECUCIÓN ---');
+    }
+
+    function resetGame() {
+        gameObjects = {
+            gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, tamaño: 100 },
+            enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, tamaño: 100 }
         };
-        
-        // Funciones globales
-        window.showCategory = showCategory;
-        window.addBlockToScript = addBlockToScript;
-        window.updateBlockParam = updateBlockParam;
-        window.removeBlock = removeBlock;
-        window.clearScript = clearScript;
-        window.executeBlocks = executeBlocks;
-        window.resetGame = resetGame;
-    </script>
+        variables = { puntaje: 0 };
+        drawGame();
+        addLog('Juego reiniciado');
+    }
+
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
+    window.onload = () => {
+        renderPalette();
+        drawGame();
+        document.getElementById('runBtn').addEventListener('click', ejecutarTodo);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            scriptBlocks = [];
+            renderScript();
+            addLog('Script limpiado');
+        });
+    };
+
+    // Exponer funciones globales
+    window.showCategory = showCategory;
+</script>
 </body>
 </html>
