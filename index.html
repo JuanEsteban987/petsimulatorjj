@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Sistema de Input por Tecla</title>
+    <title>Juego de Programación - Sistema de Inputs Mejorado</title>
     <style>
         * {
             box-sizing: border-box;
@@ -57,50 +57,13 @@
             max-height: 600px;
         }
         
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #2d3445;
-            padding-bottom: 5px;
-        }
-        
-        .tab {
-            padding: 8px 15px;
-            background: #1e2433;
-            border: none;
-            color: #9aa5b8;
-            cursor: pointer;
-            border-radius: 8px 8px 0 0;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        
-        .tab.active {
-            background: #4fa3e3;
-            color: white;
-        }
-        
-        .tab:hover:not(.active) {
-            background: #2d3445;
-            color: white;
-        }
-        
-        .code-section {
-            display: none;
-        }
-        
-        .code-section.active {
-            display: block;
-        }
-        
         .code-input {
             margin-bottom: 20px;
         }
         
         textarea {
             width: 100%;
-            height: 200px;
+            height: 300px;
             background: #1e2433;
             border: 3px solid #2d3445;
             border-radius: 8px;
@@ -115,51 +78,6 @@
         textarea:focus {
             outline: none;
             border-color: #4fa3e3;
-        }
-        
-        .input-config {
-            background: #1e2433;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 3px solid #2d3445;
-        }
-        
-        .input-config h4 {
-            margin: 0 0 10px 0;
-            color: #ffb86b;
-            font-size: 14px;
-        }
-        
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            background: #0f1219;
-            padding: 8px;
-            border-radius: 4px;
-        }
-        
-        .key-badge {
-            background: #4fa3e3;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            min-width: 60px;
-            text-align: center;
-        }
-        
-        .key-description {
-            flex: 1;
-            color: #b4e1fd;
-            font-size: 12px;
-        }
-        
-        .key-status {
-            color: #6bbf6b;
-            font-size: 12px;
         }
         
         .button-group {
@@ -380,6 +298,19 @@
             display: inline-block;
             margin-top: 5px;
         }
+        
+        .syntax-highlight {
+            color: #ffb86b;
+        }
+        
+        .input-indicator {
+            background: #2d3445;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #b4e1fd;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -395,100 +326,50 @@
         
         <!-- Panel de código -->
         <div class="code-panel">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('setup')">⚙️ SETUP</button>
-                <button class="tab" onclick="switchTab('input_a')">⌨️ INPUT A</button>
-                <button class="tab" onclick="switchTab('input_b')">⌨️ INPUT B</button>
-                <button class="tab" onclick="switchTab('input_c')">⌨️ INPUT C</button>
-            </div>
-            
-            <!-- Sección SETUP (código inicial) -->
-            <div id="setup-section" class="code-section active">
-                <div class="code-input">
-                    <textarea id="setupCode" placeholder="Código de inicialización (se ejecuta al presionar EJECUTAR)">// CÓDIGO DE INICIALIZACIÓN
-// Este código se ejecuta primero, limpiando todo
+            <div class="code-input">
+                <textarea id="codeEditor" placeholder="Escribe tu código aquí...">// COMANDOS DISPONIBLES:
+// crearobjeto:"nombre"
+// sprite:"objeto":"forma":"color"
+// mover:"objeto":"pasos"
+// var:"nombre":"tipo":"objeto"
+// varset:"nombre":"numero"
+// posset:"objeto":"x":"y"  ← NUEVO
 
-// Crear personaje principal
+// EJEMPLO DE INPUTS:
+input:"A"
+    mover:"heroe":"-30"
+    varset:"vida_enemigo":"-10"
+finish
+
+input:"B"
+    mover:"heroe":"30"
+    varset:"vida_enemigo":"-20"
+finish
+
+input:"C"
+    varset:"vida_heroe":"+20"
+    crearobjeto:"ayuda"
+    sprite:"ayuda":"circulo":"verde"
+finish
+
+// Código principal (se ejecuta al iniciar)
 crearobjeto:"heroe"
 sprite:"heroe":"circulo":"azul"
 var:"vida_heroe":"Vida":"heroe"
 
-// Crear enemigo
 crearobjeto:"enemigo"
 sprite:"enemigo":"cubo":"rojo"
 var:"vida_enemigo":"Vida":"enemigo"
 
-// Crear objeto neutral
-crearobjeto:"caja"
-sprite:"caja":"cubo":"amarillo"</textarea>
-                </div>
-            </div>
-            
-            <!-- Sección INPUT A -->
-            <div id="input_a-section" class="code-section">
-                <div class="input-config">
-                    <h4>⌨️ CONFIGURACIÓN INPUT A</h4>
-                    <div class="input-row">
-                        <span class="key-badge">TECLA A</span>
-                        <span class="key-description">Presiona 'A' para ejecutar:</span>
-                        <span class="key-status">✓ Activo</span>
-                    </div>
-                </div>
-                <div class="code-input">
-                    <textarea id="inputACode" placeholder="Código para tecla A">// CÓDIGO PARA TECLA A
-// Mover héroe a la izquierda
-mover:"heroe":"-30"
-
-// Pequeño ataque
-varset:"vida_enemigo":"-10"</textarea>
-                </div>
-            </div>
-            
-            <!-- Sección INPUT B -->
-            <div id="input_b-section" class="code-section">
-                <div class="input-config">
-                    <h4>⌨️ CONFIGURACIÓN INPUT B</h4>
-                    <div class="input-row">
-                        <span class="key-badge">TECLA B</span>
-                        <span class="key-description">Presiona 'B' para ejecutar:</span>
-                        <span class="key-status">✓ Activo</span>
-                    </div>
-                </div>
-                <div class="code-input">
-                    <textarea id="inputBCode" placeholder="Código para tecla B">// CÓDIGO PARA TECLA B
-// Mover héroe a la derecha
-mover:"heroe":"30"
-
-// Ataque fuerte
-varset:"vida_enemigo":"-25"</textarea>
-                </div>
-            </div>
-            
-            <!-- Sección INPUT C -->
-            <div id="input_c-section" class="code-section">
-                <div class="input-config">
-                    <h4>⌨️ CONFIGURACIÓN INPUT C</h4>
-                    <div class="input-row">
-                        <span class="key-badge">TECLA C</span>
-                        <span class="key-description">Presiona 'C' para ejecutar:</span>
-                        <span class="key-status">✓ Activo</span>
-                    </div>
-                </div>
-                <div class="code-input">
-                    <textarea id="inputCCode" placeholder="Código para tecla C">// CÓDIGO PARA TECLA C
-// Curar héroe
-varset:"vida_heroe":"+20"
-
-// Crear ayuda
-crearobjeto:"ayuda"
-sprite:"ayuda":"circulo":"verde"</textarea>
-                </div>
+// Posicionar objetos
+posset:"heroe":"100":"200"
+posset:"enemigo":"400":"200"</textarea>
             </div>
             
             <div class="button-group">
-                <button class="execute" onclick="executeGame()">▶ EJECUTAR SETUP</button>
-                <button class="reset" onclick="resetGame()">↺ REINICIAR TODO</button>
-                <button onclick="addExample()">📋 EJEMPLO COMPLETO</button>
+                <button class="execute" onclick="executeCode()">▶ EJECUTAR TODO</button>
+                <button class="reset" onclick="resetGame()">↺ REINICIAR</button>
+                <button onclick="addExample()">📋 EJEMPLO</button>
             </div>
             
             <div id="errorDisplay" class="error-message"></div>
@@ -524,9 +405,15 @@ sprite:"ayuda":"circulo":"verde"</textarea>
                 <h3>📚 MANUAL DE COMANDOS</h3>
                 <div class="command-list">
                     <div class="command-item new-command">
-                        <div class="command-name">⌨️ INPUT (NUEVO)</div>
-                        <div class="command-example">input:"tecla"</div>
-                        <div class="command-desc">Detecta teclas A, B, C y ejecuta código asociado en tiempo real</div>
+                        <div class="command-name">🎯 POSSET (NUEVO)</div>
+                        <div class="command-example">posset:"objeto":"x":"y"</div>
+                        <div class="command-desc">Establece la posición exacta del objeto en coordenadas X e Y</div>
+                    </div>
+                    
+                    <div class="command-item new-command">
+                        <div class="command-name">⌨️ INPUT (NUEVO FORMATO)</div>
+                        <div class="command-example">input:"TECLA"<br>    comando1<br>    comando2<br>finish</div>
+                        <div class="command-desc">Define un bloque de código para una tecla (A, B, C, etc)</div>
                     </div>
                     
                     <div class="command-item">
@@ -575,11 +462,34 @@ sprite:"ayuda":"circulo":"verde"</textarea>
         let gameInitialized = false;
         let lastKey = '—';
         
-        // Códigos por tecla
-        let keyCodes = {
-            'a': '',
-            'b': '',
-            'c': ''
+        // Input handlers
+        let inputHandlers = {
+            'a': [],
+            'b': [],
+            'c': [],
+            'd': [],
+            'e': [],
+            'f': [],
+            'g': [],
+            'h': [],
+            'i': [],
+            'j': [],
+            'k': [],
+            'l': [],
+            'm': [],
+            'n': [],
+            'o': [],
+            'p': [],
+            'q': [],
+            'r': [],
+            's': [],
+            't': [],
+            'u': [],
+            'v': [],
+            'w': [],
+            'x': [],
+            'y': [],
+            'z': []
         };
         
         // Colores predefinidos
@@ -593,17 +503,6 @@ sprite:"ayuda":"circulo":"verde"</textarea>
             'blanco': '#FFFFFF',
             'negro': '#000000'
         };
-        
-        // Función para cambiar pestañas
-        function switchTab(tab) {
-            // Actualizar botones
-            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Actualizar secciones
-            document.querySelectorAll('.code-section').forEach(section => section.classList.remove('active'));
-            document.getElementById(tab + '-section').classList.add('active');
-        }
         
         // Función para dibujar en el canvas
         function drawGame() {
@@ -833,6 +732,21 @@ sprite:"ayuda":"circulo":"verde"</textarea>
                     if (gameObjects[moveObj].x > canvas.width - 30) gameObjects[moveObj].x = canvas.width - 30;
                     break;
                     
+                case 'posset':
+                    if (params.length < 3) throw new Error('posset necesita: objeto, x, y');
+                    const posObj = params[0];
+                    const newX = parseInt(params[1]);
+                    const newY = parseInt(params[2]);
+                    
+                    if (!gameObjects[posObj]) throw new Error(`Objeto "${posObj}" no encontrado`);
+                    if (gameObjects[posObj].vida <= 0) throw new Error(`Objeto "${posObj}" destruido`);
+                    if (isNaN(newX) || isNaN(newY)) throw new Error('Coordenadas deben ser números');
+                    
+                    // Limitar dentro del canvas
+                    gameObjects[posObj].x = Math.max(30, Math.min(canvas.width - 30, newX));
+                    gameObjects[posObj].y = Math.max(30, Math.min(canvas.height - 30, newY));
+                    break;
+                    
                 case 'var':
                     if (params.length < 3) throw new Error('var necesita: nombre, tipo, objeto');
                     const varName = params[0];
@@ -873,7 +787,7 @@ sprite:"ayuda":"circulo":"verde"</textarea>
                     const variable = gameVariables[setVarName];
                     let newValue;
                     
-                    // Permitir operaciones relativas (+20, -10)
+                    // Permitir operaciones relativas
                     if (setValue.startsWith('+')) {
                         newValue = variable.value + parseInt(setValue.substring(1));
                     } else if (setValue.startsWith('-')) {
@@ -912,39 +826,111 @@ sprite:"ayuda":"circulo":"verde"</textarea>
             return true;
         }
         
-        // Ejecutar código completo (setup + inputs)
-        function executeGame() {
+        // Parsear bloques de input
+        function parseInputBlocks(code) {
+            const lines = code.split('\n');
+            let i = 0;
+            let currentInput = null;
+            let currentCommands = [];
+            
+            while (i < lines.length) {
+                let line = lines[i].trim();
+                
+                if (line.startsWith('//')) {
+                    i++;
+                    continue;
+                }
+                
+                if (line.toLowerCase().startsWith('input:')) {
+                    // Guardar input anterior si existe
+                    if (currentInput) {
+                        inputHandlers[currentInput] = [...currentCommands];
+                    }
+                    
+                    // Nuevo input
+                    const params = line.substring(line.indexOf(':') + 1).split(':').map(p => 
+                        p.trim().replace(/^"|"$/g, '')
+                    );
+                    currentInput = params[0].toLowerCase();
+                    currentCommands = [];
+                }
+                else if (line.toLowerCase() === 'finish') {
+                    if (currentInput) {
+                        inputHandlers[currentInput] = [...currentCommands];
+                        currentInput = null;
+                        currentCommands = [];
+                    }
+                }
+                else if (currentInput && line !== '') {
+                    // Es parte del bloque input
+                    currentCommands.push(line);
+                }
+                
+                i++;
+            }
+            
+            // Guardar último input si no tiene finish
+            if (currentInput && currentCommands.length > 0) {
+                inputHandlers[currentInput] = [...currentCommands];
+            }
+        }
+        
+        // Ejecutar código completo
+        function executeCode() {
             // Limpiar todo el estado
             gameObjects = {};
             gameVariables = {};
             nextPosition = 50;
             
-            // Guardar códigos de input
-            keyCodes.a = document.getElementById('inputACode').value;
-            keyCodes.b = document.getElementById('inputBCode').value;
-            keyCodes.c = document.getElementById('inputCCode').value;
+            // Limpiar handlers
+            for (let key in inputHandlers) {
+                inputHandlers[key] = [];
+            }
             
-            // Ejecutar código de setup
-            const setupCode = document.getElementById('setupCode').value;
-            const lines = setupCode.split('\n');
+            const code = document.getElementById('codeEditor').value;
+            const lines = code.split('\n');
             const errorDisplay = document.getElementById('errorDisplay');
             
             errorDisplay.style.display = 'none';
             
-            for (let i = 0; i < lines.length; i++) {
-                try {
-                    processCommand(lines[i]);
-                } catch (error) {
-                    errorDisplay.textContent = `Error en setup línea ${i + 1}: ${error.message}`;
-                    errorDisplay.style.display = 'block';
-                    break;
+            // Primero parsear inputs
+            parseInputBlocks(code);
+            
+            // Ejecutar líneas que no son de input
+            let i = 0;
+            let inInputBlock = false;
+            
+            while (i < lines.length) {
+                let line = lines[i].trim();
+                
+                if (line.startsWith('//')) {
+                    i++;
+                    continue;
                 }
+                
+                if (line.toLowerCase().startsWith('input:')) {
+                    inInputBlock = true;
+                }
+                else if (line.toLowerCase() === 'finish') {
+                    inInputBlock = false;
+                }
+                else if (!inInputBlock && line !== '') {
+                    try {
+                        processCommand(line);
+                    } catch (error) {
+                        errorDisplay.textContent = `Error en línea ${i + 1}: ${error.message}`;
+                        errorDisplay.style.display = 'block';
+                        break;
+                    }
+                }
+                
+                i++;
             }
             
             gameInitialized = true;
             drawGame();
             updateLists();
-            showSuccess('✅ Juego inicializado! Presiona A, B o C');
+            showSuccess('✅ Código ejecutado! Presiona A, B, C, etc');
         }
         
         // Reiniciar todo
@@ -956,6 +942,10 @@ sprite:"ayuda":"circulo":"verde"</textarea>
             lastKey = '—';
             document.getElementById('lastKeyDisplay').textContent = lastKey;
             
+            for (let key in inputHandlers) {
+                inputHandlers[key] = [];
+            }
+            
             drawGame();
             updateLists();
             showSuccess('🔄 Todo reiniciado');
@@ -964,28 +954,24 @@ sprite:"ayuda":"circulo":"verde"</textarea>
         // Ejecutar input por tecla
         function executeInput(tecla) {
             if (!gameInitialized) {
-                showError('❌ Primero ejecuta el SETUP');
+                showError('❌ Primero ejecuta el código');
                 return;
             }
             
-            let code = '';
-            if (tecla === 'a') code = keyCodes.a;
-            else if (tecla === 'b') code = keyCodes.b;
-            else if (tecla === 'c') code = keyCodes.c;
+            const commands = inputHandlers[tecla] || [];
             
-            if (!code || code.trim() === '') {
+            if (commands.length === 0) {
                 showError(`⚠️ No hay código para tecla ${tecla.toUpperCase()}`);
                 return;
             }
             
-            const lines = code.split('\n');
             const errorDisplay = document.getElementById('errorDisplay');
             
-            for (let i = 0; i < lines.length; i++) {
+            for (let i = 0; i < commands.length; i++) {
                 try {
-                    processCommand(lines[i], true);
+                    processCommand(commands[i], true);
                 } catch (error) {
-                    errorDisplay.textContent = `Error en tecla ${tecla.toUpperCase()} línea ${i + 1}: ${error.message}`;
+                    errorDisplay.textContent = `Error en tecla ${tecla.toUpperCase()}: ${error.message}`;
                     errorDisplay.style.display = 'block';
                     break;
                 }
@@ -999,7 +985,7 @@ sprite:"ayuda":"circulo":"verde"</textarea>
         document.addEventListener('keydown', function(e) {
             const key = e.key.toLowerCase();
             
-            if (key === 'a' || key === 'b' || key === 'c') {
+            if (key.match(/[a-z]/)) {
                 e.preventDefault();
                 lastKey = key.toUpperCase();
                 document.getElementById('lastKeyDisplay').textContent = lastKey;
@@ -1009,38 +995,48 @@ sprite:"ayuda":"circulo":"verde"</textarea>
         
         // Añadir ejemplo completo
         function addExample() {
-            document.getElementById('setupCode').value = 
-                '// 🎮 SETUP - Creación de personajes\n' +
+            document.getElementById('codeEditor').value = 
+                '// 🎮 SISTEMA DE INPUTS MEJORADO\n' +
+                '// ----------------------------------------\n\n' +
+                '// DEFINICIÓN DE INPUTS\n' +
+                'input:"A"\n' +
+                '    // Mover héroe izquierda\n' +
+                '    mover:"heroe":"-30"\n' +
+                '    // Ataque suave\n' +
+                '    varset:"vida_enemigo":"-10"\n' +
+                'finish\n\n' +
+                'input:"B"\n' +
+                '    // Mover héroe derecha\n' +
+                '    mover:"heroe":"30"\n' +
+                '    // Ataque fuerte\n' +
+                '    varset:"vida_enemigo":"-25"\n' +
+                'finish\n\n' +
+                'input:"C"\n' +
+                '    // Curar héroe\n' +
+                '    varset:"vida_heroe":"+20"\n' +
+                '    // Crear ayuda\n' +
+                '    crearobjeto:"ayuda"\n' +
+                '    sprite:"ayuda":"circulo":"verde"\n' +
+                '    posset:"ayuda":"200":"150"\n' +
+                'finish\n\n' +
+                'input:"D"\n' +
+                '    // Teletransportar\n' +
+                '    posset:"heroe":"350":"200"\n' +
+                '    varset:"vida_enemigo":"-50"\n' +
+                'finish\n\n' +
+                '// ----------------------------------------\n' +
+                '// CÓDIGO PRINCIPAL\n' +
                 'crearobjeto:"heroe"\n' +
                 'sprite:"heroe":"circulo":"azul"\n' +
                 'var:"vida_heroe":"Vida":"heroe"\n\n' +
                 'crearobjeto:"enemigo"\n' +
                 'sprite:"enemigo":"cubo":"rojo"\n' +
                 'var:"vida_enemigo":"Vida":"enemigo"\n\n' +
-                'crearobjeto:"aliado"\n' +
-                'sprite:"aliado":"circulo":"verde"\n' +
-                'var:"vida_aliado":"Vida":"aliado"';
+                '// Posicionar objetos\n' +
+                'posset:"heroe":"100":"200"\n' +
+                'posset:"enemigo":"500":"200"';
             
-            document.getElementById('inputACode').value = 
-                '// ⌨️ TECLA A - Movimiento izquierda\n' +
-                'mover:"heroe":"-30"\n' +
-                'mover:"aliado":"-20"\n' +
-                'varset:"vida_enemigo":"-5"';
-            
-            document.getElementById('inputBCode').value = 
-                '// ⌨️ TECLA B - Movimiento derecha\n' +
-                'mover:"heroe":"30"\n' +
-                'mover:"aliado":"20"\n' +
-                'varset:"vida_enemigo":"-15"';
-            
-            document.getElementById('inputCCode').value = 
-                '// ⌨️ TECLA C - Curar y crear\n' +
-                'varset:"vida_heroe":"+15"\n' +
-                'varset:"vida_aliado":"+10"\n' +
-                'crearobjeto:"ayuda"\n' +
-                'sprite:"ayuda":"circulo":"amarillo"';
-            
-            showSuccess('📋 Ejemplo cargado! Ejecuta SETUP primero');
+            showSuccess('📋 Ejemplo cargado!');
         }
         
         // Inicializar
@@ -1048,17 +1044,16 @@ sprite:"ayuda":"circulo":"verde"</textarea>
             resetGame();
             
             // Event listener para Ctrl+Enter
-            document.getElementById('setupCode').addEventListener('keydown', function(e) {
+            document.getElementById('codeEditor').addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     e.preventDefault();
-                    executeGame();
+                    executeCode();
                 }
             });
         };
         
         // Hacer funciones globales
-        window.switchTab = switchTab;
-        window.executeGame = executeGame;
+        window.executeCode = executeCode;
         window.resetGame = resetGame;
         window.addExample = addExample;
     </script>
