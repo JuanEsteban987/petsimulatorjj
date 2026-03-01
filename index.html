@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>BlockPlay - Editor de Sprite + Bloques estilo Scratch</title>
+    <title>BlockPlay - Editor de Sprite + Bloques (Emoji Gato)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -174,7 +174,17 @@
             max-width: 600px;
             height: auto;
             aspect-ratio: 1/1;
-            image-rendering: pixelated;
+            font-size: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cat-emoji {
+            font-size: 120px;
+            line-height: 1;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+            transform-origin: center center;
+            transition: transform 0.1s;
         }
         .info-panel {
             margin-top: 20px;
@@ -210,16 +220,31 @@
             text-align: center;
             border: 1px solid #4a4a6a;
         }
+        .execution-log {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 200px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
     </style>
     <!-- Cargar Blockly desde CDN -->
     <script src="https://unpkg.com/blockly/blockly.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>🎨 BlockPlay · Editor de Sprite + Bloques</h1>
+        <h1>🐱 BlockPlay · Editor de Sprite + Bloques</h1>
         <button class="btn primary" id="runButton">▶ Ejecutar programa</button>
         <button class="btn" id="resetButton">↺ Reiniciar gato</button>
         <button class="btn danger" id="clearButton">🗑 Limpiar bloques</button>
+        <button class="btn" id="stopButton">⏹️ Detener</button>
     </header>
     <div class="main-container">
         <div class="left-panel">
@@ -243,7 +268,7 @@
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: center;">
                     <button class="btn" id="clearSprite">Limpiar Sprite</button>
-                    <button class="btn primary" id="loadDefault">Gato por defecto</button>
+                    <button class="btn primary" id="loadDefault">Gato Emoji</button>
                 </div>
             </div>
             <div class="blockly-area">
@@ -252,12 +277,14 @@
             </div>
         </div>
         <div class="canvas-area">
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div id="gameCanvas">
+                <div id="catEmoji" class="cat-emoji" style="transform: translate(0px, 0px) rotate(0deg);">🐱</div>
+            </div>
             <div class="info-panel">
                 <div class="info-item">
                     <span class="info-label">🐱 Posición:</span>
-                    <span class="info-value" id="posX">200</span>
-                    <span class="info-value" id="posY">200</span>
+                    <span class="info-value" id="posX">0</span>
+                    <span class="info-value" id="posY">0</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">↻ Dirección:</span>
@@ -268,6 +295,7 @@
                     <span class="info-value" id="messageBox"></span>
                 </div>
             </div>
+            <div id="executionLog" class="execution-log"></div>
         </div>
     </div>
 
@@ -309,16 +337,27 @@
             <block type="go_to">
                 <value name="X">
                     <shadow type="math_number">
-                        <field name="NUM">200</field>
+                        <field name="NUM">0</field>
                     </shadow>
                 </value>
                 <value name="Y">
                     <shadow type="math_number">
-                        <field name="NUM">200</field>
+                        <field name="NUM">0</field>
                     </shadow>
                 </value>
             </block>
-            <block type="point_towards"></block>
+            <block type="point_towards">
+                <value name="X">
+                    <shadow type="math_number">
+                        <field name="NUM">0</field>
+                    </shadow>
+                </value>
+                <value name="Y">
+                    <shadow type="math_number">
+                        <field name="NUM">0</field>
+                    </shadow>
+                </value>
+            </block>
         </category>
         <category name="Apariencia" colour="#9C27B0">
             <block type="say">
@@ -335,6 +374,13 @@
                     </shadow>
                 </value>
             </block>
+            <block type="set_emoji">
+                <value name="EMOJI">
+                    <shadow type="text">
+                        <field name="TEXT">🐱</field>
+                    </shadow>
+                </value>
+            </block>
             <block type="set_color">
                 <value name="COLOR">
                     <shadow type="colour_picker">
@@ -345,7 +391,7 @@
             <block type="change_size">
                 <value name="SIZE">
                     <shadow type="math_number">
-                        <field name="NUM">10</field>
+                        <field name="NUM">120</field>
                     </shadow>
                 </value>
             </block>
@@ -365,65 +411,91 @@
             <block type="wait">
                 <value name="SECONDS">
                     <shadow type="math_number">
-                        <field name="NUM">1</field>
+                        <field name="NUM">0.5</field>
                     </shadow>
                 </value>
             </block>
-            <block type="if_then"></block>
+            <block type="if_then">
+                <value name="CONDITION">
+                    <shadow type="logic_boolean">
+                        <field name="BOOL">TRUE</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="if_then_else"></block>
         </category>
         <category name="Operadores" colour="#607D8B">
             <block type="math_number"></block>
             <block type="text"></block>
             <block type="colour_picker"></block>
-            <block type="math_arithmetic"></block>
+            <block type="math_arithmetic">
+                <value name="A">
+                    <shadow type="math_number">
+                        <field name="NUM">5</field>
+                    </shadow>
+                </value>
+                <value name="B">
+                    <shadow type="math_number">
+                        <field name="NUM">3</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="logic_compare"></block>
+            <block type="logic_boolean"></block>
         </category>
     </xml>
 
     <script>
         // ---------- Configuración del gato ----------
         let cat = {
-            x: 200,
-            y: 200,
+            x: 0,
+            y: 0,
             angle: 0,
             sayText: '',
             sayTimer: null,
             thinkText: '',
             thinkTimer: null,
+            emoji: '🐱',
             color: '#FF6B6B',
-            size: 20
+            size: 120
         };
 
-        // Sprite personalizado (16x16 píxeles)
-        let spriteData = new Array(16 * 16).fill('#2C3E50'); // Color por defecto (fondo)
-        
-        // Sprite por defecto (gato pixel art)
-        const defaultSprite = [
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FFFFFF', '#FFFFFF', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FFFFFF', '#FFFFFF', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FFFFFF', '#FFFFFF', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FFFFFF', '#FFFFFF', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#FF6B6B', '#FF6B6B', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50',
-            '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50', '#2C3E50'
-        ];
+        let isRunning = false;
+        let stopExecution = false;
+        let executionLog = [];
 
+        // Elementos del DOM
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const catEmoji = document.getElementById('catEmoji');
         const posXSpan = document.getElementById('posX');
         const posYSpan = document.getElementById('posY');
         const angleSpan = document.getElementById('angle');
         const messageBox = document.getElementById('messageBox');
+        const executionLogDiv = document.getElementById('executionLog');
         const previewCanvas = document.getElementById('previewCanvas');
         const previewCtx = previewCanvas.getContext('2d');
+
+        // Sprite personalizado (16x16 píxeles)
+        let spriteData = new Array(16 * 16).fill('#2C3E50');
+        
+        // Sprite por defecto (gato pixel art simple)
+        const defaultSprite = new Array(256).fill('#2C3E50');
+        // Dibujar un gato simple en el sprite
+        for (let y = 4; y <= 11; y++) {
+            for (let x = 4; x <= 11; x++) {
+                if ((x === 4 || x === 11) && (y >= 5 && y <= 10)) continue;
+                if ((y === 4 || y === 11) && (x >= 5 && x <= 10)) continue;
+                if (x >= 5 && x <= 10 && y >= 5 && y <= 10) {
+                    if ((x === 6 || x === 9) && (y === 6 || y === 7)) {
+                        defaultSprite[y * 16 + x] = '#FFFFFF'; // Ojos
+                    } else if (x === 7 && y === 8) {
+                        defaultSprite[y * 16 + x] = '#FF6B6B'; // Nariz
+                    } else {
+                        defaultSprite[y * 16 + x] = '#FFB347'; // Cuerpo naranja
+                    }
+                }
+            }
+        }
 
         let selectedColor = '#FF6B6B';
         let isDrawing = false;
@@ -464,7 +536,6 @@
                 previewCtx.fillStyle = spriteData[i];
                 previewCtx.fillRect(x, y, 1, 1);
             }
-            drawCat(); // Redibujar el gato con el nuevo sprite
         }
 
         // Cargar sprite por defecto
@@ -499,76 +570,21 @@
         });
         document.querySelector('.color-btn').classList.add('selected');
 
-        // Dibujar el gato con el sprite personalizado
-        function drawCat() {
-            ctx.clearRect(0, 0, 400, 400);
-
-            // Fondo cuadrícula
-            ctx.fillStyle = '#2d2d44';
-            ctx.fillRect(0, 0, 400, 400);
-            ctx.strokeStyle = '#4a4a6a';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i <= 400; i += 20) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#3d3d5a';
-                ctx.lineWidth = 0.5;
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, 400);
-                ctx.stroke();
-                ctx.moveTo(0, i);
-                ctx.lineTo(400, i);
-                ctx.stroke();
-            }
-
-            // Dibujar sprite pixel art
-            const size = cat.size * 2; // Escalar el sprite
-            const startX = cat.x - 16;
-            const startY = cat.y - 16;
-
-            for (let i = 0; i < 256; i++) {
-                const px = i % 16;
-                const py = Math.floor(i / 16);
-                ctx.fillStyle = spriteData[i];
-                ctx.fillRect(startX + px * 2, startY + py * 2, 2, 2);
-            }
-
-            // Dirección (línea)
-            ctx.beginPath();
-            ctx.strokeStyle = '#ffcc00';
-            ctx.lineWidth = 2;
-            ctx.moveTo(cat.x, cat.y);
-            const rad = cat.angle * Math.PI / 180;
-            ctx.lineTo(cat.x + Math.cos(rad) * 30, cat.y - Math.sin(rad) * 30);
-            ctx.stroke();
-
-            // Mensajes
-            if (cat.sayText) {
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.ellipse(cat.x + 30, cat.y - 30, 50, 25, 0, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText(cat.sayText, cat.x + 10, cat.y - 35);
-            }
-
-            if (cat.thinkText) {
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.ellipse(cat.x + 30, cat.y - 30, 50, 25, 0, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText('💭 ' + cat.thinkText, cat.x + 10, cat.y - 35);
-            }
-
-            // Actualizar info
+        // Función para actualizar la posición del emoji
+        function updateCatPosition() {
+            // El canvas es de 600x600, centramos el emoji
+            const canvasRect = canvas.getBoundingClientRect();
+            const centerX = canvasRect.width / 2;
+            const centerY = canvasRect.height / 2;
+            
+            // Convertir coordenadas del gato (rango -300 a 300) a píxeles
+            const pixelX = centerX + cat.x;
+            const pixelY = centerY + cat.y;
+            
+            catEmoji.style.transform = `translate(${pixelX - 60}px, ${pixelY - 60}px) rotate(${cat.angle}deg)`;
+            catEmoji.style.color = cat.color;
+            catEmoji.style.fontSize = cat.size + 'px';
+            
             posXSpan.textContent = Math.round(cat.x);
             posYSpan.textContent = Math.round(cat.y);
             angleSpan.textContent = cat.angle;
@@ -576,75 +592,114 @@
         }
 
         // ---------- API de acciones ----------
-        function mover(pasos) {
+        function log(message) {
+            executionLog.push(message);
+            if (executionLog.length > 5) executionLog.shift();
+            executionLogDiv.innerHTML = executionLog.join('<br>');
+        }
+
+        async function mover(pasos) {
+            if (stopExecution) return;
             let rad = cat.angle * Math.PI / 180;
             cat.x += Math.cos(rad) * pasos;
             cat.y -= Math.sin(rad) * pasos;
-            cat.x = Math.min(380, Math.max(20, cat.x));
-            cat.y = Math.min(380, Math.max(20, cat.y));
-            drawCat();
+            // Limitar dentro del canvas (rango -250 a 250 para mantener dentro del canvas)
+            cat.x = Math.min(250, Math.max(-250, cat.x));
+            cat.y = Math.min(250, Math.max(-250, cat.y));
+            updateCatPosition();
+            log(`🚶 Mover ${pasos} pasos`);
+            await sleep(100);
         }
 
-        function moverAtras(pasos) {
-            mover(-pasos);
+        async function moverAtras(pasos) {
+            await mover(-pasos);
         }
 
-        function girar(grados) {
+        async function girar(grados) {
+            if (stopExecution) return;
             cat.angle = (cat.angle + grados) % 360;
-            drawCat();
+            updateCatPosition();
+            log(`↻ Girar ${grados}°`);
+            await sleep(100);
         }
 
-        function girarIzquierda(grados) {
-            girar(-grados);
+        async function girarIzquierda(grados) {
+            await girar(-grados);
         }
 
-        function irA(x, y) {
-            cat.x = Math.min(380, Math.max(20, Number(x) || 200));
-            cat.y = Math.min(380, Math.max(20, Number(y) || 200));
-            drawCat();
+        async function irA(x, y) {
+            if (stopExecution) return;
+            cat.x = Math.min(250, Math.max(-250, Number(x) || 0));
+            cat.y = Math.min(250, Math.max(-250, Number(y) || 0));
+            updateCatPosition();
+            log(`🎯 Ir a (${x}, ${y})`);
+            await sleep(100);
         }
 
-        function apuntarHacia(x, y) {
+        async function apuntarHacia(x, y) {
+            if (stopExecution) return;
             let dx = x - cat.x;
-            let dy = cat.y - y; // Invertido por coordenadas canvas
+            let dy = cat.y - y;
             cat.angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            drawCat();
+            updateCatPosition();
+            log(`🧭 Apuntar hacia (${x}, ${y})`);
+            await sleep(100);
         }
 
-        function decir(texto) {
+        async function decir(texto) {
+            if (stopExecution) return;
             if (cat.sayTimer) clearTimeout(cat.sayTimer);
             cat.sayText = String(texto);
             cat.thinkText = '';
-            drawCat();
+            messageBox.textContent = cat.sayText;
+            log(`💬 Decir: "${texto}"`);
             cat.sayTimer = setTimeout(() => {
                 cat.sayText = '';
-                drawCat();
+                messageBox.textContent = '(vacío)';
             }, 1500);
+            await sleep(100);
         }
 
-        function pensar(texto) {
+        async function pensar(texto) {
+            if (stopExecution) return;
             if (cat.thinkTimer) clearTimeout(cat.thinkTimer);
             cat.thinkText = String(texto);
             cat.sayText = '';
-            drawCat();
+            messageBox.textContent = cat.thinkText;
+            log(`🤔 Pensar: "${texto}"`);
             cat.thinkTimer = setTimeout(() => {
                 cat.thinkText = '';
-                drawCat();
+                messageBox.textContent = '(vacío)';
             }, 1500);
+            await sleep(100);
         }
 
-        function cambiarColor(color) {
+        async function cambiarEmoji(emoji) {
+            if (stopExecution) return;
+            cat.emoji = String(emoji);
+            catEmoji.textContent = cat.emoji;
+            log(`😺 Cambiar emoji a: ${emoji}`);
+            await sleep(100);
+        }
+
+        async function cambiarColor(color) {
+            if (stopExecution) return;
             cat.color = color;
-            drawCat();
+            updateCatPosition();
+            log(`🎨 Cambiar color a ${color}`);
+            await sleep(100);
         }
 
-        function cambiarSize(size) {
-            cat.size = Math.min(40, Math.max(10, Number(size) || 20));
-            drawCat();
+        async function cambiarSize(size) {
+            if (stopExecution) return;
+            cat.size = Math.min(200, Math.max(40, Number(size) || 120));
+            updateCatPosition();
+            log(`🔍 Cambiar tamaño a ${cat.size}px`);
+            await sleep(100);
         }
 
         function playSound() {
-            // Simular sonido con beep
+            if (stopExecution) return;
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
@@ -654,31 +709,49 @@
             gainNode.gain.value = 0.1;
             oscillator.start();
             oscillator.stop(audioCtx.currentTime + 0.1);
+            log(`🔊 Reproducir sonido`);
         }
 
         function beep() {
+            if (stopExecution) return;
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioCtx.createOscillator();
             oscillator.connect(audioCtx.destination);
             oscillator.frequency.value = 880;
             oscillator.start();
             oscillator.stop(audioCtx.currentTime + 0.05);
+            log(`📢 Beep!`);
         }
 
-        function wait(seconds) {
-            return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function wait(seconds) {
+            if (stopExecution) return;
+            log(`⏱️ Esperar ${seconds} segundos`);
+            await sleep(seconds * 1000);
         }
 
         function resetCat() {
-            cat.x = 200;
-            cat.y = 200;
+            stopExecution = true;
+            isRunning = false;
+            cat.x = 0;
+            cat.y = 0;
             cat.angle = 0;
-            cat.size = 20;
+            cat.size = 120;
+            cat.emoji = '🐱';
+            cat.color = '#FF6B6B';
             if (cat.sayTimer) clearTimeout(cat.sayTimer);
             if (cat.thinkTimer) clearTimeout(cat.thinkTimer);
             cat.sayText = '';
             cat.thinkText = '';
-            drawCat();
+            catEmoji.textContent = cat.emoji;
+            catEmoji.style.color = cat.color;
+            updateCatPosition();
+            executionLog = [];
+            executionLogDiv.innerHTML = '';
+            log('🔄 Reiniciado');
         }
 
         // ---------- Definición de bloques Blockly ----------
@@ -696,7 +769,18 @@
             init: function() {
                 this.appendDummyInput()
                     .appendField('⌨️ al presionar tecla')
-                    .appendField(new Blockly.FieldDropdown([['espacio', 'Space'], ['flecha arriba', 'ArrowUp'], ['flecha abajo', 'ArrowDown'], ['flecha izquierda', 'ArrowLeft'], ['flecha derecha', 'ArrowRight'], ['a', 'KeyA'], ['b', 'KeyB']]), 'KEY');
+                    .appendField(new Blockly.FieldDropdown([
+                        ['espacio', 'Space'],
+                        ['flecha arriba', 'ArrowUp'],
+                        ['flecha abajo', 'ArrowDown'],
+                        ['flecha izquierda', 'ArrowLeft'],
+                        ['flecha derecha', 'ArrowRight'],
+                        ['a', 'KeyA'],
+                        ['b', 'KeyB'],
+                        ['c', 'KeyC'],
+                        ['1', 'Digit1'],
+                        ['2', 'Digit2']
+                    ]), 'KEY');
                 this.appendStatementInput('DO').setCheck(null);
                 this.setColour('#FFC107');
                 this.setPreviousStatement(false);
@@ -786,6 +870,16 @@
             }
         };
 
+        Blockly.Blocks['set_emoji'] = {
+            init: function() {
+                this.appendDummyInput().appendField('😺 cambiar emoji a');
+                this.appendValueInput('EMOJI').setCheck('String').appendField('');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#9C27B0');
+            }
+        };
+
         Blockly.Blocks['set_color'] = {
             init: function() {
                 this.appendDummyInput().appendField('🎨 cambiar color a');
@@ -799,7 +893,7 @@
         Blockly.Blocks['change_size'] = {
             init: function() {
                 this.appendDummyInput().appendField('🔍 cambiar tamaño a');
-                this.appendValueInput('SIZE').setCheck('Number').appendField('');
+                this.appendValueInput('SIZE').setCheck('Number').appendField('px');
                 this.setPreviousStatement(true);
                 this.setNextStatement(true);
                 this.setColour('#9C27B0');
@@ -848,8 +942,20 @@
         Blockly.Blocks['if_then'] = {
             init: function() {
                 this.appendDummyInput().appendField('🔀 si');
-                this.appendValueInput('CONDITION').setCheck('Boolean').appendField('condición');
+                this.appendValueInput('CONDITION').setCheck('Boolean').appendField('');
                 this.appendStatementInput('DO').setCheck(null).appendField('entonces');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#FF5722');
+            }
+        };
+
+        Blockly.Blocks['if_then_else'] = {
+            init: function() {
+                this.appendDummyInput().appendField('🔀 si');
+                this.appendValueInput('CONDITION').setCheck('Boolean').appendField('');
+                this.appendStatementInput('DO').setCheck(null).appendField('entonces');
+                this.appendStatementInput('ELSE').setCheck(null).appendField('si no');
                 this.setPreviousStatement(true);
                 this.setNextStatement(true);
                 this.setColour('#FF5722');
@@ -859,16 +965,16 @@
         // Generadores de código
         Blockly.JavaScript['when_flag_clicked'] = function(block) {
             let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return '(function() {\n' + statements + '})();\n';
+            return statements;
         };
 
         Blockly.JavaScript['when_key_pressed'] = function(block) {
             let key = block.getFieldValue('KEY');
             let statements = Blockly.JavaScript.statementToCode(block, 'DO');
             return `
-                document.addEventListener('keydown', function(e) {
-                    if(e.code === '${key}') {
-                        (function() { ${statements} })();
+                window.addEventListener('keydown', function(e) {
+                    if(e.code === '${key}' && isRunning) {
+                        (async function() { ${statements} })();
                     }
                 });
             `;
@@ -876,54 +982,59 @@
 
         Blockly.JavaScript['move_forward'] = function(block) {
             let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
-            return 'mover(' + steps + ');\n';
+            return 'await mover(' + steps + ');\n';
         };
 
         Blockly.JavaScript['move_backward'] = function(block) {
             let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
-            return 'moverAtras(' + steps + ');\n';
+            return 'await moverAtras(' + steps + ');\n';
         };
 
         Blockly.JavaScript['turn_right'] = function(block) {
             let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
-            return 'girar(' + degrees + ');\n';
+            return 'await girar(' + degrees + ');\n';
         };
 
         Blockly.JavaScript['turn_left'] = function(block) {
             let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
-            return 'girarIzquierda(' + degrees + ');\n';
+            return 'await girarIzquierda(' + degrees + ');\n';
         };
 
         Blockly.JavaScript['go_to'] = function(block) {
-            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '200';
-            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '200';
-            return 'irA(' + x + ', ' + y + ');\n';
+            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '0';
+            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '0';
+            return 'await irA(' + x + ', ' + y + ');\n';
         };
 
         Blockly.JavaScript['point_towards'] = function(block) {
-            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '200';
-            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '200';
-            return 'apuntarHacia(' + x + ', ' + y + ');\n';
+            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '0';
+            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '0';
+            return 'await apuntarHacia(' + x + ', ' + y + ');\n';
         };
 
         Blockly.JavaScript['say'] = function(block) {
             let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'Hola'";
-            return 'decir(' + message + ');\n';
+            return 'await decir(' + message + ');\n';
         };
 
         Blockly.JavaScript['think'] = function(block) {
             let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'...'";
-            return 'pensar(' + message + ');\n';
+            return 'await pensar(' + message + ');\n';
+        };
+
+        Blockly.JavaScript['set_emoji'] = function(block) {
+            let emoji = Blockly.JavaScript.valueToCode(block, 'EMOJI', Blockly.JavaScript.ORDER_NONE) || "'🐱'";
+            return 'await cambiarEmoji(' + emoji + ');\n';
         };
 
         Blockly.JavaScript['set_color'] = function(block) {
             let color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_NONE) || "'#FF6B6B'";
-            return 'cambiarColor(' + color + ');\n';
+            return 'await cambiarColor(' + color + ');\n';
         };
 
         Blockly.JavaScript['change_size'] = function(block) {
-            let size = Blockly.JavaScript.valueToCode(block, 'SIZE', Blockly.JavaScript.ORDER_NONE) || '20';
-            return 'cambiarSize(' + size + ');\n';
+            let size = Blockly.JavaScript.valueToCode(block, 'SIZE', Blockly.JavaScript.ORDER_NONE) || '120';
+            return 'await cambiarSize(' + size + ');\n';
         };
 
         Blockly.JavaScript['play_sound'] = function(block) {
@@ -937,11 +1048,11 @@
         Blockly.JavaScript['repeat'] = function(block) {
             let times = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '10';
             let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return 'for (var i__ = 0; i__ < ' + times + '; i__++) {\n' + statements + '}\n';
+            return 'for (let i__ = 0; i__ < ' + times + '; i__++) {\n' + statements + '}\n';
         };
 
         Blockly.JavaScript['wait'] = function(block) {
-            let seconds = Blockly.JavaScript.valueToCode(block, 'SECONDS', Blockly.JavaScript.ORDER_NONE) || '1';
+            let seconds = Blockly.JavaScript.valueToCode(block, 'SECONDS', Blockly.JavaScript.ORDER_NONE) || '0.5';
             return 'await wait(' + seconds + ');\n';
         };
 
@@ -949,6 +1060,13 @@
             let condition = Blockly.JavaScript.valueToCode(block, 'CONDITION', Blockly.JavaScript.ORDER_NONE) || 'true';
             let statements = Blockly.JavaScript.statementToCode(block, 'DO');
             return 'if (' + condition + ') {\n' + statements + '}\n';
+        };
+
+        Blockly.JavaScript['if_then_else'] = function(block) {
+            let condition = Blockly.JavaScript.valueToCode(block, 'CONDITION', Blockly.JavaScript.ORDER_NONE) || 'true';
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            let elseStatements = Blockly.JavaScript.statementToCode(block, 'ELSE');
+            return 'if (' + condition + ') {\n' + statements + '} else {\n' + elseStatements + '}\n';
         };
 
         // Inicializar Blockly
@@ -964,43 +1082,143 @@
             media: 'https://unpkg.com/blockly/media/'
         });
 
-        // Bloques iniciales
+        // Bloques iniciales con un ejemplo funcional
         Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(
             '<xml>' +
-            '<block type="when_flag_clicked" x="20" y="20"></block>' +
-            '<block type="when_key_pressed" x="20" y="120"></block>' +
+            '<block type="when_flag_clicked" x="20" y="20">' +
+            '  <statement name="DO">' +
+            '    <block type="repeat">' +
+            '      <value name="TIMES">' +
+            '        <shadow type="math_number">' +
+            '          <field name="NUM">4</field>' +
+            '        </shadow>' +
+            '      </value>' +
+            '      <statement name="DO">' +
+            '        <block type="move_forward">' +
+            '          <value name="STEPS">' +
+            '            <shadow type="math_number">' +
+            '              <field name="NUM">50</field>' +
+            '            </shadow>' +
+            '          </value>' +
+            '          <next>' +
+            '            <block type="say">' +
+            '              <value name="MESSAGE">' +
+            '                <shadow type="text">' +
+            '                  <field name="TEXT">¡Miau!</field>' +
+            '                </shadow>' +
+            '              </value>' +
+            '              <next>' +
+            '                <block type="wait">' +
+            '                  <value name="SECONDS">' +
+            '                    <shadow type="math_number">' +
+            '                      <field name="NUM">0.3</field>' +
+            '                    </shadow>' +
+            '                  </value>' +
+            '                  <next>' +
+            '                    <block type="turn_right">' +
+            '                      <value name="DEGREES">' +
+            '                        <shadow type="math_number">' +
+            '                          <field name="NUM">90</field>' +
+            '                        </shadow>' +
+            '                      </value>' +
+            '                    </block>' +
+            '                  </next>' +
+            '                </block>' +
+            '              </next>' +
+            '            </block>' +
+            '          </next>' +
+            '        </block>' +
+            '      </statement>' +
+            '    </block>' +
+            '  </statement>' +
+            '</block>' +
+            '<block type="when_key_pressed" x="20" y="280">' +
+            '  <field name="KEY">Space</field>' +
+            '  <statement name="DO">' +
+            '    <block type="set_emoji">' +
+            '      <value name="EMOJI">' +
+            '        <shadow type="text">' +
+            '          <field name="TEXT">😺</field>' +
+            '        </shadow>' +
+            '      </value>' +
+            '      <next>' +
+            '        <block type="play_sound"></block>' +
+            '      </next>' +
+            '    </block>' +
+            '  </statement>' +
+            '</block>' +
             '</xml>'
         ), workspace);
 
         // Botones
         document.getElementById('runButton').addEventListener('click', async function() {
+            if (isRunning) {
+                log('⏸️ Ya está en ejecución');
+                return;
+            }
+            
+            stopExecution = false;
+            isRunning = true;
+            
             let code = Blockly.JavaScript.workspaceToCode(workspace);
             console.log("Código generado:\n", code);
+            
             try {
-                // Hacer que async/await funcione
-                let func = new Function('mover', 'moverAtras', 'girar', 'girarIzquierda', 'irA', 'apuntarHacia', 'decir', 'pensar', 'cambiarColor', 'cambiarSize', 'playSound', 'beep', 'wait', `
-                    return (async function() {
-                        ${code}
-                    })();
-                `);
-                await func(mover, moverAtras, girar, girarIzquierda, irA, apuntarHacia, decir, pensar, cambiarColor, cambiarSize, playSound, beep, wait);
+                // Buscar el bloque de bandera y ejecutar solo ese
+                const flagCode = code.split('\n').filter(line => line.includes('when_flag_clicked')).join('\n');
+                if (flagCode) {
+                    // Crear función async con todas las dependencias
+                    let func = new Function('mover', 'moverAtras', 'girar', 'girarIzquierda', 'irA', 'apuntarHacia', 'decir', 'pensar', 'cambiarEmoji', 'cambiarColor', 'cambiarSize', 'playSound', 'beep', 'wait', 'isRunning', 'stopExecution', 'log', `
+                        return (async function() {
+                            ${code}
+                        })();
+                    `);
+                    
+                    await func(mover, moverAtras, girar, girarIzquierda, irA, apuntarHacia, decir, pensar, cambiarEmoji, cambiarColor, cambiarSize, playSound, beep, wait, isRunning, stopExecution, log);
+                } else {
+                    log('⚠️ No hay bloque de bandera');
+                }
             } catch (e) {
-                alert("Error al ejecutar los bloques: " + e.message);
+                console.error("Error:", e);
+                log('❌ Error: ' + e.message);
+            } finally {
+                isRunning = false;
             }
         });
 
+        document.getElementById('stopButton').addEventListener('click', function() {
+            stopExecution = true;
+            isRunning = false;
+            log('⏹️ Ejecución detenida');
+        });
+
         document.getElementById('resetButton').addEventListener('click', resetCat);
+        
         document.getElementById('clearButton').addEventListener('click', function() {
             workspace.clear();
             resetCat();
+            // Agregar bloques de ejemplo nuevamente
+            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(
+                '<xml>' +
+                '<block type="when_flag_clicked" x="20" y="20"></block>' +
+                '<block type="when_key_pressed" x="20" y="120"></block>' +
+                '</xml>'
+            ), workspace);
         });
 
         // Inicializar
         createPixelGrid();
         loadDefaultSprite();
         resetCat();
+        
+        // Hacer que el canvas sea responsivo
+        window.addEventListener('resize', () => {
+            Blockly.svgResize(workspace);
+            updateCatPosition();
+        });
 
-        window.addEventListener('resize', () => Blockly.svgResize(workspace));
+        // Asegurar que el emoji se actualice al cargar
+        setTimeout(updateCatPosition, 100);
     </script>
 </body>
 </html>
