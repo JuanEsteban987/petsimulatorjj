@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Sistema de Variables y Vida</title>
+    <title>Juego de Programación - Sistema de Input por Tecla</title>
     <style>
         * {
             box-sizing: border-box;
@@ -43,7 +43,6 @@
             border-radius: 8px;
             display: block;
             border: 3px solid #2d3445;
-            cursor: crosshair;
         }
         
         /* Panel derecho - Control y código */
@@ -56,6 +55,43 @@
             color: #fff;
             overflow-y: auto;
             max-height: 600px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #2d3445;
+            padding-bottom: 5px;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            background: #1e2433;
+            border: none;
+            color: #9aa5b8;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            background: #4fa3e3;
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #2d3445;
+            color: white;
+        }
+        
+        .code-section {
+            display: none;
+        }
+        
+        .code-section.active {
+            display: block;
         }
         
         .code-input {
@@ -79,6 +115,51 @@
         textarea:focus {
             outline: none;
             border-color: #4fa3e3;
+        }
+        
+        .input-config {
+            background: #1e2433;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 3px solid #2d3445;
+        }
+        
+        .input-config h4 {
+            margin: 0 0 10px 0;
+            color: #ffb86b;
+            font-size: 14px;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: #0f1219;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .key-badge {
+            background: #4fa3e3;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .key-description {
+            flex: 1;
+            color: #b4e1fd;
+            font-size: 12px;
+        }
+        
+        .key-status {
+            color: #6bbf6b;
+            font-size: 12px;
         }
         
         .button-group {
@@ -128,7 +209,6 @@
             background: #e06f6f;
         }
         
-        /* Manual de comandos */
         .manual {
             background: #1e2433;
             border-radius: 8px;
@@ -187,10 +267,6 @@
             background: #1a1e2a;
         }
         
-        .new-command .command-name {
-            color: #ffb86b;
-        }
-        
         .object-list, .variable-list {
             margin-top: 15px;
             background: #0f1219;
@@ -227,11 +303,6 @@
             border-left: 3px solid transparent;
         }
         
-        .object-item.vida-baja {
-            border-left-color: #d45b5b;
-            background: #2a1e1e;
-        }
-        
         .object-color {
             width: 16px;
             height: 16px;
@@ -246,24 +317,6 @@
             align-items: center;
             justify-content: center;
             margin-left: auto;
-        }
-        
-        .vida-bar {
-            height: 4px;
-            background: #2d3445;
-            border-radius: 2px;
-            margin-top: 4px;
-            overflow: hidden;
-        }
-        
-        .vida-fill {
-            height: 100%;
-            background: #4fa3e3;
-            transition: width 0.3s;
-        }
-        
-        .vida-fill.baja {
-            background: #d45b5b;
         }
         
         .variable-value {
@@ -307,6 +360,26 @@
             gap: 10px;
             margin-top: 15px;
         }
+        
+        .last-input {
+            background: #1e2433;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+            border: 2px solid #2d3445;
+        }
+        
+        .last-key {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffb86b;
+            background: #0f1219;
+            padding: 5px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -314,37 +387,108 @@
         <!-- Área del juego -->
         <div class="game-area">
             <canvas id="gameCanvas" width="700" height="400"></canvas>
+            <div class="last-input">
+                <span>Última tecla presionada:</span>
+                <div class="last-key" id="lastKeyDisplay">—</div>
+            </div>
         </div>
         
         <!-- Panel de código -->
         <div class="code-panel">
-            <div class="code-input">
-                <textarea id="codeEditor" placeholder="Escribe tu código aquí...">// COMANDOS DISPONIBLES:
-// crearobjeto:"nombre"
-// sprite:"objeto":"forma(cubo/circulo)":"color"
-// mover:"objeto":"pasos"
-// var:"nombre":"tipo(Vida/node)":"objeto"
-// varset:"nombre":"numero"
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('setup')">⚙️ SETUP</button>
+                <button class="tab" onclick="switchTab('input_a')">⌨️ INPUT A</button>
+                <button class="tab" onclick="switchTab('input_b')">⌨️ INPUT B</button>
+                <button class="tab" onclick="switchTab('input_c')">⌨️ INPUT C</button>
+            </div>
+            
+            <!-- Sección SETUP (código inicial) -->
+            <div id="setup-section" class="code-section active">
+                <div class="code-input">
+                    <textarea id="setupCode" placeholder="Código de inicialización (se ejecuta al presionar EJECUTAR)">// CÓDIGO DE INICIALIZACIÓN
+// Este código se ejecuta primero, limpiando todo
 
-// Ejemplo completo:
+// Crear personaje principal
 crearobjeto:"heroe"
-sprite:"heroe":"circulo":"#4FA3E3"
+sprite:"heroe":"circulo":"azul"
 var:"vida_heroe":"Vida":"heroe"
 
+// Crear enemigo
 crearobjeto:"enemigo"
-sprite:"enemigo":"cubo":"#D45B5B"
+sprite:"enemigo":"cubo":"rojo"
 var:"vida_enemigo":"Vida":"enemigo"
 
-// Reducir vida al enemigo
-varset:"vida_enemigo":"70"
-// Mover al héroe
-mover:"heroe":"100"</textarea>
+// Crear objeto neutral
+crearobjeto:"caja"
+sprite:"caja":"cubo":"amarillo"</textarea>
+                </div>
+            </div>
+            
+            <!-- Sección INPUT A -->
+            <div id="input_a-section" class="code-section">
+                <div class="input-config">
+                    <h4>⌨️ CONFIGURACIÓN INPUT A</h4>
+                    <div class="input-row">
+                        <span class="key-badge">TECLA A</span>
+                        <span class="key-description">Presiona 'A' para ejecutar:</span>
+                        <span class="key-status">✓ Activo</span>
+                    </div>
+                </div>
+                <div class="code-input">
+                    <textarea id="inputACode" placeholder="Código para tecla A">// CÓDIGO PARA TECLA A
+// Mover héroe a la izquierda
+mover:"heroe":"-30"
+
+// Pequeño ataque
+varset:"vida_enemigo":"-10"</textarea>
+                </div>
+            </div>
+            
+            <!-- Sección INPUT B -->
+            <div id="input_b-section" class="code-section">
+                <div class="input-config">
+                    <h4>⌨️ CONFIGURACIÓN INPUT B</h4>
+                    <div class="input-row">
+                        <span class="key-badge">TECLA B</span>
+                        <span class="key-description">Presiona 'B' para ejecutar:</span>
+                        <span class="key-status">✓ Activo</span>
+                    </div>
+                </div>
+                <div class="code-input">
+                    <textarea id="inputBCode" placeholder="Código para tecla B">// CÓDIGO PARA TECLA B
+// Mover héroe a la derecha
+mover:"heroe":"30"
+
+// Ataque fuerte
+varset:"vida_enemigo":"-25"</textarea>
+                </div>
+            </div>
+            
+            <!-- Sección INPUT C -->
+            <div id="input_c-section" class="code-section">
+                <div class="input-config">
+                    <h4>⌨️ CONFIGURACIÓN INPUT C</h4>
+                    <div class="input-row">
+                        <span class="key-badge">TECLA C</span>
+                        <span class="key-description">Presiona 'C' para ejecutar:</span>
+                        <span class="key-status">✓ Activo</span>
+                    </div>
+                </div>
+                <div class="code-input">
+                    <textarea id="inputCCode" placeholder="Código para tecla C">// CÓDIGO PARA TECLA C
+// Curar héroe
+varset:"vida_heroe":"+20"
+
+// Crear ayuda
+crearobjeto:"ayuda"
+sprite:"ayuda":"circulo":"verde"</textarea>
+                </div>
             </div>
             
             <div class="button-group">
-                <button class="execute" onclick="executeCode()">▶ EJECUTAR</button>
-                <button class="reset" onclick="resetGame(true)">↺ REINICIAR TODO</button>
-                <button onclick="addExample()">📋 EJEMPLO</button>
+                <button class="execute" onclick="executeGame()">▶ EJECUTAR SETUP</button>
+                <button class="reset" onclick="resetGame()">↺ REINICIAR TODO</button>
+                <button onclick="addExample()">📋 EJEMPLO COMPLETO</button>
             </div>
             
             <div id="errorDisplay" class="error-message"></div>
@@ -379,6 +523,12 @@ mover:"heroe":"100"</textarea>
             <div class="manual">
                 <h3>📚 MANUAL DE COMANDOS</h3>
                 <div class="command-list">
+                    <div class="command-item new-command">
+                        <div class="command-name">⌨️ INPUT (NUEVO)</div>
+                        <div class="command-example">input:"tecla"</div>
+                        <div class="command-desc">Detecta teclas A, B, C y ejecuta código asociado en tiempo real</div>
+                    </div>
+                    
                     <div class="command-item">
                         <div class="command-name">📌 CREAR OBJETO</div>
                         <div class="command-example">crearobjeto:"nombre"</div>
@@ -397,16 +547,16 @@ mover:"heroe":"100"</textarea>
                         <div class="command-desc">Mueve el objeto horizontalmente</div>
                     </div>
                     
-                    <div class="command-item new-command">
-                        <div class="command-name">🔷 VAR (NUEVO)</div>
+                    <div class="command-item">
+                        <div class="command-name">🔷 VAR</div>
                         <div class="command-example">var:"nombre":"tipo":"objeto"</div>
-                        <div class="command-desc">Crea una variable. Tipos: node o Vida (auto 100). Se vincula a un objeto</div>
+                        <div class="command-desc">Crea variable (Vida/node) vinculada a objeto</div>
                     </div>
                     
-                    <div class="command-item new-command">
-                        <div class="command-name">🔶 VARSET (NUEVO)</div>
+                    <div class="command-item">
+                        <div class="command-name">🔶 VARSET</div>
                         <div class="command-example">varset:"nombre":"numero"</div>
-                        <div class="command-desc">Establece el valor de una variable. Si es Vida y llega a 0, el objeto desaparece</div>
+                        <div class="command-desc">Cambia valor de variable (+20, -10, etc)</div>
                     </div>
                 </div>
             </div>
@@ -418,10 +568,19 @@ mover:"heroe":"100"</textarea>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Objetos y variables del juego
+        // Estado del juego
         let gameObjects = {};
         let gameVariables = {};
         let nextPosition = 50;
+        let gameInitialized = false;
+        let lastKey = '—';
+        
+        // Códigos por tecla
+        let keyCodes = {
+            'a': '',
+            'b': '',
+            'c': ''
+        };
         
         // Colores predefinidos
         const colorExamples = {
@@ -435,13 +594,24 @@ mover:"heroe":"100"</textarea>
             'negro': '#000000'
         };
         
+        // Función para cambiar pestañas
+        function switchTab(tab) {
+            // Actualizar botones
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Actualizar secciones
+            document.querySelectorAll('.code-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tab + '-section').classList.add('active');
+        }
+        
         // Función para dibujar en el canvas
         function drawGame() {
             // Limpiar canvas
             ctx.fillStyle = '#1e2433';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Dibujar grid de referencia (opcional)
+            // Dibujar grid
             ctx.strokeStyle = '#2d3445';
             ctx.lineWidth = 1;
             for(let i = 0; i < canvas.width; i += 50) {
@@ -456,35 +626,27 @@ mover:"heroe":"100"</textarea>
             Object.keys(gameObjects).forEach(key => {
                 const obj = gameObjects[key];
                 
-                // Verificar si el objeto debe ser visible (vida > 0)
                 if (obj.vida <= 0) return;
                 
                 ctx.save();
                 ctx.translate(obj.x, obj.y);
                 
-                // Sombra para efecto 3D
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.shadowBlur = 10;
                 ctx.shadowOffsetY = 3;
-                
-                // Dibujar según la forma
                 ctx.fillStyle = obj.color;
                 
                 if (obj.shape === 'circulo') {
                     ctx.beginPath();
                     ctx.arc(0, 0, 20, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Borde blanco
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 2;
                     ctx.shadowBlur = 0;
                     ctx.shadowOffsetY = 0;
                     ctx.stroke();
-                } else { // cubo (cuadrado)
+                } else {
                     ctx.fillRect(-20, -20, 40, 40);
-                    
-                    // Borde blanco
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 2;
                     ctx.shadowBlur = 0;
@@ -494,7 +656,7 @@ mover:"heroe":"100"</textarea>
                 
                 ctx.restore();
                 
-                // Dibujar nombre del objeto (fuera de la transformación)
+                // Nombre del objeto
                 ctx.save();
                 ctx.font = 'bold 12px Courier New';
                 ctx.fillStyle = '#ffffff';
@@ -503,24 +665,20 @@ mover:"heroe":"100"</textarea>
                 ctx.shadowOffsetY = 2;
                 ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
                 
-                // Buscar variable de vida asociada a este objeto
+                // Barra de vida
                 const vidaVar = Object.values(gameVariables).find(v => 
                     v.type === 'Vida' && v.object === obj.name
                 );
                 
-                // Dibujar barra de vida si existe
                 if (vidaVar) {
                     const vidaPercent = (obj.vida / 100) * 100;
                     
-                    // Fondo de la barra
                     ctx.fillStyle = '#2d3445';
                     ctx.fillRect(obj.x - 30, obj.y - 20, 60, 8);
                     
-                    // Barra de vida
                     ctx.fillStyle = vidaPercent > 50 ? '#4FA3E3' : '#D45B5B';
                     ctx.fillRect(obj.x - 30, obj.y - 20, 60 * (vidaPercent/100), 8);
                     
-                    // Texto de vida
                     ctx.font = '9px Courier New';
                     ctx.fillStyle = '#ffffff';
                     ctx.shadowBlur = 2;
@@ -531,7 +689,7 @@ mover:"heroe":"100"</textarea>
             });
         }
         
-        // Actualizar listas de objetos y variables en el panel
+        // Actualizar listas
         function updateLists() {
             const objectsContainer = document.getElementById('objectsContainer');
             const variablesContainer = document.getElementById('variablesContainer');
@@ -540,7 +698,6 @@ mover:"heroe":"100"</textarea>
             
             if (!objectsContainer || !variablesContainer) return;
             
-            // Actualizar lista de objetos
             let objectsHtml = '';
             let objetosVisibles = 0;
             
@@ -568,7 +725,6 @@ mover:"heroe":"100"</textarea>
             objectsContainer.innerHTML = objectsHtml;
             objectCount.textContent = objetosVisibles;
             
-            // Actualizar lista de variables
             let variablesHtml = '';
             let variablesActivas = 0;
             
@@ -592,43 +748,37 @@ mover:"heroe":"100"</textarea>
             variableCount.textContent = variablesActivas;
         }
         
-        // Mostrar mensaje de éxito
+        // Mostrar mensajes
         function showSuccess(message) {
             const successDisplay = document.getElementById('successDisplay');
             successDisplay.textContent = message;
             successDisplay.style.display = 'block';
             setTimeout(() => {
                 successDisplay.style.display = 'none';
-            }, 3000);
+            }, 2000);
         }
         
-        // Mostrar mensaje de error
         function showError(message) {
             const errorDisplay = document.getElementById('errorDisplay');
             errorDisplay.textContent = message;
             errorDisplay.style.display = 'block';
         }
         
-        // Procesar un comando individual
-        function processCommand(command) {
-            // Limpiar espacios y saltos de línea
+        // Procesar comando individual
+        function processCommand(command, fromInput = false) {
             command = command.trim();
             
-            // Ignorar comentarios y líneas vacías
             if (command === '' || command.startsWith('//')) return true;
             
-            // Separar comando y parámetros
             const colonIndex = command.indexOf(':');
             if (colonIndex === -1) {
-                throw new Error(`Comando inválido: ${command} (debe usar : para separar)`);
+                throw new Error(`Comando inválido: ${command}`);
             }
             
             const cmd = command.substring(0, colonIndex).toLowerCase();
             const params = command.substring(colonIndex + 1).split(':').map(p => 
-                p.trim().replace(/^"|"$/g, '') // Quitar comillas
+                p.trim().replace(/^"|"$/g, '')
             );
-            
-            console.log('Procesando:', cmd, params);
             
             switch(cmd) {
                 case 'crearobjeto':
@@ -646,7 +796,6 @@ mover:"heroe":"100"</textarea>
                     };
                     nextPosition += 70;
                     if (nextPosition > 600) nextPosition = 50;
-                    showSuccess(`✅ Objeto "${name}" creado`);
                     break;
                     
                 case 'sprite':
@@ -656,37 +805,32 @@ mover:"heroe":"100"</textarea>
                     let color = params[2];
                     
                     if (!gameObjects[spriteObj]) throw new Error(`Objeto "${spriteObj}" no encontrado`);
-                    if (gameObjects[spriteObj].vida <= 0) throw new Error(`Objeto "${spriteObj}" está destruido`);
+                    if (gameObjects[spriteObj].vida <= 0) throw new Error(`Objeto "${spriteObj}" destruido`);
                     if (shape !== 'cubo' && shape !== 'circulo') {
                         throw new Error('Forma debe ser "cubo" o "circulo"');
                     }
                     
-                    // Verificar si es un color predefinido
                     if (colorExamples[color.toLowerCase()]) {
                         color = colorExamples[color.toLowerCase()];
                     }
                     
                     gameObjects[spriteObj].shape = shape;
                     gameObjects[spriteObj].color = color;
-                    showSuccess(`🎨 Sprite de "${spriteObj}" actualizado`);
                     break;
                     
                 case 'mover':
                     if (params.length < 2) throw new Error('mover necesita: objeto, pasos');
                     const moveObj = params[0];
-                    const steps = parseInt(params[1]);
+                    let steps = parseInt(params[1]);
                     
                     if (!gameObjects[moveObj]) throw new Error(`Objeto "${moveObj}" no encontrado`);
-                    if (gameObjects[moveObj].vida <= 0) throw new Error(`Objeto "${moveObj}" está destruido`);
+                    if (gameObjects[moveObj].vida <= 0) throw new Error(`Objeto "${moveObj}" destruido`);
                     if (isNaN(steps)) throw new Error('Pasos debe ser un número');
                     
                     gameObjects[moveObj].x += steps;
                     
-                    // Mantener dentro del canvas
                     if (gameObjects[moveObj].x < 30) gameObjects[moveObj].x = 30;
                     if (gameObjects[moveObj].x > canvas.width - 30) gameObjects[moveObj].x = canvas.width - 30;
-                    
-                    showSuccess(`➡️ "${moveObj}" movido ${steps} pasos`);
                     break;
                     
                 case 'var':
@@ -695,9 +839,9 @@ mover:"heroe":"100"</textarea>
                     const varType = params[1];
                     const varObject = params[2];
                     
-                    if (gameVariables[varName]) throw new Error(`La variable "${varName}" ya existe`);
+                    if (gameVariables[varName]) throw new Error(`Variable "${varName}" ya existe`);
                     if (!gameObjects[varObject]) throw new Error(`Objeto "${varObject}" no encontrado`);
-                    if (gameObjects[varObject].vida <= 0) throw new Error(`Objeto "${varObject}" está destruido`);
+                    if (gameObjects[varObject].vida <= 0) throw new Error(`Objeto "${varObject}" destruido`);
                     
                     if (varType.toLowerCase() === 'vida') {
                         gameVariables[varName] = {
@@ -707,7 +851,6 @@ mover:"heroe":"100"</textarea>
                             value: 100
                         };
                         gameObjects[varObject].vida = 100;
-                        showSuccess(`❤️ Variable de vida "${varName}" creada para "${varObject}"`);
                     } else if (varType.toLowerCase() === 'node') {
                         gameVariables[varName] = {
                             name: varName,
@@ -715,38 +858,43 @@ mover:"heroe":"100"</textarea>
                             object: varObject,
                             value: 0
                         };
-                        showSuccess(`📊 Variable "${varName}" creada para "${varObject}"`);
                     } else {
-                        throw new Error('Tipo de variable debe ser "Vida" o "node"');
+                        throw new Error('Tipo debe ser "Vida" o "node"');
                     }
                     break;
                     
                 case 'varset':
                     if (params.length < 2) throw new Error('varset necesita: nombre, numero');
                     const setVarName = params[0];
-                    const setValue = parseInt(params[1]);
+                    let setValue = params[1];
                     
                     if (!gameVariables[setVarName]) throw new Error(`Variable "${setVarName}" no encontrada`);
-                    if (isNaN(setValue)) throw new Error('Valor debe ser un número');
                     
                     const variable = gameVariables[setVarName];
-                    const oldValue = variable.value;
-                    variable.value = setValue;
+                    let newValue;
                     
-                    showSuccess(`🔢 Variable "${setVarName}" cambiada: ${oldValue} → ${setValue}`);
+                    // Permitir operaciones relativas (+20, -10)
+                    if (setValue.startsWith('+')) {
+                        newValue = variable.value + parseInt(setValue.substring(1));
+                    } else if (setValue.startsWith('-')) {
+                        newValue = variable.value - parseInt(setValue.substring(1));
+                    } else {
+                        newValue = parseInt(setValue);
+                    }
                     
-                    // Si es variable de vida, actualizar el objeto y verificar muerte
+                    if (isNaN(newValue)) throw new Error('Valor debe ser número');
+                    
+                    variable.value = newValue;
+                    
                     if (variable.type === 'Vida') {
                         const obj = gameObjects[variable.object];
                         if (obj) {
-                            obj.vida = setValue;
+                            obj.vida = newValue;
                             
-                            // Si vida llega a 0 o menos, el objeto desaparece
                             if (obj.vida <= 0) {
                                 obj.vida = 0;
-                                showSuccess(`💀 OBJETO DESTRUIDO: ${variable.object} ha muerto!`);
                                 
-                                // Eliminar variables asociadas al objeto destruido
+                                // Eliminar variables asociadas
                                 Object.keys(gameVariables).forEach(key => {
                                     if (gameVariables[key].object === obj.name) {
                                         delete gameVariables[key];
@@ -764,138 +912,153 @@ mover:"heroe":"100"</textarea>
             return true;
         }
         
-        // Ejecutar todo el código del editor
-        function executeCode() {
-            const code = document.getElementById('codeEditor').value;
-            const lines = code.split('\n');
-            const errorDisplay = document.getElementById('errorDisplay');
-            
-            errorDisplay.style.display = 'none';
-            
-            // Procesar cada línea
-            for (let i = 0; i < lines.length; i++) {
-                try {
-                    processCommand(lines[i]);
-                } catch (error) {
-                    errorDisplay.textContent = `Error en línea ${i + 1}: ${error.message}`;
-                    errorDisplay.style.display = 'block';
-                    console.error('Error:', error);
-                    break;
-                }
-            }
-            
-            // Actualizar visualización
-            drawGame();
-            updateLists();
-        }
-        
-        // Reiniciar juego completamente
-        function resetGame(total = true) {
-            // Limpiar todos los objetos y variables
+        // Ejecutar código completo (setup + inputs)
+        function executeGame() {
+            // Limpiar todo el estado
             gameObjects = {};
             gameVariables = {};
             nextPosition = 50;
             
-            if (total) {
-                // Crear objetos de ejemplo
-                gameObjects['heroe'] = {
-                    name: 'heroe',
-                    x: 100,
-                    y: 150,
-                    shape: 'circulo',
-                    color: '#4FA3E3',
-                    vida: 100
-                };
-                
-                gameObjects['enemigo'] = {
-                    name: 'enemigo',
-                    x: 400,
-                    y: 250,
-                    shape: 'cubo',
-                    color: '#D45B5B',
-                    vida: 100
-                };
-                
-                gameObjects['objeto1'] = {
-                    name: 'objeto1',
-                    x: 250,
-                    y: 100,
-                    shape: 'cubo',
-                    color: '#6BBF6B',
-                    vida: 100
-                };
-                
-                // Variables de ejemplo
-                gameVariables['vida_heroe'] = {
-                    name: 'vida_heroe',
-                    type: 'Vida',
-                    object: 'heroe',
-                    value: 100
-                };
-                
-                gameVariables['vida_enemigo'] = {
-                    name: 'vida_enemigo',
-                    type: 'Vida',
-                    object: 'enemigo',
-                    value: 100
-                };
-                
-                gameVariables['puntos'] = {
-                    name: 'puntos',
-                    type: 'node',
-                    object: 'heroe',
-                    value: 0
-                };
-                
-                nextPosition = 500;
-                
-                showSuccess('✨ Juego reiniciado completamente');
+            // Guardar códigos de input
+            keyCodes.a = document.getElementById('inputACode').value;
+            keyCodes.b = document.getElementById('inputBCode').value;
+            keyCodes.c = document.getElementById('inputCCode').value;
+            
+            // Ejecutar código de setup
+            const setupCode = document.getElementById('setupCode').value;
+            const lines = setupCode.split('\n');
+            const errorDisplay = document.getElementById('errorDisplay');
+            
+            errorDisplay.style.display = 'none';
+            
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    processCommand(lines[i]);
+                } catch (error) {
+                    errorDisplay.textContent = `Error en setup línea ${i + 1}: ${error.message}`;
+                    errorDisplay.style.display = 'block';
+                    break;
+                }
+            }
+            
+            gameInitialized = true;
+            drawGame();
+            updateLists();
+            showSuccess('✅ Juego inicializado! Presiona A, B o C');
+        }
+        
+        // Reiniciar todo
+        function resetGame() {
+            gameObjects = {};
+            gameVariables = {};
+            nextPosition = 50;
+            gameInitialized = false;
+            lastKey = '—';
+            document.getElementById('lastKeyDisplay').textContent = lastKey;
+            
+            drawGame();
+            updateLists();
+            showSuccess('🔄 Todo reiniciado');
+        }
+        
+        // Ejecutar input por tecla
+        function executeInput(tecla) {
+            if (!gameInitialized) {
+                showError('❌ Primero ejecuta el SETUP');
+                return;
+            }
+            
+            let code = '';
+            if (tecla === 'a') code = keyCodes.a;
+            else if (tecla === 'b') code = keyCodes.b;
+            else if (tecla === 'c') code = keyCodes.c;
+            
+            if (!code || code.trim() === '') {
+                showError(`⚠️ No hay código para tecla ${tecla.toUpperCase()}`);
+                return;
+            }
+            
+            const lines = code.split('\n');
+            const errorDisplay = document.getElementById('errorDisplay');
+            
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    processCommand(lines[i], true);
+                } catch (error) {
+                    errorDisplay.textContent = `Error en tecla ${tecla.toUpperCase()} línea ${i + 1}: ${error.message}`;
+                    errorDisplay.style.display = 'block';
+                    break;
+                }
             }
             
             drawGame();
             updateLists();
         }
         
-        // Añadir código de ejemplo al editor
+        // Detectar teclas
+        document.addEventListener('keydown', function(e) {
+            const key = e.key.toLowerCase();
+            
+            if (key === 'a' || key === 'b' || key === 'c') {
+                e.preventDefault();
+                lastKey = key.toUpperCase();
+                document.getElementById('lastKeyDisplay').textContent = lastKey;
+                executeInput(key);
+            }
+        });
+        
+        // Añadir ejemplo completo
         function addExample() {
-            document.getElementById('codeEditor').value = 
-                '// 🔥 SISTEMA DE VIDA Y VARIABLES\n' +
-                '// ----------------------------------------\n\n' +
-                '// 1. Crear personajes\n' +
-                'crearobjeto:"guerrero"\n' +
-                'sprite:"guerrero":"circulo":"azul"\n' +
-                'var:"vida_guerrero":"Vida":"guerrero"\n\n' +
-                'crearobjeto:"boss"\n' +
-                'sprite:"boss":"cubo":"rojo"\n' +
-                'var:"vida_boss":"Vida":"boss"\n\n' +
-                '// 2. Crear variable normal\n' +
-                'var:"puntos_ataque":"node":"guerrero"\n\n' +
-                '// 3. El guerrero ataca al boss\n' +
-                'mover:"guerrero":"150"\n' +
-                'varset:"vida_boss":"70"\n' +
-                'varset:"puntos_ataque":"30"\n\n' +
-                '// 4. El boss contraataca!\n' +
-                'mover:"boss":"-80"\n' +
-                'varset:"vida_guerrero":"40"\n\n' +
-                '// 5. Si la vida llega a 0, el objeto desaparece\n' +
-                '// Prueba: varset:"vida_boss":"0"';
+            document.getElementById('setupCode').value = 
+                '// 🎮 SETUP - Creación de personajes\n' +
+                'crearobjeto:"heroe"\n' +
+                'sprite:"heroe":"circulo":"azul"\n' +
+                'var:"vida_heroe":"Vida":"heroe"\n\n' +
+                'crearobjeto:"enemigo"\n' +
+                'sprite:"enemigo":"cubo":"rojo"\n' +
+                'var:"vida_enemigo":"Vida":"enemigo"\n\n' +
+                'crearobjeto:"aliado"\n' +
+                'sprite:"aliado":"circulo":"verde"\n' +
+                'var:"vida_aliado":"Vida":"aliado"';
+            
+            document.getElementById('inputACode').value = 
+                '// ⌨️ TECLA A - Movimiento izquierda\n' +
+                'mover:"heroe":"-30"\n' +
+                'mover:"aliado":"-20"\n' +
+                'varset:"vida_enemigo":"-5"';
+            
+            document.getElementById('inputBCode').value = 
+                '// ⌨️ TECLA B - Movimiento derecha\n' +
+                'mover:"heroe":"30"\n' +
+                'mover:"aliado":"20"\n' +
+                'varset:"vida_enemigo":"-15"';
+            
+            document.getElementById('inputCCode').value = 
+                '// ⌨️ TECLA C - Curar y crear\n' +
+                'varset:"vida_heroe":"+15"\n' +
+                'varset:"vida_aliado":"+10"\n' +
+                'crearobjeto:"ayuda"\n' +
+                'sprite:"ayuda":"circulo":"amarillo"';
+            
+            showSuccess('📋 Ejemplo cargado! Ejecuta SETUP primero');
         }
         
-        // Inicializar el juego cuando carga la página
+        // Inicializar
         window.onload = function() {
-            resetGame(true);
+            resetGame();
             
-            // Añadir event listener para tecla F5 (ejecutar con Ctrl+Enter)
-            document.getElementById('codeEditor').addEventListener('keydown', function(e) {
+            // Event listener para Ctrl+Enter
+            document.getElementById('setupCode').addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     e.preventDefault();
-                    executeCode();
+                    executeGame();
                 }
             });
         };
         
-        // Hacer funciones globales accesibles desde HTML
-        window.executeCode = executeCode;
+        // Hacer funciones globales
+        window.switchTab = switchTab;
+        window.executeGame = executeGame;
         window.resetGame = resetGame;
         window.addExample = addExample;
     </script>
