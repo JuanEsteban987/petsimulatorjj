@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Programación 2008 + Escenario</title>
+  <title>Sistema 2008 + Comandos Visibles</title>
   <style>
-    /* ===== ESTÉTICA 2008 (GLOSSY, BORDES REDONDEADOS, SOMBRAS) ===== */
+    /* ===== ESTÉTICA 2008 ===== */
     * {
       margin: 0;
       padding: 0;
@@ -46,7 +46,6 @@
       font-weight: bold;
       color: #2a3f5e;
       text-shadow: 2px 2px 0 #d0e0f0, 3px 3px 3px rgba(0,0,0,0.2);
-      letter-spacing: -0.5px;
       font-family: 'Arial Black', 'Gadget', sans-serif;
       display: inline-block;
       background: linear-gradient(to bottom, #eef5fc, #c2d4e8);
@@ -84,7 +83,7 @@
       transform: rotate(1deg);
     }
 
-    .editor-box, .escenario-box, .console-box {
+    .editor-box, .escenario-box, .console-box, .comandos-box {
       background: #dae5f0;
       border: 2px inset #aabbcc;
       border-radius: 8px;
@@ -121,12 +120,11 @@
       line-height: 1.4;
     }
 
-    /* Canvas con estilo monitor retro */
     canvas#escenario {
       display: block;
       width: 100%;
       height: auto;
-      background: #0a1828;  /* color de fondo por defecto (será sobrescrito por JS) */
+      background: #0a1828;
       border: 4px inset #3d5a73;
       border-radius: 6px;
       box-shadow: 0 0 0 2px #90a9c4, inset 0 0 10px #000000;
@@ -152,7 +150,6 @@
     .btn-glossy .inner {
       display: block;
       padding: 10px 32px;
-      background: #3a7bb5;
       background: linear-gradient(to bottom, #60b0f0, #1d5c9e);
       border: 2px solid #d7eaff;
       border-radius: 40px 12px 40px 12px;
@@ -184,13 +181,60 @@
       box-shadow: 0 1px 0 #10324f, 0 5px 8px rgba(0,0,0,0.3);
     }
 
-    #clear, #clearScene {
-      margin-left: 5px;
-    }
-    #clear .inner, #clearScene .inner {
+    #clear .inner, #clearScene .inner, #comandosBtn .inner {
       background: linear-gradient(to bottom, #a5b8cb, #5b6f87);
       box-shadow: 0 5px 0 #2b3b4b, 0 8px 12px rgba(0,0,0,0.3), inset 0 2px 5px #e1edfa;
       text-shadow: 0 2px 3px #141c28;
+    }
+
+    /* Panel de comandos desplegable */
+    .comandos-box {
+      display: none;  /* oculto por defecto */
+      margin-top: 20px;
+      background: #e2ebf3;
+      border: 2px ridge #6b8eb0;
+    }
+    .comandos-box.visible {
+      display: block;
+    }
+    .comandos-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr 2fr;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .comandos-grid div {
+      padding: 6px 8px;
+      background: #f0f6fc;
+      border: 1px solid #9bb7d4;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+    }
+    .comandos-grid .header {
+      background: #2f5575;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1px solid #1d3450;
+    }
+    .cerrar-comandos {
+      text-align: right;
+      margin-top: 8px;
+    }
+    .cerrar-comandos span {
+      background: #9b2f2f;
+      color: #ffdbaa;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #ffbaba;
+      box-shadow: inset 0 1px 3px #ffcfcf, 0 2px 3px black;
+      font-size: 14px;
+    }
+    .cerrar-comandos span:hover {
+      background: #b33f3f;
     }
 
     .console-box {
@@ -204,13 +248,12 @@
       max-height: 250px;
       overflow: auto;
       padding: 10px;
-      font-family: 'Courier New', 'Courier', monospace;
+      font-family: 'Courier New', monospace;
       font-size: 14px;
       color: #031a2b;
       border-radius: 6px;
       box-shadow: inset 0 0 0 2px #d5e3f0, inset 2px 2px 8px #3f4f64;
       white-space: pre-wrap;
-      word-wrap: break-word;
     }
 
     .footer-2008 {
@@ -230,7 +273,6 @@
       padding: 2px 10px;
       border-radius: 20px 0 20px 0;
     }
-
     .reflejo {
       width: 120px;
       height: 12px;
@@ -247,68 +289,64 @@
 
   <!-- CABECERA -->
   <div class="cabecera">
-    <h1>PROG-2008 <span>escenario 2.0</span></h1>
-    <div class="badge">gráficos · objetos</div>
+    <h1>PROG-2008 <span>gráficos + comandos</span></h1>
+    <div class="badge">ayuda integrada</div>
     <div class="reflejo"></div>
     <div style="clear:both"></div>
   </div>
 
-  <!-- EDITOR DE CÓDIGO (ahora con ejemplos de dibujo) -->
+  <!-- EDITOR -->
   <div class="editor-box">
-    <label class="etiqueta">✎ Editor JavaScript (2008) — crea objetos en el escenario</label>
-    <textarea id="codigo" rows="8">// --- DIBUJA EN EL ESCENARIO (funciones disponibles) ---
-// limpiarEscenario()  - fondo negro
-// dibujarRect(x, y, ancho, alto, color)
-// dibujarCirculo(x, y, radio, color)
-// dibujarLinea(x1, y1, x2, y2, color)
-// dibujarTexto("texto", x, y, color)
-// cambiarFondo(color)  - ej: "navy", "#330066"
+    <label class="etiqueta">✎ Editor JavaScript (con ejemplos gráficos)</label>
+    <textarea id="codigo" rows="8">// --- PRUEBA LAS FUNCIONES GRÁFICAS ---
+limpiarEscenario();  // fondo negro
 
-limpiarEscenario();  // borra el canvas
+dibujarRect(50, 30, 80, 60, "#FFAA33");
+dibujarCirculo(180, 70, 30, "#44AAFF");
+dibujarLinea(250, 20, 350, 120, "#FF55AA");
+dibujarTexto("CLICK EN COMANDOS", 400, 80, "#99FF99");
 
-// Dibujamos el sol (un círculo amarillo)
-dibujarCirculo(100, 80, 40, "#FFD966");
-
-// Un rectángulo que parece edificio
-dibujarRect(200, 70, 80, 100, "#4A86E8");
-
-// Línea a modo de rayo láser
-dibujarLinea(300, 30, 380, 150, "#FF5555");
-
-// Texto retro
-dibujarTexto("Hola 2008!", 400, 120, "#33FF99");
-
-// Más objetos: un árbol sencillo
-dibujarRect(500, 120, 20, 60, "#8B4513");       // tronco
-dibujarCirculo(510, 80, 25, "#2E7D32");         // copa
-
-console.log("✅ Escenario pintado con objetos 2008");</textarea>
+console.log("✅ Objetos creados");</textarea>
   </div>
 
-  <!-- ESCENARIO (canvas) para crear objetos visuales -->
+  <!-- ESCENARIO (canvas) -->
   <div class="escenario-box">
-    <label class="etiqueta">🎬 ESCENARIO (crea objetos: rect, círculo, línea, texto)</label>
+    <label class="etiqueta">🎬 ESCENARIO (crea objetos aquí)</label>
     <canvas id="escenario" width="600" height="200"></canvas>
-    <!-- pequeña leyenda -->
     <div style="margin-top: 6px; font-size: 12px; color: #1f3c5a; text-align: right;">
       <i>funciones: dibujarRect, dibujarCirculo, dibujarLinea, dibujarTexto, cambiarFondo, limpiarEscenario</i>
     </div>
   </div>
 
-  <!-- BARRA DE BOTONES GLOSSY -->
+  <!-- BARRA DE BOTONES (incluye COMANDOS) -->
   <div class="toolbar">
-    <button class="btn-glossy" id="run">
-      <span class="inner">▶ EJECUTAR</span>
-    </button>
-    <button class="btn-glossy" id="clear">
-      <span class="inner">⌧ LIMPIAR CONSOLA</span>
-    </button>
-    <button class="btn-glossy" id="clearScene">
-      <span class="inner">🗑️ LIMPIAR ESCENARIO</span>
-    </button>
+    <button class="btn-glossy" id="run"><span class="inner">▶ EJECUTAR</span></button>
+    <button class="btn-glossy" id="clear"><span class="inner">⌧ LIMPIAR CONSOLA</span></button>
+    <button class="btn-glossy" id="clearScene"><span class="inner">🗑️ LIMPIAR ESCENARIO</span></button>
+    <button class="btn-glossy" id="comandosBtn"><span class="inner">📚 COMANDOS</span></button>
   </div>
 
-  <!-- CONSOLA DE SALIDA -->
+  <!-- PANEL DE COMANDOS (oculto inicialmente) -->
+  <div id="panelComandos" class="comandos-box">
+    <div class="etiqueta">📋 TODOS LOS COMANDOS Y EJEMPLOS</div>
+    <div class="comandos-grid">
+      <div class="header">FUNCIÓN</div>
+      <div class="header">DESCRIPCIÓN</div>
+      <div class="header">EJEMPLO</div>
+
+      <div>dibujarRect(x, y, w, h, color)</div><div>Rectángulo relleno</div><div>dibujarRect(10,10,50,30,"#FF0000")</div>
+      <div>dibujarCirculo(x, y, radio, color)</div><div>Círculo relleno</div><div>dibujarCirculo(80,50,25,"#00CCFF")</div>
+      <div>dibujarLinea(x1,y1,x2,y2,color)</div><div>Línea de grosor 3px</div><div>dibujarLinea(10,80,150,120,"#FFAA00")</div>
+      <div>dibujarTexto("texto", x, y, color)</div><div>Texto en negrita 16px</div><div>dibujarTexto("Hola", 200,50,"#AAFFAA")</div>
+      <div>cambiarFondo(color)</div><div>Cambia el fondo del escenario</div><div>cambiarFondo("#330066")</div>
+      <div>limpiarEscenario()</div><div>Restaura fondo negro</div><div>limpiarEscenario()</div>
+    </div>
+    <div class="cerrar-comandos">
+      <span id="cerrarComandos">✖ CERRAR AYUDA</span>
+    </div>
+  </div>
+
+  <!-- CONSOLA -->
   <div class="console-box">
     <label class="etiqueta">📟 Consola (output)</label>
     <div id="output"></div>
@@ -317,12 +355,11 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
 
   <!-- PIE -->
   <div class="footer-2008">
-    <span>ⓒ 2008  Gráficos en tiempo real · Todos los derechos reservados</span>
+    <span>ⓒ 2008  Comandos siempre a la vista · Todos los derechos reservados</span>
   </div>
-
 </div>
 
-<!-- ========== SISTEMA DE PROGRAMACIÓN + ESCENARIO ========== -->
+<!-- ========== SISTEMA DE PROGRAMACIÓN + ESCENARIO + COMANDOS ========== -->
 <script>
   (function() {
     // ---- ELEMENTOS DEL DOM ----
@@ -330,30 +367,30 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
     var runBtn = document.getElementById('run');
     var clearBtn = document.getElementById('clear');
     var clearSceneBtn = document.getElementById('clearScene');
+    var comandosBtn = document.getElementById('comandosBtn');
+    var panelComandos = document.getElementById('panelComandos');
+    var cerrarComandos = document.getElementById('cerrarComandos');
     var codeEl = document.getElementById('codigo');
     var canvas = document.getElementById('escenario');
     var ctx = canvas.getContext('2d');
 
-    // ---- CONFIGURACIÓN INICIAL DEL ESCENARIO (fondo negro) ----
+    // ---- FUNCIONES GRÁFICAS ----
     function limpiarEscenario() {
-      ctx.fillStyle = '#0a1828';   // azul noche
+      ctx.fillStyle = '#0a1828';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-    limpiarEscenario(); // fondo por defecto
+    limpiarEscenario(); // fondo inicial
 
-    // ---- FUNCIONES GRÁFICAS GLOBALES (para que el usuario las use en su código) ----
     window.dibujarRect = function(x, y, w, h, color) {
       ctx.fillStyle = color || '#FFCC00';
       ctx.fillRect(x, y, w, h);
     };
-
     window.dibujarCirculo = function(x, y, r, color) {
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fillStyle = color || '#33CCFF';
       ctx.fill();
     };
-
     window.dibujarLinea = function(x1, y1, x2, y2, color) {
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -362,21 +399,18 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
       ctx.lineWidth = 3;
       ctx.stroke();
     };
-
     window.dibujarTexto = function(texto, x, y, color) {
       ctx.font = 'bold 16px "Courier New", Courier, monospace';
       ctx.fillStyle = color || '#AAFFAA';
       ctx.fillText(texto, x, y);
     };
-
     window.cambiarFondo = function(color) {
       ctx.fillStyle = color || '#0a1828';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
+    window.limpiarEscenario = limpiarEscenario;
 
-    window.limpiarEscenario = limpiarEscenario;  // alias
-
-    // ---- SOBREESCRITURA DE CONSOLA (para capturar en el div output) ----
+    // ---- CONSOLA PERSONALIZADA ----
     var originalLog = console.log;
     var originalError = console.error;
     var originalWarn = console.warn;
@@ -418,16 +452,14 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
       return true;
     };
 
-    // ---- FUNCIÓN EJECUTAR (run) ----
+    // ---- EJECUTAR ----
     function ejecutar() {
-      outputEl.innerHTML = '';  // limpia consola
-
+      outputEl.innerHTML = '';
       var codigo = codeEl.value;
       if (codigo.trim() === '') {
         console.log('¡Escribe código para ejecutar!');
         return;
       }
-
       try {
         window.eval(codigo);
       } catch (e) {
@@ -435,24 +467,33 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
       }
     }
 
-    // ---- LIMPIAR CONSOLA (solo texto) ----
+    // ---- LIMPIAR CONSOLA ----
     function limpiarConsola() {
       outputEl.innerHTML = '';
       outputEl.innerHTML = '> Consola limpiada. Listo.\n';
     }
 
-    // ---- LIMPIAR ESCENARIO (canvas) ----
+    // ---- LIMPIAR ESCENARIO ----
     function limpiarEscenarioHandler() {
       limpiarEscenario();
       outputEl.innerHTML += '🗑️ Escenario limpiado.\n';
     }
 
-    // ---- ASIGNAR EVENTOS ----
+    // ---- MOSTRAR/OCULTAR PANEL DE COMANDOS ----
+    function toggleComandos() {
+      panelComandos.classList.toggle('visible');
+    }
+
+    // ---- EVENTOS ----
     runBtn.addEventListener('click', ejecutar);
     clearBtn.addEventListener('click', limpiarConsola);
     clearSceneBtn.addEventListener('click', limpiarEscenarioHandler);
+    comandosBtn.addEventListener('click', toggleComandos);
+    cerrarComandos.addEventListener('click', function() {
+      panelComandos.classList.remove('visible');
+    });
 
-    // ---- ATAJO Ctrl+Enter ----
+    // Atajo Ctrl+Enter
     codeEl.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
@@ -460,13 +501,13 @@ console.log("✅ Escenario pintado con objetos 2008");</textarea>
       }
     });
 
-    // ---- MENSAJE INICIAL ----
-    outputEl.innerHTML = '> Sistema de programación 2008 con escenario listo.\n> Usa las funciones gráficas: dibujarRect, dibujarCirculo, dibujarLinea, dibujarTexto, cambiarFondo, limpiarEscenario.\n';
-    console.log('✓ Escenario interactivo preparado. ¡A dibujar!');
+    // Mensaje inicial
+    outputEl.innerHTML = '> Sistema 2008 listo. Presiona "COMANDOS" para ver todas las funciones gráficas.\n';
+    console.log('✓ Escenario interactivo y ayuda integrada.');
   })();
 </script>
 
-<!-- pequeño destello flotante (puro sabor 2008) -->
+<!-- toque 2008 flotante -->
 <div style="position:fixed; bottom:10px; left:10px; opacity:0.2; filter:blur(2px);">✪ 2008 ✪</div>
 </body>
 </html>
