@@ -2,595 +2,480 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madness Combat · Arena P2P</title>
+    <title>BlockPlay - Crea juegos con bloques (estilo Scratch)</title>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
         body {
             margin: 0;
-            min-height: 100vh;
-            background: #0a0c0f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', monospace;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
-        .game-container {
-            background: #1a1e24;
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            border: 2px solid #7a2f2f;
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .btn {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            background-color: #e8e8e8;
+            transform: scale(1.02);
+        }
+        .btn.danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn.danger:hover {
+            background-color: #d32f2f;
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .blockly-area {
+            width: 50%;
+            border-right: 2px solid #ccc;
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+        }
+        .blockly-header {
+            padding: 8px;
+            background-color: #ddd;
+            font-weight: bold;
+            text-align: center;
+        }
+        #blocklyDiv {
+            flex: 1;
+            height: 100%;
+            min-height: 500px;
+        }
+        .canvas-area {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #e5e5e5;
+            padding: 10px;
         }
         canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 16px;
-            background: #2b2f36;
-            box-shadow: inset 0 0 0 2px #4a3a2a, 0 0 0 2px #2f1e1e;
-            cursor: crosshair;
+            background-color: white;
+            border: 3px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            aspect-ratio: 1/1;
         }
-        .panel {
-            margin-top: 16px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            background: #13171c;
-            padding: 16px;
-            border-radius: 40px;
-            border: 1px solid #7a4f4f;
+        .info {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        input, button {
-            background: #262e36;
-            border: 2px solid #6b3f3f;
-            color: #f0c9a0;
-            font-family: inherit;
+        #messageBox {
+            color: #333;
             font-weight: bold;
-            font-size: 1rem;
-            padding: 10px 18px;
-            border-radius: 40px;
-            outline: none;
-            transition: all 0.2s;
-        }
-        input::placeholder {
-            color: #6d6d6d;
-        }
-        input:focus, button:hover {
-            border-color: #c97e3a;
-            background: #2f3a44;
-            color: #ffe2b3;
-        }
-        button {
-            background: #3f2b2b;
-            border-color: #a1522b;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #3d1e1e;
-            transform: translateY(0);
-        }
-        button:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-        .status {
-            color: #bdaa8a;
-            font-size: 0.9rem;
-            background: #1f2329;
-            padding: 8px 20px;
-            border-radius: 40px;
-            border: 1px solid #623a3a;
-            flex: 1;
-            min-width: 200px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        .status span {
-            color: #dd9696;
-            font-weight: bold;
+            min-height: 1.5em;
         }
     </style>
-    <!-- PeerJS para conexiones WebRTC simples -->
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Cargar Blockly desde CDN -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
 </head>
 <body>
-<div class="game-container">
-    <canvas id="gameCanvas" width="900" height="600"></canvas>
-
-    <div class="panel">
-        <input type="text" id="peerIdInput" placeholder="ID del anfitrión..." value="">
-        <button id="hostBtn">🔥 SERVER (anfitrión)</button>
-        <button id="connectBtn">⚡ UNIRSE</button>
-        <div class="status" id="statusMsg">⏳ esperando...</div>
+    <header>
+        <h1>🧩 BlockPlay · Crea tu juego con bloques</h1>
+        <button class="btn" id="runButton">▶ Ejecutar programa</button>
+        <button class="btn" id="resetButton">↺ Reiniciar gato</button>
+        <button class="btn danger" id="clearButton">🗑 Limpiar bloques</button>
+    </header>
+    <div class="main-container">
+        <div class="blockly-area">
+            <div class="blockly-header">🧱 Área de bloques (arrastra desde la caja de herramientas)</div>
+            <div id="blocklyDiv"></div>
+        </div>
+        <div class="canvas-area">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div class="info">
+                <span>🐱 Posición: (<span id="posX">200</span>, <span id="posY">200</span>) | Dirección: <span id="angle">0</span>°</span>
+            </div>
+            <div id="messageBox" class="info">💬 Mensaje: </div>
+        </div>
     </div>
-</div>
 
-<script>
-(function() {
-    // --- Configuración del mundo ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const statusEl = document.getElementById('statusMsg');
-    const peerIdInput = document.getElementById('peerIdInput');
+    <!-- Toolbox personalizada (caja de herramientas con nuestros bloques) -->
+    <xml id="toolbox" style="display: none">
+        <category name="Eventos" colour="#FFC107">
+            <block type="when_flag_clicked"></block>
+        </category>
+        <category name="Movimiento" colour="#4CAF50">
+            <block type="move_forward">
+                <value name="STEPS">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="turn_right">
+                <value name="DEGREES">
+                    <shadow type="math_number">
+                        <field name="NUM">15</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        <category name="Apariencia" colour="#9C27B0">
+            <block type="say">
+                <value name="MESSAGE">
+                    <shadow type="text">
+                        <field name="TEXT">¡Hola!</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        <category name="Control" colour="#FF5722">
+            <block type="repeat">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+    </xml>
 
-    // Constantes
-    const WORLD_WIDTH = 2000;
-    const WORLD_HEIGHT = 2000;
-    const PLAYER_RADIUS = 18;
-    const BULLET_RADIUS = 5;
-    const BULLET_SPEED = 7;
-    const PLAYER_SPEED = 3.2;
-    const ATTACK_COOLDOWN = 15; // frames
-    const MAX_HEALTH = 100;
-
-    // Estado global
-    let peer = null;               // instancia PeerJS
-    let connections = [];          // lista de conexiones de datos (solo host)
-    let isHost = false;
-    let localPlayerId = null;
-    let gameLoopId = null;
-
-    // Estado del juego (sincronizado)
-    let players = {};              // id -> { x, y, vx, vy, angle, health, lastShot }
-    let bullets = [];              // { x, y, vx, vy, ownerId, life }
-
-    // Input local
-    const keys = {
-        w: false, a: false, s: false, d: false
-    };
-    let mouseX = 0, mouseY = 0;
-    let mouseShoot = false;        // botón izquierdo presionado
-    let lastShotFrame = 0;
-
-    // --- Funciones auxiliares ---
-    function generateId() {
-        return Math.random().toString(36).substring(2, 10);
-    }
-
-    // Crear jugador local (solo para host o después de unirse)
-    function createLocalPlayer(x, y) {
-        return {
-            id: localPlayerId,
-            x: x || WORLD_WIDTH/2 + (Math.random()*200-100),
-            y: y || WORLD_HEIGHT/2 + (Math.random()*200-100),
-            vx: 0, vy: 0,
-            angle: 0,
-            health: MAX_HEALTH,
-            lastShot: 0
-        };
-    }
-
-    // Actualizar estado en UI
-    function setStatus(text, isError = false) {
-        statusEl.innerHTML = text;
-        if (isError) statusEl.style.color = '#d98b8b';
-        else statusEl.style.color = '#bdaa8a';
-    }
-
-    // --- Lógica del juego (solo host) ---
-    function hostUpdate() {
-        if (!isHost) return;
-
-        // 1. Aplicar inputs recibidos a cada jugador (los inputs se guardan en players[].input)
-        for (let id in players) {
-            const p = players[id];
-            if (!p.input) continue;
-
-            // Movimiento basado en teclas
-            let dx = 0, dy = 0;
-            if (p.input.w) dy -= 1;
-            if (p.input.s) dy += 1;
-            if (p.input.a) dx -= 1;
-            if (p.input.d) dx += 1;
-
-            if (dx !== 0 || dy !== 0) {
-                const len = Math.hypot(dx, dy);
-                dx = dx / len * PLAYER_SPEED;
-                dy = dy / len * PLAYER_SPEED;
-            }
-            // aplicar velocidad (con inercia simple)
-            p.vx = dx;
-            p.vy = dy;
-
-            p.x += p.vx;
-            p.y += p.vy;
-            // límites del mundo
-            p.x = Math.max(PLAYER_RADIUS, Math.min(WORLD_WIDTH - PLAYER_RADIUS, p.x));
-            p.y = Math.max(PLAYER_RADIUS, Math.min(WORLD_HEIGHT - PLAYER_RADIUS, p.y));
-
-            // Ángulo de apuntado (desde el jugador a la posición del mouse en mundo)
-            // el mouse del cliente viene en coordenadas relativas, host necesita convertir a mundo?
-            // Simplificamos: el cliente envía ángulo calculado directamente.
-            if (p.input.angle !== undefined) {
-                p.angle = p.input.angle;
-            }
-
-            // Disparo
-            if (p.input.shoot && (p.lastShot === undefined || (window.performance.now() - p.lastShot) > 300)) {
-                // crear bala
-                const angle = p.angle;
-                const bulletVx = Math.cos(angle) * BULLET_SPEED;
-                const bulletVy = Math.sin(angle) * BULLET_SPEED;
-                bullets.push({
-                    x: p.x + Math.cos(angle) * PLAYER_RADIUS,
-                    y: p.y + Math.sin(angle) * PLAYER_RADIUS,
-                    vx: bulletVx,
-                    vy: bulletVy,
-                    ownerId: id,
-                    life: 180 // frames hasta desaparecer
-                });
-                p.lastShot = window.performance.now();
-            }
-        }
-
-        // 2. Mover balas y colisiones
-        for (let i = bullets.length - 1; i >= 0; i--) {
-            const b = bullets[i];
-            b.x += b.vx;
-            b.y += b.vy;
-            b.life--;
-
-            // eliminar por límites o vida
-            if (b.x < 0 || b.x > WORLD_WIDTH || b.y < 0 || b.y > WORLD_HEIGHT || b.life <= 0) {
-                bullets.splice(i, 1);
-                continue;
-            }
-
-            // colisión con jugadores (excepto dueño)
-            for (let id in players) {
-                if (id === b.ownerId) continue; // sin autodaño por ahora
-                const p = players[id];
-                const dist = Math.hypot(b.x - p.x, b.y - p.y);
-                if (dist < PLAYER_RADIUS + BULLET_RADIUS) {
-                    // daño
-                    p.health = Math.max(0, p.health - 25);
-                    bullets.splice(i, 1);
-                    if (p.health <= 0) {
-                        // respawn
-                        p.x = WORLD_WIDTH/2 + (Math.random()*300-150);
-                        p.y = WORLD_HEIGHT/2 + (Math.random()*300-150);
-                        p.health = MAX_HEALTH;
-                    }
-                    break;
-                }
-            }
-        }
-
-        // 3. Broadcast del estado a todos los clientes
-        const gameState = {
-            type: 'state',
-            players: players,
-            bullets: bullets.map(b => ({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, ownerId: b.ownerId })) // simplificado
+    <script>
+        // ---------- Configuración del gato (estado) ----------
+        let cat = {
+            x: 200,
+            y: 200,
+            angle: 0,        // grados, 0 = derecha, 90 = arriba
+            sayText: '',
+            sayTimer: null
         };
 
-        connections.forEach(conn => {
-            if (conn.open) {
-                conn.send(gameState);
-            }
-        });
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const posXSpan = document.getElementById('posX');
+        const posYSpan = document.getElementById('posY');
+        const angleSpan = document.getElementById('angle');
+        const messageBox = document.getElementById('messageBox');
 
-        // También actualizamos la vista local (host)
-    }
+        // Dibujar el escenario y el gato
+        function drawCat() {
+            ctx.clearRect(0, 0, 400, 400);
 
-    // --- Cliente: enviar input al host ---
-    function sendInputToHost() {
-        if (!peer || isHost) return;
-
-        // Calcular ángulo (coordenadas del canvas a mundo)
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        // convertir mouse a coordenadas de canvas (píxeles)
-        let canvasMouseX = (mouseX - rect.left) * scaleX;
-        let canvasMouseY = (mouseY - rect.top) * scaleY;
-
-        // cámara centrada en el jugador local
-        const localPlayer = players[localPlayerId];
-        if (!localPlayer) return;
-
-        const camX = localPlayer.x - canvas.width/2;
-        const camY = localPlayer.y - canvas.height/2;
-
-        const worldMouseX = canvasMouseX + camX;
-        const worldMouseY = canvasMouseY + camY;
-
-        const angle = Math.atan2(worldMouseY - localPlayer.y, worldMouseX - localPlayer.x);
-
-        // construir mensaje de input
-        const inputMsg = {
-            type: 'input',
-            w: keys.w,
-            a: keys.a,
-            s: keys.s,
-            d: keys.d,
-            angle: angle,
-            shoot: mouseShoot
-        };
-
-        // enviar al host (primer peer conectado, asumimos que es única conexión)
-        if (peer.connections && Object.values(peer.connections).length > 0) {
-            const firstConn = Object.values(peer.connections)[0][0];
-            if (firstConn && firstConn.open) {
-                firstConn.send(inputMsg);
-            }
-        }
-    }
-
-    // --- Renderizado (común para host y cliente) ---
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // jugador local para cámara
-        const localPlayer = players[localPlayerId];
-        if (!localPlayer) {
-            // sin jugador, dibujar mensaje
-            ctx.fillStyle = '#aaa';
-            ctx.font = 'bold 24px monospace';
-            ctx.fillText('Esperando conexión...', 200, 300);
-            return;
-        }
-
-        // cámara centrada en localPlayer
-        const camX = localPlayer.x - canvas.width/2;
-        const camY = localPlayer.y - canvas.height/2;
-
-        // dibujar grid (mundo)
-        ctx.save();
-        ctx.translate(-camX, -camY);
-
-        // Fondo y líneas
-        ctx.fillStyle = '#262e36';
-        ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-        ctx.strokeStyle = '#4e3f33';
-        ctx.lineWidth = 2;
-        for (let i = 0; i <= WORLD_WIDTH; i += 100) {
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, WORLD_HEIGHT);
-            ctx.strokeStyle = '#3a2f27';
-            ctx.stroke();
-        }
-        for (let i = 0; i <= WORLD_HEIGHT; i += 100) {
-            ctx.beginPath();
-            ctx.moveTo(0, i);
-            ctx.lineTo(WORLD_WIDTH, i);
-            ctx.stroke();
-        }
-
-        // Dibujar balas
-        ctx.fillStyle = '#f5d742';
-        ctx.shadowColor = '#ffbb33';
-        ctx.shadowBlur = 8;
-        bullets.forEach(b => {
-            ctx.beginPath();
-            ctx.arc(b.x, b.y, BULLET_RADIUS, 0, Math.PI*2);
-            ctx.fill();
-        });
-        ctx.shadowBlur = 0;
-
-        // Dibujar jugadores (estilo Madness Combat simplificado)
-        for (let id in players) {
-            const p = players[id];
-            const isLocal = (id === localPlayerId);
-
-            // color según vida
-            const healthPercent = p.health / MAX_HEALTH;
-            const red = 200 + Math.floor(55 * (1 - healthPercent));
-            const green = Math.floor(100 * healthPercent);
-            const blue = Math.floor(80 * healthPercent);
-            ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
-            ctx.strokeStyle = '#fcd7a0';
-            ctx.lineWidth = 3;
-
-            // cabeza (círculo)
-            ctx.beginPath();
-            ctx.arc(p.x, p.y - 10, 12, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.stroke();
-
-            // cuerpo (línea)
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y - 4);
-            ctx.lineTo(p.x, p.y + 18);
-            ctx.strokeStyle = '#bbaa99';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // brazos (líneas según ángulo)
-            const armAngle = p.angle || 0;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y + 2);
-            ctx.lineTo(p.x + Math.cos(armAngle-0.5)*18, p.y + Math.sin(armAngle-0.5)*8);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y + 2);
-            ctx.lineTo(p.x + Math.cos(armAngle+0.5)*18, p.y + Math.sin(armAngle+0.5)*8);
-            ctx.stroke();
-
-            // piernas
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y + 18);
-            ctx.lineTo(p.x-10, p.y+32);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y + 18);
-            ctx.lineTo(p.x+10, p.y+32);
-            ctx.stroke();
-
-            // barra de vida
-            ctx.fillStyle = '#511';
-            ctx.fillRect(p.x-20, p.y-40, 40, 6);
-            ctx.fillStyle = '#7f3';
-            ctx.fillRect(p.x-20, p.y-40, 40 * healthPercent, 6);
-
-            if (isLocal) {
+            // Dibujar fondo estilo césped
+            ctx.fillStyle = '#b0e57c';
+            ctx.fillRect(0, 0, 400, 400);
+            // Líneas decorativas
+            ctx.strokeStyle = '#8bc34a';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 10; i++) {
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, PLAYER_RADIUS+2, 0, 2*Math.PI);
-                ctx.strokeStyle = '#ffd966';
-                ctx.lineWidth = 3;
+                ctx.moveTo(i * 40, 0);
+                ctx.lineTo(i * 40, 400);
+                ctx.strokeStyle = '#8bc34a';
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * 40);
+                ctx.lineTo(400, i * 40);
                 ctx.stroke();
             }
+
+            // Dibujar gato (triángulo para cuerpo, círculo cabeza)
+            const headX = cat.x;
+            const headY = cat.y;
+            const headR = 20;
+
+            // Dirección (línea)
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.moveTo(headX, headY);
+            const rad = cat.angle * Math.PI / 180;
+            ctx.lineTo(headX + Math.cos(rad) * 40, headY - Math.sin(rad) * 40); // ojo: y invertido
+            ctx.stroke();
+
+            // Cuerpo
+            ctx.fillStyle = '#FF9800';
+            ctx.beginPath();
+            ctx.ellipse(headX, headY, 22, 18, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#E65100';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Orejas
+            ctx.fillStyle = '#FF9800';
+            ctx.beginPath();
+            ctx.moveTo(headX - 15, headY - 15);
+            ctx.lineTo(headX - 5, headY - 30);
+            ctx.lineTo(headX - 25, headY - 25);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(headX + 15, headY - 15);
+            ctx.lineTo(headX + 5, headY - 30);
+            ctx.lineTo(headX + 25, headY - 25);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Ojos
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(headX - 8, headY - 4, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(headX + 8, headY - 4, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(headX - 8 + (Math.cos(rad)*2), headY - 4 - (Math.sin(rad)*2), 2, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(headX + 8 + (Math.cos(rad)*2), headY - 4 - (Math.sin(rad)*2), 2, 0, 2*Math.PI);
+            ctx.fill();
+
+            // Bigotes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(headX-12, headY+2); ctx.lineTo(headX-25, headY+5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(headX-12, headY+5); ctx.lineTo(headX-25, headY+2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(headX+12, headY+2); ctx.lineTo(headX+25, headY+5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(headX+12, headY+5); ctx.lineTo(headX+25, headY+2); ctx.stroke();
+
+            // Si hay mensaje de "decir", dibujar bocadillo
+            if (cat.sayText) {
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(headX + 40, headY - 30, 45, 25, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(cat.sayText, headX + 18, headY - 33);
+            }
+
+            // Actualizar info en HTML
+            posXSpan.textContent = Math.round(cat.x);
+            posYSpan.textContent = Math.round(cat.y);
+            angleSpan.textContent = cat.angle;
+            messageBox.textContent = `💬 Mensaje: ${cat.sayText || '(vacío)'}`;
         }
 
-        ctx.restore();
-    }
-
-    // --- Bucle principal (tanto host como cliente) ---
-    function gameLoop() {
-        if (isHost) {
-            hostUpdate();
-        } else {
-            // cliente: enviar input al host
-            sendInputToHost();
+        // ---------- API que será llamada desde los bloques ----------
+        function mover(pasos) {
+            let rad = cat.angle * Math.PI / 180;
+            cat.x += Math.cos(rad) * pasos;
+            cat.y -= Math.sin(rad) * pasos;  // y decrece hacia arriba
+            // Limitar dentro del canvas (con margen)
+            cat.x = Math.min(380, Math.max(20, cat.x));
+            cat.y = Math.min(380, Math.max(20, cat.y));
+            drawCat();
         }
-        render();
-        requestAnimationFrame(gameLoop);
-    }
 
-    // --- Inicialización PeerJS para anfitrión ---
-    function startHost() {
-        isHost = true;
-        setStatus('🟢 Creando sala...');
-        peer = new Peer(generateId()); // ID aleatorio
+        function girar(grados) {
+            cat.angle = (cat.angle + grados) % 360;
+            drawCat();
+        }
 
-        peer.on('open', (id) => {
-            localPlayerId = id;
-            players = {};
-            players[localPlayerId] = createLocalPlayer(WORLD_WIDTH/2, WORLD_HEIGHT/2);
-            bullets = [];
-            setStatus(`🟢 Sala activa: <span>${id}</span>`);
-            peerIdInput.value = id; // mostrar ID
+        function decir(texto) {
+            if (cat.sayTimer) clearTimeout(cat.sayTimer);
+            cat.sayText = String(texto);
+            drawCat();
+            cat.sayTimer = setTimeout(() => {
+                cat.sayText = '';
+                drawCat();
+            }, 1500);
+        }
 
-            // Escuchar conexiones entrantes
-            peer.on('connection', (conn) => {
-                connections.push(conn);
-                setStatus(`➕ Jugador conectado. Total: ${connections.length+1}`);
+        // Reiniciar posición del gato
+        function resetCat() {
+            cat.x = 200;
+            cat.y = 200;
+            cat.angle = 0;
+            if (cat.sayTimer) clearTimeout(cat.sayTimer);
+            cat.sayText = '';
+            drawCat();
+        }
 
-                // Asignar ID al cliente
-                const newPlayerId = generateId();
-                players[newPlayerId] = createLocalPlayer(WORLD_WIDTH/2 + 100, WORLD_HEIGHT/2);
+        // ---------- Definición de bloques personalizados Blockly ----------
+        Blockly.Blocks['when_flag_clicked'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('⚑ al presionar bandera');
+                this.appendStatementInput('DO')
+                    .setCheck(null);
+                this.setColour('#FFC107');
+                this.setTooltip('Comenzar al hacer clic en la bandera');
+                this.setPreviousStatement(false);
+                this.setNextStatement(false);
+            }
+        };
 
-                conn.on('data', (data) => {
-                    // datos entrantes del cliente (input)
-                    if (data.type === 'input') {
-                        if (players[newPlayerId]) {
-                            players[newPlayerId].input = data; // guardamos input para hostUpdate
-                        }
-                    }
-                });
+        Blockly.Blocks['move_forward'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('mover');
+                this.appendValueInput('STEPS')
+                    .setCheck('Number')
+                    .appendField('pasos');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#4CAF50');
+                this.setTooltip('Mueve el gato hacia adelante');
+            }
+        };
 
-                conn.on('close', () => {
-                    // eliminar jugador
-                    delete players[newPlayerId];
-                    connections = connections.filter(c => c !== conn);
-                    setStatus(`❌ Jugador desconectado. Restantes: ${connections.length+1}`);
-                });
+        Blockly.Blocks['turn_right'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('girar');
+                this.appendValueInput('DEGREES')
+                    .setCheck('Number')
+                    .appendField('grados a la derecha');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#4CAF50');
+                this.setTooltip('Gira el gato a la derecha');
+            }
+        };
 
-                // Enviar confirmación con ID y estado actual
-                conn.send({
-                    type: 'init',
-                    yourId: newPlayerId,
-                    players: players,
-                    bullets: bullets
-                });
-            });
+        Blockly.Blocks['say'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('decir');
+                this.appendValueInput('MESSAGE')
+                    .setCheck('String')
+                    .appendField('mensaje');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#9C27B0');
+                this.setTooltip('Mostrar un mensaje');
+            }
+        };
+
+        Blockly.Blocks['repeat'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('repetir');
+                this.appendValueInput('TIMES')
+                    .setCheck('Number')
+                    .appendField('veces');
+                this.appendStatementInput('DO')
+                    .setCheck(null)
+                    .appendField('hacer');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#FF5722');
+                this.setTooltip('Repite un bloque varias veces');
+            }
+        };
+
+        // Generadores de código JavaScript
+        Blockly.JavaScript['when_flag_clicked'] = function(block) {
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            return '(function() {\n' + statements + '})();\n';
+        };
+
+        Blockly.JavaScript['move_forward'] = function(block) {
+            let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
+            return 'mover(' + steps + ');\n';
+        };
+
+        Blockly.JavaScript['turn_right'] = function(block) {
+            let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
+            return 'girar(' + degrees + ');\n';
+        };
+
+        Blockly.JavaScript['say'] = function(block) {
+            let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'Hola'";
+            return 'decir(' + message + ');\n';
+        };
+
+        Blockly.JavaScript['repeat'] = function(block) {
+            let times = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '10';
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            return 'for (var i__ = 0; i__ < ' + times + '; i__++) {\n' + statements + '}\n';
+        };
+
+        // ---------- Inicializar Blockly ----------
+        const toolbox = document.getElementById('toolbox');
+        const blocklyDiv = document.getElementById('blocklyDiv');
+        const workspace = Blockly.inject(blocklyDiv, {
+            toolbox: toolbox,
+            trashcan: true,
+            scrollbars: true,
+            horizontalLayout: false,
+            toolboxPosition: 'start',
+            sounds: false,
+            media: 'https://unpkg.com/blockly/media/'
         });
 
-        peer.on('error', (err) => {
-            setStatus(`❌ Error host: ${err.type}`, true);
+        // Agregar algunos bloques iniciales para empezar (opcional)
+        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(
+            '<xml>' +
+            '<block type="when_flag_clicked" x="20" y="20"></block>' +
+            '</xml>'
+        ), workspace);
+
+        // ---------- Botones ----------
+        document.getElementById('runButton').addEventListener('click', function() {
+            let code = Blockly.JavaScript.workspaceToCode(workspace);
+            console.log("Código generado:\n", code);
+            try {
+                eval(code);
+            } catch (e) {
+                alert("Error al ejecutar los bloques: " + e.message);
+            }
         });
-    }
 
-    // --- Unirse como cliente ---
-    function joinHost(hostId) {
-        if (!hostId.trim()) {
-            setStatus('⚠️ Ingresa un ID válido', true);
-            return;
-        }
-        isHost = false;
-        setStatus(`🟡 Conectando a ${hostId}...`);
-
-        peer = new Peer(generateId());
-        peer.on('open', () => {
-            const conn = peer.connect(hostId);
-            conn.on('open', () => {
-                setStatus(`✅ Conectado a sala. Esperando datos...`);
-                // Escuchar datos del host
-                conn.on('data', (data) => {
-                    if (data.type === 'init') {
-                        localPlayerId = data.yourId;
-                        players = data.players;
-                        bullets = data.bullets || [];
-                        setStatus(`⚔️ En combate. ID: ${localPlayerId.slice(0,5)}`);
-                    } else if (data.type === 'state') {
-                        players = data.players;
-                        bullets = data.bullets;
-                    }
-                });
-
-                conn.on('close', () => {
-                    setStatus('🔴 Desconectado del host', true);
-                });
-            });
-
-            conn.on('error', (err) => {
-                setStatus(`❌ Error conexión: ${err}`, true);
-            });
+        document.getElementById('resetButton').addEventListener('click', function() {
+            resetCat();
         });
-    }
 
-    // --- Eventos UI y controles ---
-    document.getElementById('hostBtn').addEventListener('click', () => {
-        if (peer) peer.destroy();
-        startHost();
-    });
+        document.getElementById('clearButton').addEventListener('click', function() {
+            workspace.clear();
+            resetCat();
+        });
 
-    document.getElementById('connectBtn').addEventListener('click', () => {
-        if (peer) peer.destroy();
-        joinHost(peerIdInput.value);
-    });
+        // Dibujar estado inicial
+        resetCat();
 
-    // Teclado
-    window.addEventListener('keydown', (e) => {
-        const k = e.key.toLowerCase();
-        if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-            keys[k] = true;
-            e.preventDefault();
-        }
-    });
-    window.addEventListener('keyup', (e) => {
-        const k = e.key.toLowerCase();
-        if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-            keys[k] = false;
-            e.preventDefault();
-        }
-    });
-
-    // Mouse
-    canvas.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
-
-    canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 0) {
-            mouseShoot = true;
-            e.preventDefault();
-        }
-    });
-    window.addEventListener('mouseup', (e) => {
-        if (e.button === 0) {
-            mouseShoot = false;
-        }
-    });
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // Iniciar loop gráfico
-    gameLoop();
-})();
-</script>
+        // Ajustar tamaño del bloque al redimensionar
+        window.addEventListener('resize', function() {
+            Blockly.svgResize(workspace);
+        });
+    </script>
 </body>
 </html>
