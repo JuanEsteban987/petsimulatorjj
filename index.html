@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Edición Extrema 2008</title>
+    <title>Juego de Programación - Comandos Visibles</title>
     <style>
         * {
             box-sizing: border-box;
@@ -31,6 +31,7 @@
             padding: 15px;
             background: #ece9d8;
             box-shadow: inset -2px -2px 0 #0a0a0a, inset 2px 2px 0 #ffffff;
+            position: relative;
         }
         
         /* Panel izquierdo - Canvas del juego */
@@ -54,7 +55,6 @@
             image-rendering: pixelated;
         }
         
-        /* Log de mensajes */
         .log-area {
             background: #000000;
             color: #00ff00;
@@ -65,6 +65,144 @@
             height: 80px;
             overflow-y: auto;
             font-size: 12px;
+        }
+        
+        /* Botón de comandos en esquina superior derecha */
+        .commands-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            color: #000000;
+            font-weight: bold;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            z-index: 100;
+        }
+        
+        .commands-button:hover {
+            background: #e4e0d8;
+        }
+        
+        .commands-button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            transform: translate(1px, 1px);
+        }
+        
+        /* Modal de comandos */
+        .commands-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .commands-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #d4d0c8;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #0a2f6c;
+            color: white;
+            padding: 10px;
+            border: 2px solid;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-button {
+            background: #d45b5b;
+            color: white;
+            border: 2px solid;
+            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .close-button:hover {
+            background: #e06f6f;
+        }
+        
+        .commands-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+        
+        .command-card {
+            background: #bfbfbf;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 10px;
+        }
+        
+        .command-card .command-name {
+            background: #0a2f6c;
+            color: #ffcc00;
+            padding: 3px 6px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+            border: 1px solid #3a6ea5;
+        }
+        
+        .command-card .command-desc {
+            font-size: 11px;
+            margin-bottom: 5px;
+            color: #000000;
+        }
+        
+        .command-card .command-example {
+            background: #000000;
+            color: #00ff00;
+            padding: 5px;
+            font-size: 11px;
+            font-family: monospace;
+            border: 1px solid #808080;
+        }
+        
+        .category-title {
+            grid-column: 1 / -1;
+            background: #6b238e;
+            color: white;
+            padding: 5px;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 2px solid;
+            border-color: #9b4db3 #3a175a #3a175a #9b4db3;
         }
         
         /* Panel derecho */
@@ -319,6 +457,22 @@
 </head>
 <body>
     <div class="game-container">
+        <!-- Botón de comandos en esquina -->
+        <div class="commands-button" onclick="openCommandsModal()">📚 COMANDOS</div>
+        
+        <!-- Modal de comandos -->
+        <div class="commands-modal" id="commandsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>LISTA COMPLETA DE COMANDOS (35+)</h2>
+                    <div class="close-button" onclick="closeCommandsModal()">CERRAR</div>
+                </div>
+                <div class="commands-list" id="commandsList">
+                    <!-- Se llenará dinámicamente con JavaScript -->
+                </div>
+            </div>
+        </div>
+        
         <!-- Área del juego -->
         <div class="game-area">
             <canvas id="gameCanvas" width="700" height="400"></canvas>
@@ -341,7 +495,7 @@
             <!-- Pestaña Principal -->
             <div id="tab-main" class="tab-content active">
                 <div class="code-input">
-                    <label>CÓDIGO PRINCIPAL (35+ COMANDOS)</label>
+                    <label>CÓDIGO PRINCIPAL</label>
                     <textarea id="mainCode" placeholder="Código principal...">// ========================================
 // COMANDOS DISPONIBLES (35+)
 // ========================================
@@ -351,7 +505,7 @@
 // VARIABLES: var, varset, sumarvar, restarvar, multvar, divvar, modvar, potvar, raizvar
 // COMPARACION: mayorque, menorque, igualque
 // UTILIDAD: aleatorio, distancia, texto, sonido, fondo
-// CONTROL: si, repetir, esperar (simulado)
+// CONTROL: si, repetir, esperar
 // FÍSICA: gravedad, saltar
 // ========================================
 
@@ -364,13 +518,7 @@ posset:"heroe":"100":"200"
 crearobjeto:"enemigo"
 sprite:"enemigo":"cubo":"rojo"
 var:"vida_enemigo":"Vida":"enemigo"
-posset:"enemigo":"500":"200"
-
-// Ejemplo de comandos nuevos
-texto:"Juego iniciado"
-fondo:"#000033"
-tamano:"heroe":"1.5"
-coloraleatorio:"enemigo"</textarea>
+posset:"enemigo":"500":"200"</textarea>
                 </div>
             </div>
             
@@ -454,7 +602,7 @@ finish</textarea>
             
             <!-- Estadísticas de comandos -->
             <div class="command-stats">
-                ⚡ 35+ COMANDOS DISPONIBLES - CREA, TRANSFORMA, PROGRAMAR
+                ⚡ 35+ COMANDOS DISPONIBLES - HAZ CLIC EN "COMANDOS" PARA VERLOS
             </div>
         </div>
     </div>
@@ -466,11 +614,12 @@ finish</textarea>
         const logArea = document.getElementById('logArea');
         
         // Estado del juego
-        let gameObjects = {}; // Objetos temporales
-        let permanentObjects = {}; // Objetos permanentes (guardados)
+        let gameObjects = {};
+        let permanentObjects = {};
         let gameVariables = {};
         let nextPosition = 50;
         let gameInitialized = false;
+        let backgroundColor = '#000000';
         
         // Cargar objetos permanentes del localStorage
         let savedPermanentObjects = localStorage.getItem('permanentObjects');
@@ -496,6 +645,125 @@ finish</textarea>
             'blanco': '#FFFFFF',
             'negro': '#000000'
         };
+        
+        // Lista completa de comandos para el modal
+        const commandsData = [
+            {
+                category: 'CREACIÓN Y ELIMINACIÓN',
+                commands: [
+                    { name: 'crearobjeto', desc: 'Crea un nuevo objeto temporal', example: 'crearobjeto:"nombre"' },
+                    { name: 'crearpermanente', desc: 'Crea una instancia de un objeto permanente', example: 'crearpermanente:"nombre"' },
+                    { name: 'duplicar', desc: 'Duplica un objeto existente con nuevo nombre', example: 'duplicar:"original":"copia"' },
+                    { name: 'eliminar', desc: 'Elimina un objeto (vida a 0)', example: 'eliminar:"objeto"' }
+                ]
+            },
+            {
+                category: 'SPRITE Y TRANSFORMACIÓN',
+                commands: [
+                    { name: 'sprite', desc: 'Cambia forma (cubo/circulo) y color', example: 'sprite:"objeto":"circulo":"azul"' },
+                    { name: 'tamano', desc: 'Cambia la escala del objeto (1=normal)', example: 'tamano:"objeto":"1.5"' },
+                    { name: 'rotar', desc: 'Rota el objeto en grados', example: 'rotar:"objeto":"90"' },
+                    { name: 'coloraleatorio', desc: 'Asigna un color aleatorio', example: 'coloraleatorio:"objeto"' }
+                ]
+            },
+            {
+                category: 'MOVIMIENTO',
+                commands: [
+                    { name: 'movx', desc: 'Mueve en horizontal (positivo derecha)', example: 'movx:"objeto":"30"' },
+                    { name: 'movy', desc: 'Mueve en vertical (positivo abajo)', example: 'movy:"objeto":"-20"' },
+                    { name: 'posset', desc: 'Establece posición exacta', example: 'posset:"objeto":"100":"200"' },
+                    { name: 'movimientoaleatorio', desc: 'Teletransporta a posición aleatoria', example: 'movimientoaleatorio:"objeto"' }
+                ]
+            },
+            {
+                category: 'VARIABLES',
+                commands: [
+                    { name: 'var', desc: 'Crea variable (Vida o node) vinculada a objeto', example: 'var:"vida":"Vida":"heroe"' },
+                    { name: 'varset', desc: 'Cambia valor (+20, -10, =50)', example: 'varset:"vida":"+20"' },
+                    { name: 'sumarvar', desc: 'Suma a variable', example: 'sumarvar:"variable":"5"' },
+                    { name: 'restarvar', desc: 'Resta a variable', example: 'restarvar:"variable":"3"' },
+                    { name: 'multvar', desc: 'Multiplica variable', example: 'multvar:"variable":"2"' },
+                    { name: 'divvar', desc: 'Divide variable', example: 'divvar:"variable":"2"' },
+                    { name: 'modvar', desc: 'Módulo', example: 'modvar:"variable":"10"' },
+                    { name: 'potvar', desc: 'Potencia', example: 'potvar:"variable":"2"' },
+                    { name: 'raizvar', desc: 'Raíz cuadrada', example: 'raizvar:"variable"' }
+                ]
+            },
+            {
+                category: 'COMPARACIONES',
+                commands: [
+                    { name: 'mayorque', desc: '1 si var1 > var2 en variable resultado', example: 'mayorque:"vida1":"vida2":"result"' },
+                    { name: 'menorque', desc: '1 si var1 < var2', example: 'menorque:"vida1":"vida2":"result"' },
+                    { name: 'igualque', desc: '1 si var1 == var2', example: 'igualque:"vida1":"vida2":"result"' }
+                ]
+            },
+            {
+                category: 'UTILIDADES',
+                commands: [
+                    { name: 'aleatorio', desc: 'Genera número aleatorio en variable', example: 'aleatorio:"variable":"1":"10"' },
+                    { name: 'distancia', desc: 'Calcula distancia entre objetos', example: 'distancia:"obj1":"obj2":"variable"' },
+                    { name: 'texto', desc: 'Muestra mensaje en log', example: 'texto:"Hola mundo"' },
+                    { name: 'sonido', desc: 'Simula un sonido', example: 'sonido:"explosion"' },
+                    { name: 'fondo', desc: 'Cambia color de fondo', example: 'fondo:"#003366"' }
+                ]
+            },
+            {
+                category: 'FÍSICA SIMULADA',
+                commands: [
+                    { name: 'gravedad', desc: 'Aplica gravedad (cae 15px)', example: 'gravedad:"objeto"' },
+                    { name: 'saltar', desc: 'Hace saltar (sube 25px)', example: 'saltar:"objeto"' }
+                ]
+            },
+            {
+                category: 'CONTROL DE FLUJO',
+                commands: [
+                    { name: 'si', desc: 'Ejecuta comando si condición (ej: vida>50)', example: 'si:"vida_heroe>50":"mover:heroe:10"' },
+                    { name: 'repetir', desc: 'Repite comando N veces', example: 'repetir:"3":"sonido:explosion"' },
+                    { name: 'esperar', desc: 'Simula espera (solo mensaje)', example: 'esperar:"2"' }
+                ]
+            },
+            {
+                category: 'INPUTS',
+                commands: [
+                    { name: 'input', desc: 'Define bloque para tecla (termina con finish)', example: 'input:"A"\n    movx:"heroe":"-30"\nfinish' }
+                ]
+            }
+        ];
+        
+        // Función para llenar el modal de comandos
+        function renderCommandsModal() {
+            const container = document.getElementById('commandsList');
+            let html = '';
+            commandsData.forEach(category => {
+                html += `<div class="category-title">${category.category}</div>`;
+                category.commands.forEach(cmd => {
+                    html += `
+                        <div class="command-card">
+                            <div class="command-name">${cmd.name}</div>
+                            <div class="command-desc">${cmd.desc}</div>
+                            <div class="command-example">${cmd.example.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    `;
+                });
+            });
+            container.innerHTML = html;
+        }
+        
+        // Abrir/cerrar modal
+        function openCommandsModal() {
+            document.getElementById('commandsModal').classList.add('active');
+        }
+        
+        function closeCommandsModal() {
+            document.getElementById('commandsModal').classList.remove('active');
+        }
+        
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCommandsModal();
+            }
+        });
         
         // Función para añadir mensaje al log
         function addLog(message) {
@@ -541,10 +809,8 @@ finish</textarea>
                 rotation: 0
             };
             
-            // Guardar en localStorage
             localStorage.setItem('permanentObjects', JSON.stringify(permanentObjects));
             
-            // Limpiar inputs
             document.getElementById('newObjName').value = '';
             document.getElementById('newObjShape').value = '';
             document.getElementById('newObjColor').value = '';
@@ -581,9 +847,8 @@ finish</textarea>
             addLog(`Objeto permanente "${name}" seleccionado.`);
         }
         
-        // Evaluar condición simple (ej: "vida_heroe>50" o "vida_heroe==vida_enemigo")
+        // Evaluar condición
         function evaluateCondition(condition) {
-            // Buscar operadores
             const operators = ['>=', '<=', '==', '!=', '>', '<'];
             for (let op of operators) {
                 if (condition.includes(op)) {
@@ -592,17 +857,15 @@ finish</textarea>
                         let left = parts[0].trim();
                         let right = parts[1].trim();
                         
-                        // Obtener valores izquierdo
                         let leftVal;
                         if (gameVariables[left]) {
                             leftVal = gameVariables[left].value;
                         } else if (gameObjects[left]) {
-                            leftVal = gameObjects[left].vida; // por defecto vida
+                            leftVal = gameObjects[left].vida;
                         } else {
                             leftVal = parseFloat(left);
                         }
                         
-                        // Obtener valor derecho
                         let rightVal;
                         if (gameVariables[right]) {
                             rightVal = gameVariables[right].value;
@@ -628,7 +891,7 @@ finish</textarea>
             return false;
         }
         
-        // Procesar comando individual (versión extendida)
+        // Procesar comando individual
         function processCommand(command, fromInput = false) {
             command = command.trim();
             
@@ -644,9 +907,6 @@ finish</textarea>
                 p.trim().replace(/^"|"$/g, '')
             );
             
-            // ============================================
-            // COMANDOS DE CREACIÓN Y ELIMINACIÓN
-            // ============================================
             switch(cmd) {
                 case 'crearobjeto':
                     if (params.length < 1) throw new Error('crearobjeto necesita un nombre');
@@ -699,7 +959,7 @@ finish</textarea>
                     
                     gameObjects[newName] = JSON.parse(JSON.stringify(gameObjects[origObj]));
                     gameObjects[newName].name = newName;
-                    gameObjects[newName].x += 30; // desplazar un poco
+                    gameObjects[newName].x += 30;
                     addLog(`Objeto "${origObj}" duplicado como "${newName}".`);
                     break;
                     
@@ -711,9 +971,6 @@ finish</textarea>
                     addLog(`Objeto "${delObj}" eliminado.`);
                     break;
                     
-                // ============================================
-                // COMANDOS DE SPRITE Y TRANSFORMACIÓN
-                // ============================================
                 case 'sprite':
                     if (params.length < 3) throw new Error('sprite necesita: objeto, forma, color');
                     const spriteObj = params[0];
@@ -750,7 +1007,7 @@ finish</textarea>
                     const grados = parseFloat(params[1]);
                     if (!gameObjects[rotObj]) throw new Error(`Objeto "${rotObj}" no encontrado`);
                     if (isNaN(grados)) throw new Error('Grados debe ser un número');
-                    gameObjects[rotObj].rotation = (grados * Math.PI / 180); // convertir a radianes
+                    gameObjects[rotObj].rotation = (grados * Math.PI / 180);
                     addLog(`Objeto "${rotObj}" rotado ${grados} grados.`);
                     break;
                     
@@ -763,9 +1020,6 @@ finish</textarea>
                     addLog(`Color aleatorio asignado a "${randColorObj}".`);
                     break;
                     
-                // ============================================
-                // COMANDOS DE MOVIMIENTO
-                // ============================================
                 case 'movx':
                     if (params.length < 2) throw new Error('movx necesita: objeto, pasos');
                     const moveXObj = params[0];
@@ -817,9 +1071,6 @@ finish</textarea>
                     addLog(`Objeto "${randMoveObj}" movido a posición aleatoria.`);
                     break;
                     
-                // ============================================
-                // COMANDOS DE VARIABLES (extendidos)
-                // ============================================
                 case 'var':
                     if (params.length < 3) throw new Error('var necesita: nombre, tipo, objeto');
                     const varName = params[0];
@@ -890,7 +1141,6 @@ finish</textarea>
                     }
                     break;
                     
-                // Operaciones aritméticas sobre variables
                 case 'sumarvar':
                     if (params.length < 2) throw new Error('sumarvar necesita: variable, valor');
                     const sumVar = params[0];
@@ -952,9 +1202,6 @@ finish</textarea>
                     gameVariables[raizVar].value = Math.sqrt(gameVariables[raizVar].value);
                     break;
                     
-                // ============================================
-                // COMANDOS DE COMPARACIÓN (guardan 1 o 0 en variable)
-                // ============================================
                 case 'mayorque':
                     if (params.length < 3) throw new Error('mayorque necesita: var1, var2, resultado');
                     const mq1 = params[0];
@@ -988,9 +1235,6 @@ finish</textarea>
                     gameVariables[igRes] = { name: igRes, type: 'node', object: 'system', value: iv1 == iv2 ? 1 : 0 };
                     break;
                     
-                // ============================================
-                // COMANDOS UTILITARIOS
-                // ============================================
                 case 'aleatorio':
                     if (params.length < 3) throw new Error('aleatorio necesita: variable, min, max');
                     const randVar = params[0];
@@ -1027,20 +1271,15 @@ finish</textarea>
                     
                 case 'fondo':
                     if (params.length < 1) throw new Error('fondo necesita: color');
-                    // El color se aplicará en drawGame (cambiamos el color de fondo del canvas)
-                    // Lo guardamos en una variable global
-                    window.backgroundColor = params[0];
+                    backgroundColor = params[0];
                     addLog(`Fondo cambiado a ${params[0]}`);
                     break;
                     
-                // ============================================
-                // COMANDOS DE FÍSICA SIMULADA
-                // ============================================
                 case 'gravedad':
                     if (params.length < 1) throw new Error('gravedad necesita: objeto');
                     const gravObj = params[0];
                     if (!gameObjects[gravObj]) throw new Error(`Objeto "${gravObj}" no encontrado`);
-                    gameObjects[gravObj].y += 15; // caída
+                    gameObjects[gravObj].y += 15;
                     if (gameObjects[gravObj].y > canvas.height - 30) gameObjects[gravObj].y = canvas.height - 30;
                     addLog(`Aplicando gravedad a "${gravObj}"`);
                     break;
@@ -1049,20 +1288,16 @@ finish</textarea>
                     if (params.length < 1) throw new Error('saltar necesita: objeto');
                     const saltObj = params[0];
                     if (!gameObjects[saltObj]) throw new Error(`Objeto "${saltObj}" no encontrado`);
-                    gameObjects[saltObj].y -= 25; // salto
+                    gameObjects[saltObj].y -= 25;
                     if (gameObjects[saltObj].y < 30) gameObjects[saltObj].y = 30;
                     addLog(`"${saltObj}" salta!`);
                     break;
                     
-                // ============================================
-                // COMANDOS DE CONTROL DE FLUJO
-                // ============================================
                 case 'si':
                     if (params.length < 2) throw new Error('si necesita: condición, comando');
                     const condition = params[0];
                     const trueCommand = params[1];
                     if (evaluateCondition(condition)) {
-                        // Ejecutar el comando (puede ser múltiple? por ahora simple)
                         processCommand(trueCommand, fromInput);
                     }
                     break;
@@ -1079,7 +1314,6 @@ finish</textarea>
                     break;
                     
                 case 'esperar':
-                    // Simulación: no hacemos nada, solo mensaje
                     if (params.length < 1) throw new Error('esperar necesita: segundos');
                     addLog(`Esperando ${params[0]} segundos (simulado).`);
                     break;
@@ -1138,13 +1372,11 @@ finish</textarea>
         
         // Ejecutar juego
         function executeGame() {
-            // Limpiar objetos temporales
             gameObjects = {};
             gameVariables = {};
             nextPosition = 50;
-            window.backgroundColor = '#000000'; // reset fondo
+            backgroundColor = '#000000';
             
-            // Limpiar handlers
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
             }
@@ -1152,10 +1384,8 @@ finish</textarea>
             const mainCode = document.getElementById('mainCode').value;
             const scriptsCode = document.getElementById('scriptsCode').value;
             
-            // Parsear inputs
             parseInputBlocks(scriptsCode);
             
-            // Ejecutar código principal
             const lines = mainCode.split('\n');
             const errorDisplay = document.getElementById('errorDisplay');
             errorDisplay.style.display = 'none';
@@ -1213,7 +1443,7 @@ finish</textarea>
             gameVariables = {};
             nextPosition = 50;
             gameInitialized = false;
-            window.backgroundColor = '#000000';
+            backgroundColor = '#000000';
             
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
@@ -1225,12 +1455,11 @@ finish</textarea>
             showSuccess('🔄 TODO REINICIADO');
         }
         
-        // Dibujar en canvas (con transformaciones)
+        // Dibujar en canvas
         function drawGame() {
-            ctx.fillStyle = window.backgroundColor || '#000000';
+            ctx.fillStyle = backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Grid
             ctx.strokeStyle = '#003300';
             ctx.lineWidth = 1;
             for(let i = 0; i < canvas.width; i += 50) {
@@ -1249,7 +1478,6 @@ finish</textarea>
                 ctx.stroke();
             }
             
-            // Dibujar objetos
             Object.keys(gameObjects).forEach(key => {
                 const obj = gameObjects[key];
                 
@@ -1277,18 +1505,15 @@ finish</textarea>
                 
                 ctx.restore();
                 
-                // Nombre
                 ctx.save();
                 ctx.font = 'bold 12px Courier New';
                 ctx.fillStyle = '#00ff00';
                 ctx.fillText(obj.name, obj.x - 30, obj.y - 30);
                 
-                // Coordenadas
                 ctx.font = '10px Courier New';
                 ctx.fillStyle = '#ffff00';
                 ctx.fillText(`(${obj.x},${obj.y})`, obj.x - 25, obj.y - 45);
                 
-                // Vida
                 ctx.fillStyle = '#333333';
                 ctx.fillRect(obj.x - 30, obj.y - 20, 60, 8);
                 ctx.fillStyle = obj.vida > 50 ? '#00ff00' : '#ff0000';
@@ -1381,10 +1606,10 @@ finish</textarea>
         
         // Inicializar
         window.onload = function() {
+            renderCommandsModal();
             updatePermanentObjectsList();
             resetGame();
             
-            // Ctrl+Enter para ejecutar
             document.getElementById('mainCode').addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     e.preventDefault();
@@ -1401,6 +1626,8 @@ finish</textarea>
         window.resetGame = resetGame;
         window.saveGame = saveGame;
         window.loadGame = loadGame;
+        window.openCommandsModal = openCommandsModal;
+        window.closeCommandsModal = closeCommandsModal;
     </script>
 </body>
 </html>
