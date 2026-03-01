@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2008 Shape Programmer</title>
+    <title>2008 Shape Programmer PRO</title>
     <style>
-        /* === ESTÉTICA 2008: VIBE WEB 2.0 + TOQUES VINTAGE === */
+        /* === ESTÉTICA 2008 MEJORADA === */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #39658a; /* fondo azul degradado antiguo */
+            background: #39658a;
             background: -moz-linear-gradient(top, #4b7ca1, #1a4b6d);
             background: -webkit-gradient(linear, left top, left bottom, from(#4b7ca1), to(#1a4b6d));
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Monaco', cursive, sans-serif;
@@ -23,23 +23,21 @@
             align-items: center;
             padding: 15px;
             margin: 0;
-            border: 3px solid #ffcc00; /* borde amarillento nostálgico */
+            border: 3px solid #ffcc00;
             box-shadow: inset 0 0 30px #00000066;
         }
 
         .ventana-principal {
-            width: 1100px;
+            width: 1200px;
             max-width: 100%;
-            background: #ece9d8; /* beige claro de Windows XP */
+            background: #ece9d8;
             border: 4px solid #2a6f9c;
             border-radius: 12px 12px 8px 8px;
             padding: 12px;
             -webkit-box-shadow: 8px 8px 16px #1e1e1e, inset 2px 2px 4px #ffffffb0;
             box-shadow: 8px 8px 16px #1e1e1e, inset 2px 2px 4px #ffffffb0;
-            backdrop-filter: blur(1px);
         }
 
-        /* barra de título estilo XP */
         .titulo-ventana {
             background: #2a6f9c;
             padding: 6px 10px;
@@ -55,12 +53,6 @@
             border-bottom: 2px solid #ffd966;
         }
 
-        .titulo-ventana img {
-            width: 32px;
-            height: 32px;
-            filter: drop-shadow(2px 2px 0 #0b1b28);
-        }
-
         .contenido-flex {
             display: flex;
             flex-wrap: wrap;
@@ -68,11 +60,10 @@
             margin-top: 15px;
         }
 
-        /* panel de comandos (izquierda) */
         .panel-codigo {
-            flex: 1.2;
-            min-width: 280px;
-            background: #d4d0c8; /* gris clarito retro */
+            flex: 1.3;
+            min-width: 320px;
+            background: #d4d0c8;
             border: 3px inset #ffffffd0;
             border-right-color: #808080;
             border-bottom-color: #808080;
@@ -91,12 +82,12 @@
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 180px;
             background: #171717;
             border: 4px solid #7b7b7b;
-            color: #00ff00; /* verde fosforito de monitor antiguo */
+            color: #00ff00;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
+            font-size: 15px;
             padding: 10px;
             resize: vertical;
             box-shadow: inset 0 0 12px #00aa00, 0 0 5px cyan;
@@ -104,8 +95,8 @@
             line-height: 1.5;
         }
 
-        .botonera {
-            margin: 15px 0 5px;
+        .botonera-principal {
+            margin: 15px 0 10px;
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
@@ -120,7 +111,7 @@
             font-family: 'Comic Sans MS', cursive;
             font-weight: bold;
             font-size: 18px;
-            padding: 8px 25px;
+            padding: 8px 18px;
             cursor: pointer;
             text-transform: uppercase;
             box-shadow: 2px 2px 0 #0a1c33;
@@ -140,10 +131,57 @@
             box-shadow: inset 1px 1px 5px #131313;
         }
 
-        /* panel canvas (derecha) */
+        .boton-pequeno {
+            font-size: 14px;
+            padding: 5px 10px;
+            background: #e0e0c0;
+            border: 2px outset #ffffe0;
+            border-right-color: #6b6b4e;
+            border-bottom-color: #6b6b4e;
+        }
+
+        .panel-autocompletar {
+            background: #b9c9d6;
+            border: 3px ridge #4f7b99;
+            padding: 10px;
+            margin: 12px 0 5px;
+        }
+
+        .panel-autocompletar .titulo {
+            font-size: 16px;
+            color: #0b2d44;
+            margin-bottom: 8px;
+            font-weight: bold;
+            border-bottom: 2px solid #0f3857;
+        }
+
+        .comandos-rapidos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .comando-boton {
+            background: #eef4d0;
+            border: 2px outset #faffc4;
+            border-right-color: #8a9344;
+            border-bottom-color: #8a9344;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 4px 8px;
+            cursor: pointer;
+            color: #1d3d5c;
+            box-shadow: 1px 1px 0 #1a2f40;
+        }
+
+        .comando-boton:hover {
+            background: #f8ffb5;
+        }
+
         .panel-canvas {
             flex: 2;
-            min-width: 400px;
+            min-width: 450px;
             background: #586e7e;
             border: 5px ridge #6f8fa2;
             padding: 10px;
@@ -158,7 +196,7 @@
             border: 3px solid #b9c9d6;
             box-shadow: inset 0 0 30px #000000, 4px 4px 8px black;
             cursor: crosshair;
-            image-rendering: pixelated; /* toque retro */
+            image-rendering: pixelated;
         }
 
         .barra-estado {
@@ -227,37 +265,59 @@
 <div class="ventana-principal">
     <div class="titulo-ventana">
         <span>◈ SHAPE PROGRAMMER 2008 ◈</span>
-        <span style="font-size:14px; margin-left:auto;">powered by Comic Sans</span>
+        <span style="font-size:14px; margin-left:auto;">+ 9 nuevos comandos</span>
     </div>
     <div class="marquee-2008">
-        <span>★ BIENVENIDO AL ESTUDIO DE PROGRAMACIÓN RETRO ★ CREA TUS FIGURAS CON COMANDOS ★ MUEVE Y TELETRANSPORTA ★ ESTÉTICA 2008 ★</span>
+        <span>★ AUTCOMPLETAR CON BOTONES ★ LIST / DELETE / CLEAN / COLOR / RENAME / MOVID / TPID ★</span>
     </div>
 
     <div class="contenido-flex">
-        <!-- PANEL IZQUIERDO: CÓDIGO -->
+        <!-- PANEL IZQUIERDO: CÓDIGO Y AUTOCOMPLETAR -->
         <div class="panel-codigo">
-            <label>📟 INGRESA TUS COMANDOS (una línea = un comando):</label>
+            <label>📟 TERMINAL DE COMANDOS (cada línea uno):</label>
             <textarea id="codigoArea" placeholder="Ejemplo:
-create:&quot;cuadradoRojo,1&quot;:&quot;Cubo&quot;:&quot;red&quot;
-mov:&quot;60&quot;:&quot;20&quot;
-create:&quot;circuloAzul,2&quot;:&quot;Círculo&quot;:&quot;#2266ff&quot;
-tp:&quot;400&quot;:&quot;200&quot;">create:"MiForma,101":"Cubo":"#FF44AA"
+create:'cuadradoRojo,1':'Cubo':'red'
+mov:'60':'20'
+create:'circuloAzul,2':'Círculo':'#2266ff'
+tp:'400':'200'">create:"MiForma,101":"Cubo":"#FF44AA"
 mov:"30":"-10"
 create:"Bola,202":"Circulo":"gold"
 tp:"500":"150"</textarea>
 
-            <div class="botonera">
+            <div class="botonera-principal">
                 <button class="boton-2008" id="runBtn">▶ EJECUTAR</button>
                 <button class="boton-2008" id="resetBtn">♻ RESET SHAPES</button>
                 <button class="boton-2008" id="limpiarCmdBtn">⌧ LIMPIAR CÓDIGO</button>
             </div>
+
+            <!-- AUTOCOMPLETAR: BOTONES QUE INSERTAN PLANTILLAS -->
+            <div class="panel-autocompletar">
+                <div class="titulo">⚡ AUTCOMPLETAR (haz clic para insertar comando):</div>
+                <div class="comandos-rapidos">
+                    <span class="comando-boton" data-cmd="create">create:"nombre,ID":"Cubo":"red"</span>
+                    <span class="comando-boton" data-cmd="mov">mov:"X":"Y"</span>
+                    <span class="comando-boton" data-cmd="tp">tp:"X":"Y"</span>
+                    <span class="comando-boton" data-cmd="movid">movid:"ID":"X":"Y"</span>
+                    <span class="comando-boton" data-cmd="tpid">tpid:"ID":"X":"Y"</span>
+                    <span class="comando-boton" data-cmd="color">color:"ID":"blue"</span>
+                    <span class="comando-boton" data-cmd="rename">rename:"ID":"nuevoNombre"</span>
+                    <span class="comando-boton" data-cmd="delete">delete</span>
+                    <span class="comando-boton" data-cmd="deleteid">delete:"ID"</span>
+                    <span class="comando-boton" data-cmd="list">list</span>
+                    <span class="comando-boton" data-cmd="clean">clean</span>
+                </div>
+                <div style="font-size:12px; margin-top:6px; color:#1d3a4f;"> click → añade línea. Edita los valores.</div>
+            </div>
+
             <hr>
             <div style="font-size:14px; color:#142f44; background:#fbe6b0; padding:8px; border:2px dashed #b0804c;">
-                <strong>COMANDOS 2008:</strong><br>
-                <span style="color:#a52a2a;">create:"nombre,ID":"Cubo/Circulo/Triangulo":"color"</span><br>
-                <span style="color:#1e4d6b;">mov:"X":"Y"  (mueve última figura)</span><br>
-                <span style="color:#1e4d6b;">tp:"X":"Y"   (teletransporta última figura)</span><br>
-                <span style="font-size:12px;">*Los colores: nombre o hex. *Coordenadas en canvas (px).</span>
+                <strong>📌 COMANDOS 2008 (nuevos en negrita):</strong><br>
+                create:"nombre,ID":"Cubo/Circulo/Triangulo":"color"<br>
+                mov:"X":"Y" | tp:"X":"Y" <br>
+                <strong>movid:"ID":"X":"Y" | tpid:"ID":"X":"Y"</strong><br>
+                <strong>color:"ID":"nuevocolor" | rename:"ID":"nuevonombre"</strong><br>
+                <strong>delete (último) | delete:"ID" | list | clean</strong><br>
+                <span style="font-size:12px;">*Se aceptan comillas dobles, simples u omitidas si sin espacios.</span>
             </div>
         </div>
 
@@ -274,7 +334,6 @@ tp:"500":"150"</textarea>
         </div>
     </div>
 
-    <!-- decoración extra pixel 2008 -->
     <div style="display: flex; gap: 12px; margin-top: 12px; background:#cddae5; padding: 4px; border:1px solid #457d9c;">
         <span>★</span><span> MSN 2008</span><span>★</span><span style="margin-left:auto;">MySpace</span><span>★</span><span>Fotolog</span><span>★</span>
     </div>
@@ -287,17 +346,14 @@ tp:"500":"150"</textarea>
         const ctx = canvas.getContext('2d');
         const statusEl = document.getElementById('estadoMsg');
         const contadorEl = document.getElementById('contadorShapes');
+        const codigoArea = document.getElementById('codigoArea');
 
-        // Array de shapes
         let shapes = [];
-        // Recordar índice de la última figura creada (para mov/tp)
         let lastShapeIndex = -1;
-
-        // Posición por defecto (centro del canvas)
         const DEFAULT_X = 350;
         const DEFAULT_Y = 200;
 
-        // --- FUNCIONES DE DIBUJO (estilo básico, centrado) ---
+        // --- FUNCIONES DE DIBUJO (igual) ---
         function drawShape(shape) {
             const { type, color, x, y } = shape;
             ctx.fillStyle = color;
@@ -326,15 +382,14 @@ tp:"500":"150"</textarea>
                 case 'triangulo':
                 case 'triangle':
                     ctx.beginPath();
-                    ctx.moveTo(x, y - 30);       // vértice superior
-                    ctx.lineTo(x - 25, y + 15);   // inferior izquierdo
-                    ctx.lineTo(x + 25, y + 15);   // inferior derecho
+                    ctx.moveTo(x, y - 30);
+                    ctx.lineTo(x - 25, y + 15);
+                    ctx.lineTo(x + 25, y + 15);
                     ctx.closePath();
                     ctx.fill();
                     ctx.stroke();
                     break;
                 default:
-                    // si no reconoce, dibuja un rombo raro (fallback)
                     ctx.beginPath();
                     ctx.moveTo(x, y - 20);
                     ctx.lineTo(x + 20, y);
@@ -344,16 +399,13 @@ tp:"500":"150"</textarea>
                     ctx.fill();
                     ctx.stroke();
             }
-            // pequeños detalles: borde blanco y sombra retro
-            ctx.shadowBlur = 0; // reset para no interferir
+            ctx.shadowBlur = 0;
         }
 
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // fondo tipo cuadrícula (estilo programación 2008)
             ctx.fillStyle = '#20394c';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // cuadrícula sutil
             ctx.strokeStyle = '#4c6c87';
             ctx.lineWidth = 0.5;
             for (let i = 0; i < canvas.width; i += 30) {
@@ -370,39 +422,80 @@ tp:"500":"150"</textarea>
                 ctx.lineTo(canvas.width, i);
                 ctx.stroke();
             }
-
-            // dibujar cada figura
             shapes.forEach(shape => drawShape(shape));
-
-            // actualizar contador
             contadorEl.innerText = shapes.length + (shapes.length === 1 ? ' shape' : ' shapes');
         }
 
-        // --- PARSE Y EJECUCIÓN DE COMANDOS ---
+        // --- PARSEADOR MEJORADO: acepta comillas dobles, simples o sin comillas si no hay espacios ---
+        function parsearArgumentos(linea) {
+            const partes = [];
+            let buffer = '';
+            let dentroComillas = false;
+            let comillaUsada = '';
+            for (let i = 0; i < linea.length; i++) {
+                const c = linea[i];
+                if ((c === '"' || c === "'") && (!dentroComillas || comillaUsada === c)) {
+                    if (dentroComillas && comillaUsada === c) {
+                        // cierre
+                        dentroComillas = false;
+                        comillaUsada = '';
+                        partes.push(buffer);
+                        buffer = '';
+                    } else {
+                        dentroComillas = true;
+                        comillaUsada = c;
+                    }
+                    continue;
+                }
+                if (c === ':' && !dentroComillas) {
+                    if (buffer.trim() !== '') {
+                        partes.push(buffer.trim());
+                    } else {
+                        partes.push(''); // argumento vacío
+                    }
+                    buffer = '';
+                    continue;
+                }
+                buffer += c;
+            }
+            if (buffer.trim() !== '' || dentroComillas) {
+                partes.push(buffer.trim());
+            }
+            return partes;
+        }
+
+        // --- EJECUTAR UN COMANDO (devuelve true si ok) ---
         function ejecutarComando(linea, numeroLinea) {
             linea = linea.trim();
-            if (linea === '' || linea.startsWith('//')) return true; // comentario / vacío
+            if (linea === '' || linea.startsWith('//')) return true;
 
-            const partes = linea.split(':').map(s => s.trim());
-            if (partes.length < 2) {
-                statusEl.innerText = `Error línea ${numeroLinea}: formato incorrecto`;
-                return false;
+            // Extraer comando (primera palabra hasta ':')
+            const idxColon = linea.indexOf(':');
+            let comando, resto;
+            if (idxColon === -1) {
+                comando = linea.toLowerCase();
+                resto = '';
+            } else {
+                comando = linea.substring(0, idxColon).toLowerCase().trim();
+                resto = linea.substring(idxColon + 1);
             }
 
-            const comando = partes[0].toLowerCase();
-            // quitar comillas dobles del principio y final de cada argumento
-            const args = partes.slice(1).map(arg => arg.replace(/^"|"$/g, ''));
+            // Parsear argumentos del resto
+            let args = [];
+            if (resto.trim() !== '') {
+                args = parsearArgumentos(resto);
+            }
 
             try {
+                // --- CREATE ---
                 if (comando === 'create') {
                     if (args.length < 3) {
-                        statusEl.innerText = `Error create: se necesitan 3 argumentos`;
+                        statusEl.innerText = `Error create: necesita 3 argumentos`;
                         return false;
                     }
-                    // args[0] = "nombre,ID"   ,  args[1] = forma,  args[2] = color
                     const nombreId = args[0];
                     let nombre = nombreId;
-                    let id = '' + (shapes.length + 1); // id por defecto
+                    let id = '' + (shapes.length + 1);
                     if (nombreId.includes(',')) {
                         const split = nombreId.split(',').map(s => s.trim());
                         nombre = split[0] || 'sinNombre';
@@ -412,15 +505,13 @@ tp:"500":"150"</textarea>
                     }
 
                     let formaRaw = args[1].toLowerCase();
-                    // normalizar a "Cubo", "Circulo", "Triangulo"
                     let forma = 'Cubo';
                     if (formaRaw.includes('circulo') || formaRaw.includes('circle') || formaRaw.includes('círculo')) forma = 'Circulo';
                     else if (formaRaw.includes('triangulo') || formaRaw.includes('triangle')) forma = 'Triangulo';
-                    else forma = 'Cubo'; // por defecto
+                    else forma = 'Cubo';
 
-                    const color = args[2] || '#FFB6C1'; // rosa pastel por defecto
+                    const color = args[2] || '#FFB6C1';
 
-                    // Crear nueva figura con coordenadas por defecto (centro)
                     const newShape = {
                         id: id,
                         name: nombre,
@@ -433,60 +524,126 @@ tp:"500":"150"</textarea>
                     lastShapeIndex = shapes.length - 1;
                     statusEl.innerText = `✔ Creado: ${nombre} (ID ${id})`;
                 }
+                // --- MOV (último) ---
                 else if (comando === 'mov') {
-                    if (shapes.length === 0) {
-                        statusEl.innerText = `Error mov: no hay shapes`;
-                        return false;
-                    }
-                    if (args.length < 2) {
-                        statusEl.innerText = `Error mov: necesito X e Y`;
-                        return false;
-                    }
+                    if (shapes.length === 0) { statusEl.innerText = `Error mov: no hay shapes`; return false; }
+                    if (args.length < 2) { statusEl.innerText = `Error mov: necesito X e Y`; return false; }
                     const dx = parseFloat(args[0]);
                     const dy = parseFloat(args[1]);
-                    if (isNaN(dx) || isNaN(dy)) {
-                        statusEl.innerText = `Error mov: X e Y deben ser números`;
-                        return false;
-                    }
+                    if (isNaN(dx) || isNaN(dy)) { statusEl.innerText = `Error mov: X/Y deben ser números`; return false; }
                     const shape = shapes[lastShapeIndex];
                     shape.x += dx;
                     shape.y += dy;
-                    statusEl.innerText = `✔ Movido último shape (${shape.name}) a (${Math.round(shape.x)},${Math.round(shape.y)})`;
+                    statusEl.innerText = `✔ Movido último (${shape.name}) a (${Math.round(shape.x)},${Math.round(shape.y)})`;
                 }
+                // --- TP (último) ---
                 else if (comando === 'tp') {
-                    if (shapes.length === 0) {
-                        statusEl.innerText = `Error tp: no hay shapes`;
-                        return false;
-                    }
-                    if (args.length < 2) {
-                        statusEl.innerText = `Error tp: necesito X e Y`;
-                        return false;
-                    }
+                    if (shapes.length === 0) { statusEl.innerText = `Error tp: no hay shapes`; return false; }
+                    if (args.length < 2) { statusEl.innerText = `Error tp: necesito X e Y`; return false; }
                     const newX = parseFloat(args[0]);
                     const newY = parseFloat(args[1]);
-                    if (isNaN(newX) || isNaN(newY)) {
-                        statusEl.innerText = `Error tp: coordenadas inválidas`;
-                        return false;
-                    }
+                    if (isNaN(newX) || isNaN(newY)) { statusEl.innerText = `Error tp: coordenadas inválidas`; return false; }
                     const shape = shapes[lastShapeIndex];
                     shape.x = newX;
                     shape.y = newY;
-                    statusEl.innerText = `✔ Teletransportado último shape a (${newX},${newY})`;
+                    statusEl.innerText = `✔ Teletransportado último a (${newX},${newY})`;
+                }
+                // --- MOVID (mover por ID) ---
+                else if (comando === 'movid') {
+                    if (args.length < 3) { statusEl.innerText = `Error movid: necesito ID, X, Y`; return false; }
+                    const idBuscado = args[0];
+                    const dx = parseFloat(args[1]);
+                    const dy = parseFloat(args[2]);
+                    if (isNaN(dx) || isNaN(dy)) { statusEl.innerText = `Error movid: X/Y deben ser números`; return false; }
+                    const index = shapes.findIndex(s => s.id == idBuscado);
+                    if (index === -1) { statusEl.innerText = `Error movid: ID ${idBuscado} no encontrado`; return false; }
+                    shapes[index].x += dx;
+                    shapes[index].y += dy;
+                    lastShapeIndex = index; // actualizar último
+                    statusEl.innerText = `✔ Movido ID ${idBuscado} a (${Math.round(shapes[index].x)},${Math.round(shapes[index].y)})`;
+                }
+                // --- TPID ---
+                else if (comando === 'tpid') {
+                    if (args.length < 3) { statusEl.innerText = `Error tpid: necesito ID, X, Y`; return false; }
+                    const idBuscado = args[0];
+                    const newX = parseFloat(args[1]);
+                    const newY = parseFloat(args[2]);
+                    if (isNaN(newX) || isNaN(newY)) { statusEl.innerText = `Error tpid: coordenadas inválidas`; return false; }
+                    const index = shapes.findIndex(s => s.id == idBuscado);
+                    if (index === -1) { statusEl.innerText = `Error tpid: ID ${idBuscado} no encontrado`; return false; }
+                    shapes[index].x = newX;
+                    shapes[index].y = newY;
+                    lastShapeIndex = index;
+                    statusEl.innerText = `✔ TP ID ${idBuscado} a (${newX},${newY})`;
+                }
+                // --- COLOR ---
+                else if (comando === 'color') {
+                    if (args.length < 2) { statusEl.innerText = `Error color: necesito ID y color`; return false; }
+                    const idBuscado = args[0];
+                    const nuevoColor = args[1];
+                    const index = shapes.findIndex(s => s.id == idBuscado);
+                    if (index === -1) { statusEl.innerText = `Error color: ID ${idBuscado} no encontrado`; return false; }
+                    shapes[index].color = nuevoColor;
+                    lastShapeIndex = index;
+                    statusEl.innerText = `✔ Color cambiado para ID ${idBuscado}`;
+                }
+                // --- RENAME ---
+                else if (comando === 'rename') {
+                    if (args.length < 2) { statusEl.innerText = `Error rename: necesito ID y nombre`; return false; }
+                    const idBuscado = args[0];
+                    const nuevoNombre = args[1];
+                    const index = shapes.findIndex(s => s.id == idBuscado);
+                    if (index === -1) { statusEl.innerText = `Error rename: ID ${idBuscado} no encontrado`; return false; }
+                    shapes[index].name = nuevoNombre;
+                    lastShapeIndex = index;
+                    statusEl.innerText = `✔ Renombrado ID ${idBuscado} a ${nuevoNombre}`;
+                }
+                // --- DELETE (sin argumento: último; con argumento: ID) ---
+                else if (comando === 'delete') {
+                    if (args.length === 0) {
+                        if (shapes.length === 0) { statusEl.innerText = `Error delete: no hay shapes`; return false; }
+                        const eliminado = shapes.splice(lastShapeIndex, 1)[0];
+                        if (shapes.length === 0) lastShapeIndex = -1;
+                        else lastShapeIndex = Math.min(lastShapeIndex, shapes.length - 1);
+                        statusEl.innerText = `✔ Eliminado último (${eliminado.name})`;
+                    } else {
+                        const idBuscado = args[0];
+                        const index = shapes.findIndex(s => s.id == idBuscado);
+                        if (index === -1) { statusEl.innerText = `Error delete: ID ${idBuscado} no encontrado`; return false; }
+                        shapes.splice(index, 1);
+                        if (shapes.length === 0) lastShapeIndex = -1;
+                        else if (lastShapeIndex >= shapes.length) lastShapeIndex = shapes.length - 1;
+                        statusEl.innerText = `✔ Eliminado ID ${idBuscado}`;
+                    }
+                }
+                // --- CLEAN (borrar todo) ---
+                else if (comando === 'clean') {
+                    shapes = [];
+                    lastShapeIndex = -1;
+                    statusEl.innerText = `✔ Todas las shapes eliminadas (clean)`;
+                }
+                // --- LIST (mostrar en estado) ---
+                else if (comando === 'list') {
+                    if (shapes.length === 0) {
+                        statusEl.innerText = `No hay shapes.`;
+                    } else {
+                        let lista = shapes.map(s => `${s.name}(ID:${s.id}, ${s.type}, ${s.color})`).join('; ');
+                        statusEl.innerText = `Shapes: ${lista}`;
+                    }
                 }
                 else {
                     statusEl.innerText = `Comando desconocido: ${comando}`;
                     return false;
                 }
             } catch (e) {
-                statusEl.innerText = `Error ejecutando línea ${numeroLinea}: ${e.message}`;
+                statusEl.innerText = `Error en línea ${numeroLinea}: ${e.message}`;
                 return false;
             }
             return true;
         }
 
         function ejecutarTodo() {
-            const codigo = document.getElementById('codigoArea').value;
-            const lineas = codigo.split('\n');
+            const lineas = codigoArea.value.split('\n');
             let algunaOk = false;
             for (let i = 0; i < lineas.length; i++) {
                 const ok = ejecutarComando(lineas[i], i + 1);
@@ -498,7 +655,6 @@ tp:"500":"150"</textarea>
             }
         }
 
-        // --- RESET ---
         function resetShapes() {
             shapes = [];
             lastShapeIndex = -1;
@@ -506,40 +662,59 @@ tp:"500":"150"</textarea>
             statusEl.innerText = '♻ Shapes eliminadas. Crea nuevas.';
         }
 
-        // --- LIMPIAR TEXTAREA ---
         function limpiarComandos() {
-            document.getElementById('codigoArea').value = '';
+            codigoArea.value = '';
             statusEl.innerText = '⌨ Escribe nuevos comandos';
         }
 
-        // --- INICIALIZACIÓN Y EVENTOS ---
-        window.addEventListener('load', () => {
-            redrawCanvas(); // lienzo vacío
-            statusEl.innerText = 'Ready. Escribe comandos y pulsa EJECUTAR.';
+        // --- AUTOCOMPLETAR: insertar plantilla en textarea ---
+        function insertarPlantilla(plantilla) {
+            const posInicial = codigoArea.selectionStart;
+            const texto = codigoArea.value;
+            const nuevoTexto = texto.substring(0, posInicial) + plantilla + texto.substring(codigoArea.selectionEnd);
+            codigoArea.value = nuevoTexto;
+            codigoArea.focus();
+            // Colocar cursor después de la plantilla
+            const nuevaPos = posInicial + plantilla.length;
+            codigoArea.setSelectionRange(nuevaPos, nuevaPos);
+        }
+
+        // Event listeners para botones de autocompletar
+        document.querySelectorAll('.comando-boton').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cmd = btn.getAttribute('data-cmd');
+                let plantilla = '';
+                switch (cmd) {
+                    case 'create': plantilla = 'create:"nombre,ID":"Cubo":"red"'; break;
+                    case 'mov': plantilla = 'mov:"X":"Y"'; break;
+                    case 'tp': plantilla = 'tp:"X":"Y"'; break;
+                    case 'movid': plantilla = 'movid:"ID":"X":"Y"'; break;
+                    case 'tpid': plantilla = 'tpid:"ID":"X":"Y"'; break;
+                    case 'color': plantilla = 'color:"ID":"blue"'; break;
+                    case 'rename': plantilla = 'rename:"ID":"nuevoNombre"'; break;
+                    case 'delete': plantilla = 'delete'; break;
+                    case 'deleteid': plantilla = 'delete:"ID"'; break;
+                    case 'list': plantilla = 'list'; break;
+                    case 'clean': plantilla = 'clean'; break;
+                    default: plantilla = btn.innerText;
+                }
+                insertarPlantilla(plantilla);
+            });
         });
 
-        document.getElementById('runBtn').addEventListener('click', () => {
-            ejecutarTodo();
-        });
+        // Eventos principales
+        document.getElementById('runBtn').addEventListener('click', ejecutarTodo);
+        document.getElementById('resetBtn').addEventListener('click', resetShapes);
+        document.getElementById('limpiarCmdBtn').addEventListener('click', limpiarComandos);
 
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            resetShapes();
-        });
-
-        document.getElementById('limpiarCmdBtn').addEventListener('click', () => {
-            limpiarComandos();
-        });
-
-        // Ejemplo extra: si quieres insertar un shape demo con doble click en canvas (guiño)
         canvas.addEventListener('dblclick', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             const mouseX = (e.clientX - rect.left) * scaleX;
             const mouseY = (e.clientY - rect.top) * scaleY;
-            // agregar circulito gris como atajo (no modifica estado de comandos)
             shapes.push({
-                id: 'dblclick',
+                id: 'dblclick' + Math.floor(Math.random()*1000),
                 name: 'dblclick',
                 type: 'Circulo',
                 color: '#AAAAAA',
@@ -548,8 +723,12 @@ tp:"500":"150"</textarea>
             });
             lastShapeIndex = shapes.length - 1;
             redrawCanvas();
-            statusEl.innerText = `➕ Añadido círculo gris (doble click) en (${Math.round(mouseX)},${Math.round(mouseY)})`;
+            statusEl.innerText = `➕ Círculo gris en (${Math.round(mouseX)},${Math.round(mouseY)})`;
         });
+
+        // Inicializar
+        redrawCanvas();
+        statusEl.innerText = 'Ready. Usa botones de autocompletar.';
     })();
 </script>
 </body>
