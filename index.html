@@ -3,25 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Programación 2008</title>
+  <title>Sistema de Programación 2008 + Escenario</title>
   <style>
-    /* ===== ESTÉTICA 2008 ===== 
-       - Degradados intensos (glossy)
-       - Bordes redondeados (webkit-mask no, pero border-radius ya existía)
-       - Sombras pronunciadas
-       - Sensación "Web 2.0", burbujas, reflejos
-       - Fuentes como Tahoma, Verdana, Lucida Grande
-       - Colores brillantes: azules, plateados, destellos blancos
-    */
-
+    /* ===== ESTÉTICA 2008 (GLOSSY, BORDES REDONDEADOS, SOMBRAS) ===== */
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box; /* aunque en 2008 se usaba más el border tradicional, lo incluimos por claridad */
+      box-sizing: border-box;
     }
 
     body {
-      background: #7799bb; /* fondo azul grisáceo típico de fondos de escritorio XP */
+      background: #7799bb;
       background-image: radial-gradient(circle at 20% 30%, #b0c4de, #4f6f8f);
       font-family: 'Tahoma', 'Lucida Grande', 'Verdana', sans-serif;
       padding: 30px 0 50px 0;
@@ -31,20 +23,17 @@
       min-height: 100vh;
     }
 
-    /* contenedor principal — parece una ventana de software de la época */
     .ventana-2008 {
-      width: 900px;
-      max-width: 95%;
-      background: #e8eef4;           /* gris azulado claro base */
+      width: 960px;
+      max-width: 98%;
+      background: #e8eef4;
       border: 2px solid #ffffff;
-      outline: 1px solid #3a5f7a;    /* doble borde para efecto elevado */
+      outline: 1px solid #3a5f7a;
       border-radius: 12px;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 1px 4px #ffffff;
       padding: 18px 20px 20px 20px;
-      backdrop-filter: blur(1px);     /* un toque extra, aunque no era común, le da brillo */
     }
 
-    /* Cabecera con reflejo propio (inspirado en reproductores de la época) */
     .cabecera {
       margin-bottom: 18px;
       position: relative;
@@ -80,7 +69,6 @@
       display: inline-block;
     }
 
-    /* Slogan / badge "web 2.0" */
     .badge {
       float: right;
       background: #c00c0c;
@@ -96,8 +84,7 @@
       transform: rotate(1deg);
     }
 
-    /* Área de edición: parece un bloque con brillo */
-    .editor-box {
+    .editor-box, .escenario-box, .console-box {
       background: #dae5f0;
       border: 2px inset #aabbcc;
       border-radius: 8px;
@@ -120,7 +107,6 @@
       border-left: 5px solid #1e6fa8;
     }
 
-    /* textarea — con aspecto de monitor clásico */
     textarea#codigo {
       width: 100%;
       background: #f0f5fd;
@@ -135,7 +121,18 @@
       line-height: 1.4;
     }
 
-    /* barra de herramientas con botones GLOSSY (muy 2008) */
+    /* Canvas con estilo monitor retro */
+    canvas#escenario {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #0a1828;  /* color de fondo por defecto (será sobrescrito por JS) */
+      border: 4px inset #3d5a73;
+      border-radius: 6px;
+      box-shadow: 0 0 0 2px #90a9c4, inset 0 0 10px #000000;
+      cursor: crosshair;
+    }
+
     .toolbar {
       display: flex;
       gap: 15px;
@@ -155,10 +152,10 @@
     .btn-glossy .inner {
       display: block;
       padding: 10px 32px;
-      background: #3a7bb5; /* fallback */
+      background: #3a7bb5;
       background: linear-gradient(to bottom, #60b0f0, #1d5c9e);
       border: 2px solid #d7eaff;
-      border-radius: 40px 12px 40px 12px; /* asimetría intencional */
+      border-radius: 40px 12px 40px 12px;
       color: white;
       font-size: 18px;
       font-weight: bold;
@@ -170,7 +167,6 @@
       position: relative;
     }
 
-    /* efecto glossy extra con pseudo-elemento :after (brillo superior) */
     .btn-glossy .inner::after {
       content: "";
       position: absolute;
@@ -188,27 +184,24 @@
       box-shadow: 0 1px 0 #10324f, 0 5px 8px rgba(0,0,0,0.3);
     }
 
-    /* botón secundario (limpiar) con tono plateado */
-    #clear .inner {
+    #clear, #clearScene {
+      margin-left: 5px;
+    }
+    #clear .inner, #clearScene .inner {
       background: linear-gradient(to bottom, #a5b8cb, #5b6f87);
       box-shadow: 0 5px 0 #2b3b4b, 0 8px 12px rgba(0,0,0,0.3), inset 0 2px 5px #e1edfa;
       text-shadow: 0 2px 3px #141c28;
     }
 
-    /* Consola de salida */
     .console-box {
       background: #cbd7e6;
-      border: 2px ridge #778caa;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: inset 1px 1px 4px #2a3d55, 0 4px 6px #1f3143;
     }
 
     #output {
       background: #fafcfd;
       border: 3px inset #506886;
-      min-height: 150px;
-      max-height: 300px;
+      min-height: 130px;
+      max-height: 250px;
       overflow: auto;
       padding: 10px;
       font-family: 'Courier New', 'Courier', monospace;
@@ -220,7 +213,6 @@
       word-wrap: break-word;
     }
 
-    /* footer vintage */
     .footer-2008 {
       margin-top: 20px;
       text-align: right;
@@ -239,7 +231,6 @@
       border-radius: 20px 0 20px 0;
     }
 
-    /* pequeños detalles extra */
     .reflejo {
       width: 120px;
       height: 12px;
@@ -249,40 +240,59 @@
       opacity: 0.4;
       border-radius: 50%;
     }
-
   </style>
 </head>
 <body>
 <div class="ventana-2008">
 
-  <!-- CABECERA con destellos y badge -->
+  <!-- CABECERA -->
   <div class="cabecera">
-    <h1>PROG-2008 <span>beta</span></h1>
-    <div class="badge">web 2.0 · glossy</div>
+    <h1>PROG-2008 <span>escenario 2.0</span></h1>
+    <div class="badge">gráficos · objetos</div>
     <div class="reflejo"></div>
     <div style="clear:both"></div>
   </div>
 
-  <!-- EDITOR DE CÓDIGO -->
+  <!-- EDITOR DE CÓDIGO (ahora con ejemplos de dibujo) -->
   <div class="editor-box">
-    <label class="etiqueta">✎ Editor de código JavaScript (estilo 2008)</label>
-    <textarea id="codigo" rows="8">// Escribe tu código retro...
-console.log("★ Hola desde 2008 ★");
+    <label class="etiqueta">✎ Editor JavaScript (2008) — crea objetos en el escenario</label>
+    <textarea id="codigo" rows="8">// --- DIBUJA EN EL ESCENARIO (funciones disponibles) ---
+// limpiarEscenario()  - fondo negro
+// dibujarRect(x, y, ancho, alto, color)
+// dibujarCirculo(x, y, radio, color)
+// dibujarLinea(x1, y1, x2, y2, color)
+// dibujarTexto("texto", x, y, color)
+// cambiarFondo(color)  - ej: "navy", "#330066"
 
-var suma = 20 + 8;
-console.log("suma =", suma);
+limpiarEscenario();  // borra el canvas
 
-// Objeto molón
-var usuario = { nombre: "RetroMan", año: 2008 };
-console.log("Usuario:", usuario);
+// Dibujamos el sol (un círculo amarillo)
+dibujarCirculo(100, 80, 40, "#FFD966");
 
-// Un loop con estilo
-for (var i=1; i<=3; i++) {
-  console.log("  > iteración", i);
-}
+// Un rectángulo que parece edificio
+dibujarRect(200, 70, 80, 100, "#4A86E8");
 
-// Si quieres probar un error, descomenta:
-// console.log(variableNoDefinida);</textarea>
+// Línea a modo de rayo láser
+dibujarLinea(300, 30, 380, 150, "#FF5555");
+
+// Texto retro
+dibujarTexto("Hola 2008!", 400, 120, "#33FF99");
+
+// Más objetos: un árbol sencillo
+dibujarRect(500, 120, 20, 60, "#8B4513");       // tronco
+dibujarCirculo(510, 80, 25, "#2E7D32");         // copa
+
+console.log("✅ Escenario pintado con objetos 2008");</textarea>
+  </div>
+
+  <!-- ESCENARIO (canvas) para crear objetos visuales -->
+  <div class="escenario-box">
+    <label class="etiqueta">🎬 ESCENARIO (crea objetos: rect, círculo, línea, texto)</label>
+    <canvas id="escenario" width="600" height="200"></canvas>
+    <!-- pequeña leyenda -->
+    <div style="margin-top: 6px; font-size: 12px; color: #1f3c5a; text-align: right;">
+      <i>funciones: dibujarRect, dibujarCirculo, dibujarLinea, dibujarTexto, cambiarFondo, limpiarEscenario</i>
+    </div>
   </div>
 
   <!-- BARRA DE BOTONES GLOSSY -->
@@ -293,123 +303,156 @@ for (var i=1; i<=3; i++) {
     <button class="btn-glossy" id="clear">
       <span class="inner">⌧ LIMPIAR CONSOLA</span>
     </button>
+    <button class="btn-glossy" id="clearScene">
+      <span class="inner">🗑️ LIMPIAR ESCENARIO</span>
+    </button>
   </div>
 
   <!-- CONSOLA DE SALIDA -->
   <div class="console-box">
-    <label class="etiqueta">📟 Consola de salida (output)</label>
+    <label class="etiqueta">📟 Consola (output)</label>
     <div id="output"></div>
     <div style="margin-top:6px; font-size:12px; color:#2d4968; text-align:right">[listo]</div>
   </div>
 
-  <!-- PIE DE PÁGINA con sabor a 2008 -->
+  <!-- PIE -->
   <div class="footer-2008">
-    <span>ⓒ 2008 Tecnología punta · Todos los derechos reservados</span>
+    <span>ⓒ 2008  Gráficos en tiempo real · Todos los derechos reservados</span>
   </div>
 
 </div>
 
-<!-- ========== SISTEMA DE PROGRAMACIÓN (JavaScript) ========== -->
+<!-- ========== SISTEMA DE PROGRAMACIÓN + ESCENARIO ========== -->
 <script>
   (function() {
     // ---- ELEMENTOS DEL DOM ----
     var outputEl = document.getElementById('output');
     var runBtn = document.getElementById('run');
     var clearBtn = document.getElementById('clear');
+    var clearSceneBtn = document.getElementById('clearScene');
     var codeEl = document.getElementById('codigo');
+    var canvas = document.getElementById('escenario');
+    var ctx = canvas.getContext('2d');
 
-    // ---- GUARDAMOS LOS CONSOLAS ORIGINALES (por si acaso) ----
+    // ---- CONFIGURACIÓN INICIAL DEL ESCENARIO (fondo negro) ----
+    function limpiarEscenario() {
+      ctx.fillStyle = '#0a1828';   // azul noche
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    limpiarEscenario(); // fondo por defecto
+
+    // ---- FUNCIONES GRÁFICAS GLOBALES (para que el usuario las use en su código) ----
+    window.dibujarRect = function(x, y, w, h, color) {
+      ctx.fillStyle = color || '#FFCC00';
+      ctx.fillRect(x, y, w, h);
+    };
+
+    window.dibujarCirculo = function(x, y, r, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color || '#33CCFF';
+      ctx.fill();
+    };
+
+    window.dibujarLinea = function(x1, y1, x2, y2, color) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = color || '#FF66AA';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    };
+
+    window.dibujarTexto = function(texto, x, y, color) {
+      ctx.font = 'bold 16px "Courier New", Courier, monospace';
+      ctx.fillStyle = color || '#AAFFAA';
+      ctx.fillText(texto, x, y);
+    };
+
+    window.cambiarFondo = function(color) {
+      ctx.fillStyle = color || '#0a1828';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    window.limpiarEscenario = limpiarEscenario;  // alias
+
+    // ---- SOBREESCRITURA DE CONSOLA (para capturar en el div output) ----
     var originalLog = console.log;
     var originalError = console.error;
     var originalWarn = console.warn;
 
-    // ---- SOBREESCRIBIMOS CONSOLA PARA CAPTURAR TODO EN EL DIV DE SALIDA (estilo 2008) ----
     console.log = function() {
       var args = Array.prototype.slice.call(arguments).map(function(arg) {
         if (arg === null) return 'null';
         if (arg === undefined) return 'undefined';
         if (typeof arg === 'object') {
-          try {
-            return JSON.stringify(arg);
-          } catch (e) {
-            return arg.toString();
-          }
+          try { return JSON.stringify(arg); } catch (e) { return arg.toString(); }
         }
         return arg;
       }).join(' ');
       outputEl.innerHTML += args + '<br>';
-      // Llamada opcional a la consola original (comentada para no ensuciar)
-      // originalLog.apply(console, arguments);
     };
 
     console.error = function() {
       var args = Array.prototype.slice.call(arguments).map(function(arg) {
-        if (arg === null) return 'null';
-        if (arg === undefined) return 'undefined';
         if (typeof arg === 'object') {
-          try {
-            return JSON.stringify(arg);
-          } catch (e) {
-            return arg.toString();
-          }
+          try { return JSON.stringify(arg); } catch (e) { return arg.toString(); }
         }
         return arg;
       }).join(' ');
       outputEl.innerHTML += '<span style="color:#b00; background:#fee; padding:0 4px; border-radius:4px;">⛔ ERROR: ' + args + '</span><br>';
-      // originalError.apply(console, arguments);
     };
 
-    // Para warnings (opcional) los mostramos en naranja
     console.warn = function() {
       var args = Array.prototype.slice.call(arguments).map(function(arg) {
         if (typeof arg === 'object') {
-          try { return JSON.stringify(arg); } catch(e) { return arg.toString(); }
+          try { return JSON.stringify(arg); } catch (e) { return arg.toString(); }
         }
         return arg;
       }).join(' ');
       outputEl.innerHTML += '<span style="color:#a35d00; background:#fff1cf; padding:0 4px; border-radius:4px;">⚠️ ADVERTENCIA: ' + args + '</span><br>';
-      // originalWarn.apply(console, arguments);
     };
 
-    // Capturamos errores globales no atrapados (típico de ventanas emergentes)
     window.onerror = function(mensaje, url, linea) {
       outputEl.innerHTML += '<span style="color:white; background:#c22; padding:2px 8px; border-radius:12px; font-weight:bold;">❌ Error fatality: ' + mensaje + ' (línea ' + linea + ')</span><br>';
-      return true; // Prevenimos el diálogo nativo
+      return true;
     };
 
-    // ---- FUNCIÓN EJECUTAR (RUN) ----
+    // ---- FUNCIÓN EJECUTAR (run) ----
     function ejecutar() {
-      outputEl.innerHTML = ''; // Limpiamos la consola
+      outputEl.innerHTML = '';  // limpia consola
 
       var codigo = codeEl.value;
-
-      // Pequeño guiño retro: si el código está vacío, mostramos un mensaje ochentero
       if (codigo.trim() === '') {
-        console.log('¡Escribe algo, colega!');
+        console.log('¡Escribe código para ejecutar!');
         return;
       }
 
       try {
-        // Usamos window.eval para que el código se ejecute en el ámbito global
-        // pero con nuestra consola personalizada. 
         window.eval(codigo);
       } catch (e) {
         console.error(e.name + ': ' + e.message);
       }
     }
 
-    // ---- FUNCIÓN LIMPIAR CONSOLA ----
+    // ---- LIMPIAR CONSOLA (solo texto) ----
     function limpiarConsola() {
       outputEl.innerHTML = '';
-      // Añadimos un pequeño mensaje de "limpiado" con efecto consola vintage
-      outputEl.innerHTML = '> Consola limpiada. Listo para recibir órdenes.\n';
+      outputEl.innerHTML = '> Consola limpiada. Listo.\n';
+    }
+
+    // ---- LIMPIAR ESCENARIO (canvas) ----
+    function limpiarEscenarioHandler() {
+      limpiarEscenario();
+      outputEl.innerHTML += '🗑️ Escenario limpiado.\n';
     }
 
     // ---- ASIGNAR EVENTOS ----
     runBtn.addEventListener('click', ejecutar);
     clearBtn.addEventListener('click', limpiarConsola);
+    clearSceneBtn.addEventListener('click', limpiarEscenarioHandler);
 
-    // ---- ATAJO TECLADO: Ctrl + Enter para ejecutar (como en los IDEs de la época) ----
+    // ---- ATAJO Ctrl+Enter ----
     codeEl.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
@@ -417,15 +460,13 @@ for (var i=1; i<=3; i++) {
       }
     });
 
-    // ---- MENSAJE INICIAL EN LA CONSOLA (para que no esté vacía) ----
-    outputEl.innerHTML = '> Sistema de programación 2008 listo.\n> Haz clic en "EJECUTAR" o pulsa Ctrl+Enter.\n';
-
-    // ---- un pequeño detalle de bienvenida ----
-    console.log('✓ Consola interactiva capturada. Bienvenido al pasado.');
+    // ---- MENSAJE INICIAL ----
+    outputEl.innerHTML = '> Sistema de programación 2008 con escenario listo.\n> Usa las funciones gráficas: dibujarRect, dibujarCirculo, dibujarLinea, dibujarTexto, cambiarFondo, limpiarEscenario.\n';
+    console.log('✓ Escenario interactivo preparado. ¡A dibujar!');
   })();
 </script>
 
-<!-- degradado extra para darle más autenticidad 2008 (efectos de luz) -->
+<!-- pequeño destello flotante (puro sabor 2008) -->
 <div style="position:fixed; bottom:10px; left:10px; opacity:0.2; filter:blur(2px);">✪ 2008 ✪</div>
 </body>
 </html>
