@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>BlockPlay - Editor de Sprite + Bloques (Emoji Gato)</title>
+    <title>BlockPlay - Versión Funcional</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,20 +18,16 @@
         }
         header {
             background-color: #2d2d44;
-            color: white;
             padding: 10px 20px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 10;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         header h1 {
             margin: 0;
-            font-size: 1.8rem;
-            background: linear-gradient(45deg, #ffcc00, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+            color: #ffcc00;
         }
         .btn {
             background-color: #4a4a6a;
@@ -39,29 +35,18 @@
             border: none;
             padding: 8px 16px;
             border-radius: 20px;
-            font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            transition: 0.2s;
+            font-size: 0.9rem;
             border: 1px solid #6a6a8a;
         }
         .btn:hover {
             background-color: #5f5f82;
-            transform: scale(1.02);
         }
         .btn.primary {
             background-color: #4CAF50;
-            border-color: #6ccf70;
-        }
-        .btn.primary:hover {
-            background-color: #5fcf64;
         }
         .btn.danger {
             background-color: #f44336;
-            border-color: #ff6b6b;
-        }
-        .btn.danger:hover {
-            background-color: #ff5f52;
         }
         .main-container {
             display: flex;
@@ -76,65 +61,53 @@
         }
         .sprite-editor {
             background-color: #2a2a3c;
-            padding: 15px;
+            padding: 10px;
             border-bottom: 2px solid #3d3d5a;
+            max-height: 300px;
+            overflow-y: auto;
         }
         .sprite-editor h3 {
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             color: #ffcc00;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 1rem;
         }
         .pixel-grid {
             display: grid;
             grid-template-columns: repeat(16, 1fr);
-            gap: 2px;
+            gap: 1px;
             background-color: #1a1a2a;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 5px;
+            border-radius: 5px;
         }
         .pixel {
             aspect-ratio: 1;
             background-color: #2d2d44;
             border: 1px solid #4a4a6a;
             cursor: pointer;
-            transition: 0.1s;
-        }
-        .pixel:hover {
-            transform: scale(1.1);
-            border-color: #ffcc00;
         }
         .color-palette {
             display: flex;
-            gap: 10px;
+            gap: 5px;
             flex-wrap: wrap;
-            margin: 15px 0;
+            margin: 10px 0;
             justify-content: center;
         }
         .color-btn {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .color-btn:hover {
-            transform: scale(1.1);
         }
         .color-btn.selected {
             border-color: white;
-            box-shadow: 0 0 10px currentColor;
         }
         .preview-canvas {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             image-rendering: pixelated;
             border: 2px solid #4a4a6a;
-            border-radius: 5px;
-            margin-left: 15px;
+            margin-left: 10px;
         }
         .blockly-area {
             flex: 1;
@@ -142,18 +115,19 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 400px;
         }
         .blockly-header {
-            padding: 8px;
+            padding: 5px;
             background-color: #3d3d5a;
-            font-weight: bold;
             text-align: center;
             color: #ffcc00;
+            font-size: 0.9rem;
         }
         #blocklyDiv {
             flex: 1;
             height: 100%;
-            min-height: 400px;
+            min-height: 300px;
         }
         .canvas-area {
             width: 60%;
@@ -162,97 +136,93 @@
             align-items: center;
             justify-content: center;
             background-color: #1e1e2f;
-            padding: 20px;
-            position: relative;
+            padding: 10px;
         }
         #gameCanvas {
             background-color: #2d2d44;
             border: 4px solid #4a4a6a;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 10px;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             height: auto;
             aspect-ratio: 1/1;
-            font-size: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
         .cat-emoji {
-            font-size: 120px;
-            line-height: 1;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+            position: absolute;
+            font-size: 80px;
             transform-origin: center center;
-            transition: transform 0.1s;
+            transition: transform 0.05s linear;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         .info-panel {
-            margin-top: 20px;
+            margin-top: 10px;
             background-color: #2a2a3c;
-            padding: 15px 25px;
-            border-radius: 30px;
+            padding: 10px 15px;
+            border-radius: 20px;
             display: flex;
-            gap: 30px;
+            gap: 15px;
             flex-wrap: wrap;
             justify-content: center;
-            border: 1px solid #4a4a6a;
+            font-size: 0.9rem;
         }
         .info-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-        .info-label {
-            color: #aaa;
+            gap: 5px;
         }
         .info-value {
             background-color: #1e1e2f;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 15px;
             color: #ffcc00;
         }
         #messageBox {
             background-color: #2a2a3c;
-            padding: 10px 20px;
-            border-radius: 20px;
-            min-width: 200px;
+            padding: 5px 15px;
+            border-radius: 15px;
+            min-width: 150px;
             text-align: center;
-            border: 1px solid #4a4a6a;
         }
         .execution-log {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.7);
+            bottom: 5px;
+            right: 5px;
+            background-color: rgba(0,0,0,0.8);
             color: #0f0;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            max-width: 200px;
-            max-height: 100px;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 10px;
+            max-width: 150px;
+            max-height: 80px;
             overflow-y: auto;
         }
+        .error-message {
+            color: #ff6b6b;
+            padding: 5px;
+            text-align: center;
+        }
     </style>
-    <!-- Cargar Blockly desde CDN -->
     <script src="https://unpkg.com/blockly/blockly.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>🐱 BlockPlay · Editor de Sprite + Bloques</h1>
-        <button class="btn primary" id="runButton">▶ Ejecutar programa</button>
-        <button class="btn" id="resetButton">↺ Reiniciar gato</button>
-        <button class="btn danger" id="clearButton">🗑 Limpiar bloques</button>
+        <h1>🐱 BlockPlay</h1>
+        <button class="btn primary" id="runButton">▶ Ejecutar</button>
+        <button class="btn" id="resetButton">↺ Reiniciar</button>
+        <button class="btn danger" id="clearButton">🗑 Limpiar</button>
         <button class="btn" id="stopButton">⏹️ Detener</button>
+        <span id="status" style="color: #ffcc00; margin-left: auto;">Listo</span>
     </header>
     <div class="main-container">
         <div class="left-panel">
             <div class="sprite-editor">
-                <h3>
-                    <span>✏️ Editor de Sprite (16x16)</span>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3>✏️ Editor 16x16</h3>
                     <canvas id="previewCanvas" class="preview-canvas" width="16" height="16"></canvas>
-                </h3>
+                </div>
                 <div class="pixel-grid" id="pixelGrid"></div>
                 <div class="color-palette">
                     <button class="color-btn" style="background-color: #FF6B6B;" data-color="#FF6B6B"></button>
@@ -260,46 +230,34 @@
                     <button class="color-btn" style="background-color: #FFD93D;" data-color="#FFD93D"></button>
                     <button class="color-btn" style="background-color: #6BCB77;" data-color="#6BCB77"></button>
                     <button class="color-btn" style="background-color: #9B59B6;" data-color="#9B59B6"></button>
-                    <button class="color-btn" style="background-color: #FF9F1C;" data-color="#FF9F1C"></button>
                     <button class="color-btn" style="background-color: #2C3E50;" data-color="#2C3E50"></button>
-                    <button class="color-btn" style="background-color: #E67E22;" data-color="#E67E22"></button>
-                    <button class="color-btn" style="background-color: #1ABC9C;" data-color="#1ABC9C"></button>
-                    <button class="color-btn" style="background-color: #E74C3C;" data-color="#E74C3C"></button>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn" id="clearSprite">Limpiar Sprite</button>
-                    <button class="btn primary" id="loadDefault">Gato Emoji</button>
+                <div style="display: flex; gap: 5px; justify-content: center;">
+                    <button class="btn" id="clearSprite" style="padding: 3px 8px;">Limpiar</button>
+                    <button class="btn primary" id="loadDefault" style="padding: 3px 8px;">Gato</button>
                 </div>
             </div>
             <div class="blockly-area">
-                <div class="blockly-header">🧱 Bloques de programación (arrastra desde la caja)</div>
+                <div class="blockly-header">🧱 Bloques (arrastra y conecta)</div>
                 <div id="blocklyDiv"></div>
             </div>
         </div>
         <div class="canvas-area">
-            <div id="gameCanvas">
-                <div id="catEmoji" class="cat-emoji" style="transform: translate(0px, 0px) rotate(0deg);">🐱</div>
+            <div id="gameCanvas" style="position: relative;">
+                <div id="catEmoji" class="cat-emoji" style="left: 210px; top: 210px;">🐱</div>
+                <div id="bubble" style="position: absolute; background: white; color: black; padding: 5px 10px; border-radius: 20px; font-size: 14px; display: none; border: 2px solid black;"></div>
+                <div id="executionLog" class="execution-log"></div>
             </div>
             <div class="info-panel">
-                <div class="info-item">
-                    <span class="info-label">🐱 Posición:</span>
-                    <span class="info-value" id="posX">0</span>
-                    <span class="info-value" id="posY">0</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">↻ Dirección:</span>
-                    <span class="info-value" id="angle">0</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">💬 Mensaje:</span>
-                    <span class="info-value" id="messageBox"></span>
-                </div>
+                <div class="info-item"><span>X:</span><span class="info-value" id="posX">0</span></div>
+                <div class="info-item"><span>Y:</span><span class="info-value" id="posY">0</span></div>
+                <div class="info-item"><span>Ángulo:</span><span class="info-value" id="angle">0</span></div>
+                <div class="info-item"><span>💬</span><span class="info-value" id="messageBox"></span></div>
             </div>
-            <div id="executionLog" class="execution-log"></div>
         </div>
     </div>
 
-    <!-- Toolbox mejorada con más bloques -->
+    <!-- Toolbox simplificada y funcional -->
     <xml id="toolbox" style="display: none">
         <category name="Eventos" colour="#FFC107">
             <block type="when_flag_clicked"></block>
@@ -313,21 +271,7 @@
                     </shadow>
                 </value>
             </block>
-            <block type="move_backward">
-                <value name="STEPS">
-                    <shadow type="math_number">
-                        <field name="NUM">10</field>
-                    </shadow>
-                </value>
-            </block>
             <block type="turn_right">
-                <value name="DEGREES">
-                    <shadow type="math_number">
-                        <field name="NUM">15</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="turn_left">
                 <value name="DEGREES">
                     <shadow type="math_number">
                         <field name="NUM">15</field>
@@ -346,31 +290,12 @@
                     </shadow>
                 </value>
             </block>
-            <block type="point_towards">
-                <value name="X">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-                <value name="Y">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-            </block>
         </category>
         <category name="Apariencia" colour="#9C27B0">
             <block type="say">
                 <value name="MESSAGE">
                     <shadow type="text">
-                        <field name="TEXT">¡Hola!</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="think">
-                <value name="MESSAGE">
-                    <shadow type="text">
-                        <field name="TEXT">🤔...</field>
+                        <field name="TEXT">Hola</field>
                     </shadow>
                 </value>
             </block>
@@ -381,30 +306,12 @@
                     </shadow>
                 </value>
             </block>
-            <block type="set_color">
-                <value name="COLOR">
-                    <shadow type="colour_picker">
-                        <field name="COLOUR">#FF6B6B</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="change_size">
-                <value name="SIZE">
-                    <shadow type="math_number">
-                        <field name="NUM">120</field>
-                    </shadow>
-                </value>
-            </block>
-        </category>
-        <category name="Sonido" colour="#00BCD4">
-            <block type="play_sound"></block>
-            <block type="beep"></block>
         </category>
         <category name="Control" colour="#FF5722">
             <block type="repeat">
                 <value name="TIMES">
                     <shadow type="math_number">
-                        <field name="NUM">10</field>
+                        <field name="NUM">4</field>
                     </shadow>
                 </value>
             </block>
@@ -415,95 +322,410 @@
                     </shadow>
                 </value>
             </block>
-            <block type="if_then">
-                <value name="CONDITION">
-                    <shadow type="logic_boolean">
-                        <field name="BOOL">TRUE</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="if_then_else"></block>
         </category>
         <category name="Operadores" colour="#607D8B">
             <block type="math_number"></block>
             <block type="text"></block>
-            <block type="colour_picker"></block>
-            <block type="math_arithmetic">
-                <value name="A">
-                    <shadow type="math_number">
-                        <field name="NUM">5</field>
-                    </shadow>
-                </value>
-                <value name="B">
-                    <shadow type="math_number">
-                        <field name="NUM">3</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="logic_compare"></block>
-            <block type="logic_boolean"></block>
         </category>
     </xml>
 
     <script>
-        // ---------- Configuración del gato ----------
+        // --- Estado del gato ---
         let cat = {
-            x: 0,
-            y: 0,
-            angle: 0,
-            sayText: '',
-            sayTimer: null,
-            thinkText: '',
-            thinkTimer: null,
+            x: 0, y: 0, angle: 0,
             emoji: '🐱',
-            color: '#FF6B6B',
-            size: 120
+            message: '',
+            messageTimer: null
         };
 
+        // Variables de control
         let isRunning = false;
-        let stopExecution = false;
-        let executionLog = [];
+        let shouldStop = false;
+        let executionQueue = [];
+        let statusSpan = document.getElementById('status');
+        let logDiv = document.getElementById('executionLog');
 
-        // Elementos del DOM
-        const canvas = document.getElementById('gameCanvas');
+        // Elementos DOM
         const catEmoji = document.getElementById('catEmoji');
+        const bubble = document.getElementById('bubble');
         const posXSpan = document.getElementById('posX');
         const posYSpan = document.getElementById('posY');
         const angleSpan = document.getElementById('angle');
         const messageBox = document.getElementById('messageBox');
-        const executionLogDiv = document.getElementById('executionLog');
         const previewCanvas = document.getElementById('previewCanvas');
         const previewCtx = previewCanvas.getContext('2d');
 
-        // Sprite personalizado (16x16 píxeles)
-        let spriteData = new Array(16 * 16).fill('#2C3E50');
-        
-        // Sprite por defecto (gato pixel art simple)
-        const defaultSprite = new Array(256).fill('#2C3E50');
-        // Dibujar un gato simple en el sprite
-        for (let y = 4; y <= 11; y++) {
-            for (let x = 4; x <= 11; x++) {
-                if ((x === 4 || x === 11) && (y >= 5 && y <= 10)) continue;
-                if ((y === 4 || y === 11) && (x >= 5 && x <= 10)) continue;
-                if (x >= 5 && x <= 10 && y >= 5 && y <= 10) {
-                    if ((x === 6 || x === 9) && (y === 6 || y === 7)) {
-                        defaultSprite[y * 16 + x] = '#FFFFFF'; // Ojos
-                    } else if (x === 7 && y === 8) {
-                        defaultSprite[y * 16 + x] = '#FF6B6B'; // Nariz
-                    } else {
-                        defaultSprite[y * 16 + x] = '#FFB347'; // Cuerpo naranja
-                    }
-                }
-            }
-        }
-
+        // --- Sprite (opcional, no afecta al emoji) ---
+        let spriteData = new Array(256).fill('#2C3E50');
         let selectedColor = '#FF6B6B';
         let isDrawing = false;
 
-        // Crear grid de píxeles
-        const pixelGrid = document.getElementById('pixelGrid');
+        // --- Funciones de utilidad ---
+        function log(message) {
+            console.log(message);
+            logDiv.innerHTML = message + '<br>' + logDiv.innerHTML;
+            if (logDiv.children.length > 5) logDiv.removeChild(logDiv.lastChild);
+        }
+
+        function updateStatus(text) {
+            statusSpan.textContent = text;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- Funciones de movimiento (síncronas para actualización inmediata) ---
+        function updateCatDisplay() {
+            // Convertir coordenadas (-200 a 200) a píxeles (centro del canvas)
+            const canvas = document.getElementById('gameCanvas');
+            const centerX = canvas.clientWidth / 2 - 40; // 40 es mitad del emoji (80px/2)
+            const centerY = canvas.clientHeight / 2 - 40;
+            
+            catEmoji.style.left = (centerX + cat.x) + 'px';
+            catEmoji.style.top = (centerY + cat.y) + 'px';
+            catEmoji.style.transform = `rotate(${cat.angle}deg)`;
+            
+            // Actualizar info
+            posXSpan.textContent = Math.round(cat.x);
+            posYSpan.textContent = Math.round(cat.y);
+            angleSpan.textContent = cat.angle;
+            
+            // Actualizar bocadillo
+            if (cat.message) {
+                bubble.style.display = 'block';
+                bubble.textContent = cat.message;
+                bubble.style.left = (centerX + cat.x + 50) + 'px';
+                bubble.style.top = (centerY + cat.y - 50) + 'px';
+                messageBox.textContent = cat.message;
+            } else {
+                bubble.style.display = 'none';
+                messageBox.textContent = '(vacío)';
+            }
+        }
+
+        // --- API de acciones (AHORA SON SÍNCRONAS PARA SIMPLIFICAR) ---
+        function mover(pasos) {
+            if (shouldStop) return;
+            let rad = cat.angle * Math.PI / 180;
+            cat.x += Math.cos(rad) * pasos;
+            cat.y -= Math.sin(rad) * pasos;
+            // Limitar
+            cat.x = Math.min(200, Math.max(-200, cat.x));
+            cat.y = Math.min(200, Math.max(-200, cat.y));
+            updateCatDisplay();
+            log(`Mover ${pasos} pasos`);
+        }
+
+        function girar(grados) {
+            if (shouldStop) return;
+            cat.angle = (cat.angle + grados) % 360;
+            updateCatDisplay();
+            log(`Girar ${grados}°`);
+        }
+
+        function irA(x, y) {
+            if (shouldStop) return;
+            cat.x = Math.min(200, Math.max(-200, Number(x) || 0));
+            cat.y = Math.min(200, Math.max(-200, Number(y) || 0));
+            updateCatDisplay();
+            log(`Ir a (${x}, ${y})`);
+        }
+
+        function decir(texto) {
+            if (shouldStop) return;
+            if (cat.messageTimer) clearTimeout(cat.messageTimer);
+            cat.message = String(texto);
+            updateCatDisplay();
+            log(`Decir: "${texto}"`);
+            cat.messageTimer = setTimeout(() => {
+                cat.message = '';
+                updateCatDisplay();
+            }, 1000);
+        }
+
+        function cambiarEmoji(emoji) {
+            if (shouldStop) return;
+            cat.emoji = String(emoji);
+            catEmoji.textContent = cat.emoji;
+            log(`Emoji: ${emoji}`);
+        }
+
+        // --- Definición de bloques Blockly (CORREGIDA) ---
+        Blockly.Blocks['when_flag_clicked'] = {
+            init: function() {
+                this.appendDummyInput().appendField('⚑ al hacer clic en bandera');
+                this.appendStatementInput('DO').setCheck(null);
+                this.setColour('#FFC107');
+                this.setPreviousStatement(false);
+                this.setNextStatement(false);
+            }
+        };
+
+        Blockly.Blocks['when_key_pressed'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('⌨️ tecla')
+                    .appendField(new Blockly.FieldDropdown([
+                        ['espacio', 'Space'],
+                        ['arriba', 'ArrowUp'],
+                        ['abajo', 'ArrowDown'],
+                        ['izquierda', 'ArrowLeft'],
+                        ['derecha', 'ArrowRight']
+                    ]), 'KEY')
+                    .appendField('presionada');
+                this.appendStatementInput('DO').setCheck(null);
+                this.setColour('#FFC107');
+                this.setPreviousStatement(false);
+                this.setNextStatement(false);
+            }
+        };
+
+        Blockly.Blocks['move_forward'] = {
+            init: function() {
+                this.appendDummyInput().appendField('mover');
+                this.appendValueInput('STEPS').setCheck('Number').appendField('pasos');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#4CAF50');
+            }
+        };
+
+        Blockly.Blocks['turn_right'] = {
+            init: function() {
+                this.appendDummyInput().appendField('girar');
+                this.appendValueInput('DEGREES').setCheck('Number').appendField('grados derecha');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#4CAF50');
+            }
+        };
+
+        Blockly.Blocks['go_to'] = {
+            init: function() {
+                this.appendDummyInput().appendField('ir a X');
+                this.appendValueInput('X').setCheck('Number').appendField('');
+                this.appendDummyInput().appendField('Y');
+                this.appendValueInput('Y').setCheck('Number').appendField('');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#4CAF50');
+            }
+        };
+
+        Blockly.Blocks['say'] = {
+            init: function() {
+                this.appendDummyInput().appendField('decir');
+                this.appendValueInput('MESSAGE').setCheck('String').appendField('');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#9C27B0');
+            }
+        };
+
+        Blockly.Blocks['set_emoji'] = {
+            init: function() {
+                this.appendDummyInput().appendField('cambiar emoji a');
+                this.appendValueInput('EMOJI').setCheck('String').appendField('');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#9C27B0');
+            }
+        };
+
+        Blockly.Blocks['repeat'] = {
+            init: function() {
+                this.appendDummyInput().appendField('repetir');
+                this.appendValueInput('TIMES').setCheck('Number').appendField('veces');
+                this.appendStatementInput('DO').setCheck(null).appendField('hacer');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#FF5722');
+            }
+        };
+
+        Blockly.Blocks['wait'] = {
+            init: function() {
+                this.appendDummyInput().appendField('esperar');
+                this.appendValueInput('SECONDS').setCheck('Number').appendField('segundos');
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour('#FF5722');
+            }
+        };
+
+        // --- Generadores de código JavaScript (CORREGIDOS) ---
+        Blockly.JavaScript['when_flag_clicked'] = function(block) {
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            return statements;
+        };
+
+        Blockly.JavaScript['when_key_pressed'] = function(block) {
+            let key = block.getFieldValue('KEY');
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            return `window.addEventListener('keydown', function(e) {
+                if(e.code === '${key}' && !shouldStop) {
+                    ${statements}
+                }
+            });\n`;
+        };
+
+        Blockly.JavaScript['move_forward'] = function(block) {
+            let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
+            return `mover(${steps});\n`;
+        };
+
+        Blockly.JavaScript['turn_right'] = function(block) {
+            let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
+            return `girar(${degrees});\n`;
+        };
+
+        Blockly.JavaScript['go_to'] = function(block) {
+            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '0';
+            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '0';
+            return `irA(${x}, ${y});\n`;
+        };
+
+        Blockly.JavaScript['say'] = function(block) {
+            let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'Hola'";
+            return `decir(${message});\n`;
+        };
+
+        Blockly.JavaScript['set_emoji'] = function(block) {
+            let emoji = Blockly.JavaScript.valueToCode(block, 'EMOJI', Blockly.JavaScript.ORDER_NONE) || "'🐱'";
+            return `cambiarEmoji(${emoji});\n`;
+        };
+
+        Blockly.JavaScript['repeat'] = function(block) {
+            let times = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '4';
+            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            return `for(let i=0; i<${times}; i++) { if(shouldStop) break; ${statements} }\n`;
+        };
+
+        Blockly.JavaScript['wait'] = function(block) {
+            let seconds = Blockly.JavaScript.valueToCode(block, 'SECONDS', Blockly.JavaScript.ORDER_NONE) || '0.5';
+            return `await wait(${seconds});\n`;
+        };
+
+        // --- Inicializar Blockly ---
+        const workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            trashcan: true,
+            scrollbars: true,
+            horizontalLayout: false,
+            toolboxPosition: 'start',
+            sounds: false
+        });
+
+        // Agregar bloques de ejemplo
+        function loadExample() {
+            const xml = '<xml>' +
+                '<block type="when_flag_clicked" x="20" y="20">' +
+                '<statement name="DO">' +
+                '<block type="repeat">' +
+                '<value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>' +
+                '<statement name="DO">' +
+                '<block type="move_forward">' +
+                '<value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>' +
+                '<next>' +
+                '<block type="say">' +
+                '<value name="MESSAGE"><shadow type="text"><field name="TEXT">Miau</field></shadow></value>' +
+                '<next>' +
+                '<block type="wait">' +
+                '<value name="SECONDS"><shadow type="math_number"><field name="NUM">0.3</field></shadow></value>' +
+                '<next>' +
+                '<block type="turn_right">' +
+                '<value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>' +
+                '</block></next></block></next></block></next></block>' +
+                '</statement></block>' +
+                '</statement></block>' +
+                '<block type="when_key_pressed" x="20" y="250">' +
+                '<field name="KEY">Space</field>' +
+                '<statement name="DO">' +
+                '<block type="set_emoji">' +
+                '<value name="EMOJI"><shadow type="text"><field name="TEXT">😺</field></shadow></value>' +
+                '</block>' +
+                '</statement>' +
+                '</block>' +
+                '</xml>';
+            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), workspace);
+        }
+
+        loadExample();
+
+        // --- Botones ---
+        document.getElementById('runButton').addEventListener('click', async function() {
+            if (isRunning) {
+                log('Ya está en ejecución');
+                return;
+            }
+            
+            shouldStop = false;
+            isRunning = true;
+            updateStatus('Ejecutando...');
+            
+            // Obtener código
+            let code = Blockly.JavaScript.workspaceToCode(workspace);
+            console.log('Código:', code);
+            
+            // Buscar solo el código de bandera (simplificado)
+            // Ejecutar en una función async
+            try {
+                // Crear función con todas las dependencias
+                const executeCode = new Function(
+                    'mover', 'girar', 'irA', 'decir', 'cambiarEmoji', 'wait', 'shouldStop',
+                    `return (async function() {
+                        ${code}
+                    })();`
+                );
+                
+                await executeCode(mover, girar, irA, decir, cambiarEmoji, 
+                    async (seconds) => {
+                        if (shouldStop) return;
+                        log(`Esperar ${seconds}s`);
+                        await sleep(seconds * 1000);
+                    }, 
+                    shouldStop
+                );
+            } catch (e) {
+                console.error('Error:', e);
+                log('Error: ' + e.message);
+            } finally {
+                isRunning = false;
+                updateStatus('Completado');
+            }
+        });
+
+        document.getElementById('stopButton').addEventListener('click', function() {
+            shouldStop = true;
+            isRunning = false;
+            updateStatus('Detenido');
+            log('Ejecución detenida');
+        });
+
+        document.getElementById('resetButton').addEventListener('click', function() {
+            shouldStop = true;
+            isRunning = false;
+            cat.x = 0; cat.y = 0; cat.angle = 0;
+            cat.emoji = '🐱';
+            cat.message = '';
+            catEmoji.textContent = cat.emoji;
+            if (cat.messageTimer) clearTimeout(cat.messageTimer);
+            updateCatDisplay();
+            updateStatus('Reiniciado');
+            log('Posición reiniciada');
+        });
+
+        document.getElementById('clearButton').addEventListener('click', function() {
+            workspace.clear();
+            loadExample(); // Recargar ejemplo
+            log('Bloques limpiados');
+        });
+
+        // --- Editor de píxeles ---
         function createPixelGrid() {
-            pixelGrid.innerHTML = '';
+            const grid = document.getElementById('pixelGrid');
+            grid.innerHTML = '';
             for (let i = 0; i < 256; i++) {
                 const pixel = document.createElement('div');
                 pixel.className = 'pixel';
@@ -516,8 +738,7 @@
                 pixel.addEventListener('mouseover', (e) => {
                     if (isDrawing) paintPixel(e.target.dataset.index);
                 });
-                pixel.addEventListener('mouseup', () => { isDrawing = false; });
-                pixelGrid.appendChild(pixel);
+                grid.appendChild(pixel);
             }
             document.addEventListener('mouseup', () => { isDrawing = false; });
         }
@@ -531,34 +752,10 @@
         function updatePreview() {
             previewCtx.clearRect(0, 0, 16, 16);
             for (let i = 0; i < 256; i++) {
-                const x = i % 16;
-                const y = Math.floor(i / 16);
                 previewCtx.fillStyle = spriteData[i];
-                previewCtx.fillRect(x, y, 1, 1);
+                previewCtx.fillRect(i % 16, Math.floor(i / 16), 1, 1);
             }
         }
-
-        // Cargar sprite por defecto
-        function loadDefaultSprite() {
-            spriteData = [...defaultSprite];
-            const pixels = document.querySelectorAll('.pixel');
-            pixels.forEach((pixel, i) => {
-                pixel.style.backgroundColor = spriteData[i];
-            });
-            updatePreview();
-        }
-
-        // Limpiar sprite
-        document.getElementById('clearSprite').addEventListener('click', () => {
-            spriteData = new Array(256).fill('#2C3E50');
-            const pixels = document.querySelectorAll('.pixel');
-            pixels.forEach((pixel, i) => {
-                pixel.style.backgroundColor = spriteData[i];
-            });
-            updatePreview();
-        });
-
-        document.getElementById('loadDefault').addEventListener('click', loadDefaultSprite);
 
         // Selector de color
         document.querySelectorAll('.color-btn').forEach(btn => {
@@ -568,657 +765,47 @@
                 selectedColor = btn.dataset.color;
             });
         });
-        document.querySelector('.color-btn').classList.add('selected');
 
-        // Función para actualizar la posición del emoji
-        function updateCatPosition() {
-            // El canvas es de 600x600, centramos el emoji
-            const canvasRect = canvas.getBoundingClientRect();
-            const centerX = canvasRect.width / 2;
-            const centerY = canvasRect.height / 2;
-            
-            // Convertir coordenadas del gato (rango -300 a 300) a píxeles
-            const pixelX = centerX + cat.x;
-            const pixelY = centerY + cat.y;
-            
-            catEmoji.style.transform = `translate(${pixelX - 60}px, ${pixelY - 60}px) rotate(${cat.angle}deg)`;
-            catEmoji.style.color = cat.color;
-            catEmoji.style.fontSize = cat.size + 'px';
-            
-            posXSpan.textContent = Math.round(cat.x);
-            posYSpan.textContent = Math.round(cat.y);
-            angleSpan.textContent = cat.angle;
-            messageBox.textContent = cat.sayText || cat.thinkText || '(vacío)';
-        }
-
-        // ---------- API de acciones ----------
-        function log(message) {
-            executionLog.push(message);
-            if (executionLog.length > 5) executionLog.shift();
-            executionLogDiv.innerHTML = executionLog.join('<br>');
-        }
-
-        async function mover(pasos) {
-            if (stopExecution) return;
-            let rad = cat.angle * Math.PI / 180;
-            cat.x += Math.cos(rad) * pasos;
-            cat.y -= Math.sin(rad) * pasos;
-            // Limitar dentro del canvas (rango -250 a 250 para mantener dentro del canvas)
-            cat.x = Math.min(250, Math.max(-250, cat.x));
-            cat.y = Math.min(250, Math.max(-250, cat.y));
-            updateCatPosition();
-            log(`🚶 Mover ${pasos} pasos`);
-            await sleep(100);
-        }
-
-        async function moverAtras(pasos) {
-            await mover(-pasos);
-        }
-
-        async function girar(grados) {
-            if (stopExecution) return;
-            cat.angle = (cat.angle + grados) % 360;
-            updateCatPosition();
-            log(`↻ Girar ${grados}°`);
-            await sleep(100);
-        }
-
-        async function girarIzquierda(grados) {
-            await girar(-grados);
-        }
-
-        async function irA(x, y) {
-            if (stopExecution) return;
-            cat.x = Math.min(250, Math.max(-250, Number(x) || 0));
-            cat.y = Math.min(250, Math.max(-250, Number(y) || 0));
-            updateCatPosition();
-            log(`🎯 Ir a (${x}, ${y})`);
-            await sleep(100);
-        }
-
-        async function apuntarHacia(x, y) {
-            if (stopExecution) return;
-            let dx = x - cat.x;
-            let dy = cat.y - y;
-            cat.angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            updateCatPosition();
-            log(`🧭 Apuntar hacia (${x}, ${y})`);
-            await sleep(100);
-        }
-
-        async function decir(texto) {
-            if (stopExecution) return;
-            if (cat.sayTimer) clearTimeout(cat.sayTimer);
-            cat.sayText = String(texto);
-            cat.thinkText = '';
-            messageBox.textContent = cat.sayText;
-            log(`💬 Decir: "${texto}"`);
-            cat.sayTimer = setTimeout(() => {
-                cat.sayText = '';
-                messageBox.textContent = '(vacío)';
-            }, 1500);
-            await sleep(100);
-        }
-
-        async function pensar(texto) {
-            if (stopExecution) return;
-            if (cat.thinkTimer) clearTimeout(cat.thinkTimer);
-            cat.thinkText = String(texto);
-            cat.sayText = '';
-            messageBox.textContent = cat.thinkText;
-            log(`🤔 Pensar: "${texto}"`);
-            cat.thinkTimer = setTimeout(() => {
-                cat.thinkText = '';
-                messageBox.textContent = '(vacío)';
-            }, 1500);
-            await sleep(100);
-        }
-
-        async function cambiarEmoji(emoji) {
-            if (stopExecution) return;
-            cat.emoji = String(emoji);
-            catEmoji.textContent = cat.emoji;
-            log(`😺 Cambiar emoji a: ${emoji}`);
-            await sleep(100);
-        }
-
-        async function cambiarColor(color) {
-            if (stopExecution) return;
-            cat.color = color;
-            updateCatPosition();
-            log(`🎨 Cambiar color a ${color}`);
-            await sleep(100);
-        }
-
-        async function cambiarSize(size) {
-            if (stopExecution) return;
-            cat.size = Math.min(200, Math.max(40, Number(size) || 120));
-            updateCatPosition();
-            log(`🔍 Cambiar tamaño a ${cat.size}px`);
-            await sleep(100);
-        }
-
-        function playSound() {
-            if (stopExecution) return;
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.frequency.value = 440;
-            gainNode.gain.value = 0.1;
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
-            log(`🔊 Reproducir sonido`);
-        }
-
-        function beep() {
-            if (stopExecution) return;
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            oscillator.connect(audioCtx.destination);
-            oscillator.frequency.value = 880;
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.05);
-            log(`📢 Beep!`);
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        async function wait(seconds) {
-            if (stopExecution) return;
-            log(`⏱️ Esperar ${seconds} segundos`);
-            await sleep(seconds * 1000);
-        }
-
-        function resetCat() {
-            stopExecution = true;
-            isRunning = false;
-            cat.x = 0;
-            cat.y = 0;
-            cat.angle = 0;
-            cat.size = 120;
-            cat.emoji = '🐱';
-            cat.color = '#FF6B6B';
-            if (cat.sayTimer) clearTimeout(cat.sayTimer);
-            if (cat.thinkTimer) clearTimeout(cat.thinkTimer);
-            cat.sayText = '';
-            cat.thinkText = '';
-            catEmoji.textContent = cat.emoji;
-            catEmoji.style.color = cat.color;
-            updateCatPosition();
-            executionLog = [];
-            executionLogDiv.innerHTML = '';
-            log('🔄 Reiniciado');
-        }
-
-        // ---------- Definición de bloques Blockly ----------
-        Blockly.Blocks['when_flag_clicked'] = {
-            init: function() {
-                this.appendDummyInput().appendField('⚑ al presionar bandera');
-                this.appendStatementInput('DO').setCheck(null);
-                this.setColour('#FFC107');
-                this.setPreviousStatement(false);
-                this.setNextStatement(false);
-            }
-        };
-
-        Blockly.Blocks['when_key_pressed'] = {
-            init: function() {
-                this.appendDummyInput()
-                    .appendField('⌨️ al presionar tecla')
-                    .appendField(new Blockly.FieldDropdown([
-                        ['espacio', 'Space'],
-                        ['flecha arriba', 'ArrowUp'],
-                        ['flecha abajo', 'ArrowDown'],
-                        ['flecha izquierda', 'ArrowLeft'],
-                        ['flecha derecha', 'ArrowRight'],
-                        ['a', 'KeyA'],
-                        ['b', 'KeyB'],
-                        ['c', 'KeyC'],
-                        ['1', 'Digit1'],
-                        ['2', 'Digit2']
-                    ]), 'KEY');
-                this.appendStatementInput('DO').setCheck(null);
-                this.setColour('#FFC107');
-                this.setPreviousStatement(false);
-                this.setNextStatement(false);
-            }
-        };
-
-        Blockly.Blocks['move_forward'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🚶 mover');
-                this.appendValueInput('STEPS').setCheck('Number').appendField('pasos');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['move_backward'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔙 mover atrás');
-                this.appendValueInput('STEPS').setCheck('Number').appendField('pasos');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['turn_right'] = {
-            init: function() {
-                this.appendDummyInput().appendField('↻ girar derecha');
-                this.appendValueInput('DEGREES').setCheck('Number').appendField('grados');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['turn_left'] = {
-            init: function() {
-                this.appendDummyInput().appendField('↺ girar izquierda');
-                this.appendValueInput('DEGREES').setCheck('Number').appendField('grados');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['go_to'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🎯 ir a');
-                this.appendValueInput('X').setCheck('Number').appendField('x');
-                this.appendValueInput('Y').setCheck('Number').appendField('y');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['point_towards'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🧭 apuntar hacia');
-                this.appendValueInput('X').setCheck('Number').appendField('x');
-                this.appendValueInput('Y').setCheck('Number').appendField('y');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#4CAF50');
-            }
-        };
-
-        Blockly.Blocks['say'] = {
-            init: function() {
-                this.appendDummyInput().appendField('💬 decir');
-                this.appendValueInput('MESSAGE').setCheck('String').appendField('mensaje');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#9C27B0');
-            }
-        };
-
-        Blockly.Blocks['think'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🤔 pensar');
-                this.appendValueInput('MESSAGE').setCheck('String').appendField('mensaje');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#9C27B0');
-            }
-        };
-
-        Blockly.Blocks['set_emoji'] = {
-            init: function() {
-                this.appendDummyInput().appendField('😺 cambiar emoji a');
-                this.appendValueInput('EMOJI').setCheck('String').appendField('');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#9C27B0');
-            }
-        };
-
-        Blockly.Blocks['set_color'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🎨 cambiar color a');
-                this.appendValueInput('COLOR').setCheck('Colour').appendField('');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#9C27B0');
-            }
-        };
-
-        Blockly.Blocks['change_size'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔍 cambiar tamaño a');
-                this.appendValueInput('SIZE').setCheck('Number').appendField('px');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#9C27B0');
-            }
-        };
-
-        Blockly.Blocks['play_sound'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔊 reproducir sonido');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#00BCD4');
-            }
-        };
-
-        Blockly.Blocks['beep'] = {
-            init: function() {
-                this.appendDummyInput().appendField('📢 beep');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#00BCD4');
-            }
-        };
-
-        Blockly.Blocks['repeat'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔄 repetir');
-                this.appendValueInput('TIMES').setCheck('Number').appendField('veces');
-                this.appendStatementInput('DO').setCheck(null).appendField('hacer');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#FF5722');
-            }
-        };
-
-        Blockly.Blocks['wait'] = {
-            init: function() {
-                this.appendDummyInput().appendField('⏱️ esperar');
-                this.appendValueInput('SECONDS').setCheck('Number').appendField('segundos');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#FF5722');
-            }
-        };
-
-        Blockly.Blocks['if_then'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔀 si');
-                this.appendValueInput('CONDITION').setCheck('Boolean').appendField('');
-                this.appendStatementInput('DO').setCheck(null).appendField('entonces');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#FF5722');
-            }
-        };
-
-        Blockly.Blocks['if_then_else'] = {
-            init: function() {
-                this.appendDummyInput().appendField('🔀 si');
-                this.appendValueInput('CONDITION').setCheck('Boolean').appendField('');
-                this.appendStatementInput('DO').setCheck(null).appendField('entonces');
-                this.appendStatementInput('ELSE').setCheck(null).appendField('si no');
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setColour('#FF5722');
-            }
-        };
-
-        // Generadores de código
-        Blockly.JavaScript['when_flag_clicked'] = function(block) {
-            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return statements;
-        };
-
-        Blockly.JavaScript['when_key_pressed'] = function(block) {
-            let key = block.getFieldValue('KEY');
-            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return `
-                window.addEventListener('keydown', function(e) {
-                    if(e.code === '${key}' && isRunning) {
-                        (async function() { ${statements} })();
-                    }
-                });
-            `;
-        };
-
-        Blockly.JavaScript['move_forward'] = function(block) {
-            let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
-            return 'await mover(' + steps + ');\n';
-        };
-
-        Blockly.JavaScript['move_backward'] = function(block) {
-            let steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_NONE) || '10';
-            return 'await moverAtras(' + steps + ');\n';
-        };
-
-        Blockly.JavaScript['turn_right'] = function(block) {
-            let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
-            return 'await girar(' + degrees + ');\n';
-        };
-
-        Blockly.JavaScript['turn_left'] = function(block) {
-            let degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_NONE) || '15';
-            return 'await girarIzquierda(' + degrees + ');\n';
-        };
-
-        Blockly.JavaScript['go_to'] = function(block) {
-            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '0';
-            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '0';
-            return 'await irA(' + x + ', ' + y + ');\n';
-        };
-
-        Blockly.JavaScript['point_towards'] = function(block) {
-            let x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_NONE) || '0';
-            let y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_NONE) || '0';
-            return 'await apuntarHacia(' + x + ', ' + y + ');\n';
-        };
-
-        Blockly.JavaScript['say'] = function(block) {
-            let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'Hola'";
-            return 'await decir(' + message + ');\n';
-        };
-
-        Blockly.JavaScript['think'] = function(block) {
-            let message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_NONE) || "'...'";
-            return 'await pensar(' + message + ');\n';
-        };
-
-        Blockly.JavaScript['set_emoji'] = function(block) {
-            let emoji = Blockly.JavaScript.valueToCode(block, 'EMOJI', Blockly.JavaScript.ORDER_NONE) || "'🐱'";
-            return 'await cambiarEmoji(' + emoji + ');\n';
-        };
-
-        Blockly.JavaScript['set_color'] = function(block) {
-            let color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_NONE) || "'#FF6B6B'";
-            return 'await cambiarColor(' + color + ');\n';
-        };
-
-        Blockly.JavaScript['change_size'] = function(block) {
-            let size = Blockly.JavaScript.valueToCode(block, 'SIZE', Blockly.JavaScript.ORDER_NONE) || '120';
-            return 'await cambiarSize(' + size + ');\n';
-        };
-
-        Blockly.JavaScript['play_sound'] = function(block) {
-            return 'playSound();\n';
-        };
-
-        Blockly.JavaScript['beep'] = function(block) {
-            return 'beep();\n';
-        };
-
-        Blockly.JavaScript['repeat'] = function(block) {
-            let times = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '10';
-            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return 'for (let i__ = 0; i__ < ' + times + '; i__++) {\n' + statements + '}\n';
-        };
-
-        Blockly.JavaScript['wait'] = function(block) {
-            let seconds = Blockly.JavaScript.valueToCode(block, 'SECONDS', Blockly.JavaScript.ORDER_NONE) || '0.5';
-            return 'await wait(' + seconds + ');\n';
-        };
-
-        Blockly.JavaScript['if_then'] = function(block) {
-            let condition = Blockly.JavaScript.valueToCode(block, 'CONDITION', Blockly.JavaScript.ORDER_NONE) || 'true';
-            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            return 'if (' + condition + ') {\n' + statements + '}\n';
-        };
-
-        Blockly.JavaScript['if_then_else'] = function(block) {
-            let condition = Blockly.JavaScript.valueToCode(block, 'CONDITION', Blockly.JavaScript.ORDER_NONE) || 'true';
-            let statements = Blockly.JavaScript.statementToCode(block, 'DO');
-            let elseStatements = Blockly.JavaScript.statementToCode(block, 'ELSE');
-            return 'if (' + condition + ') {\n' + statements + '} else {\n' + elseStatements + '}\n';
-        };
-
-        // Inicializar Blockly
-        const toolbox = document.getElementById('toolbox');
-        const blocklyDiv = document.getElementById('blocklyDiv');
-        const workspace = Blockly.inject(blocklyDiv, {
-            toolbox: toolbox,
-            trashcan: true,
-            scrollbars: true,
-            horizontalLayout: false,
-            toolboxPosition: 'start',
-            sounds: false,
-            media: 'https://unpkg.com/blockly/media/'
+        document.getElementById('clearSprite').addEventListener('click', () => {
+            spriteData.fill('#2C3E50');
+            document.querySelectorAll('.pixel').forEach((p, i) => p.style.backgroundColor = spriteData[i]);
+            updatePreview();
         });
 
-        // Bloques iniciales con un ejemplo funcional
-        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(
-            '<xml>' +
-            '<block type="when_flag_clicked" x="20" y="20">' +
-            '  <statement name="DO">' +
-            '    <block type="repeat">' +
-            '      <value name="TIMES">' +
-            '        <shadow type="math_number">' +
-            '          <field name="NUM">4</field>' +
-            '        </shadow>' +
-            '      </value>' +
-            '      <statement name="DO">' +
-            '        <block type="move_forward">' +
-            '          <value name="STEPS">' +
-            '            <shadow type="math_number">' +
-            '              <field name="NUM">50</field>' +
-            '            </shadow>' +
-            '          </value>' +
-            '          <next>' +
-            '            <block type="say">' +
-            '              <value name="MESSAGE">' +
-            '                <shadow type="text">' +
-            '                  <field name="TEXT">¡Miau!</field>' +
-            '                </shadow>' +
-            '              </value>' +
-            '              <next>' +
-            '                <block type="wait">' +
-            '                  <value name="SECONDS">' +
-            '                    <shadow type="math_number">' +
-            '                      <field name="NUM">0.3</field>' +
-            '                    </shadow>' +
-            '                  </value>' +
-            '                  <next>' +
-            '                    <block type="turn_right">' +
-            '                      <value name="DEGREES">' +
-            '                        <shadow type="math_number">' +
-            '                          <field name="NUM">90</field>' +
-            '                        </shadow>' +
-            '                      </value>' +
-            '                    </block>' +
-            '                  </next>' +
-            '                </block>' +
-            '              </next>' +
-            '            </block>' +
-            '          </next>' +
-            '        </block>' +
-            '      </statement>' +
-            '    </block>' +
-            '  </statement>' +
-            '</block>' +
-            '<block type="when_key_pressed" x="20" y="280">' +
-            '  <field name="KEY">Space</field>' +
-            '  <statement name="DO">' +
-            '    <block type="set_emoji">' +
-            '      <value name="EMOJI">' +
-            '        <shadow type="text">' +
-            '          <field name="TEXT">😺</field>' +
-            '        </shadow>' +
-            '      </value>' +
-            '      <next>' +
-            '        <block type="play_sound"></block>' +
-            '      </next>' +
-            '    </block>' +
-            '  </statement>' +
-            '</block>' +
-            '</xml>'
-        ), workspace);
-
-        // Botones
-        document.getElementById('runButton').addEventListener('click', async function() {
-            if (isRunning) {
-                log('⏸️ Ya está en ejecución');
-                return;
-            }
-            
-            stopExecution = false;
-            isRunning = true;
-            
-            let code = Blockly.JavaScript.workspaceToCode(workspace);
-            console.log("Código generado:\n", code);
-            
-            try {
-                // Buscar el bloque de bandera y ejecutar solo ese
-                const flagCode = code.split('\n').filter(line => line.includes('when_flag_clicked')).join('\n');
-                if (flagCode) {
-                    // Crear función async con todas las dependencias
-                    let func = new Function('mover', 'moverAtras', 'girar', 'girarIzquierda', 'irA', 'apuntarHacia', 'decir', 'pensar', 'cambiarEmoji', 'cambiarColor', 'cambiarSize', 'playSound', 'beep', 'wait', 'isRunning', 'stopExecution', 'log', `
-                        return (async function() {
-                            ${code}
-                        })();
-                    `);
-                    
-                    await func(mover, moverAtras, girar, girarIzquierda, irA, apuntarHacia, decir, pensar, cambiarEmoji, cambiarColor, cambiarSize, playSound, beep, wait, isRunning, stopExecution, log);
-                } else {
-                    log('⚠️ No hay bloque de bandera');
+        document.getElementById('loadDefault').addEventListener('click', () => {
+            // Gato simple
+            spriteData.fill('#2C3E50');
+            for (let i = 0; i < 256; i++) {
+                let x = i % 16, y = Math.floor(i / 16);
+                if (x >= 5 && x <= 10 && y >= 4 && y <= 11) {
+                    spriteData[i] = '#FFB347';
                 }
-            } catch (e) {
-                console.error("Error:", e);
-                log('❌ Error: ' + e.message);
-            } finally {
-                isRunning = false;
             }
-        });
-
-        document.getElementById('stopButton').addEventListener('click', function() {
-            stopExecution = true;
-            isRunning = false;
-            log('⏹️ Ejecución detenida');
-        });
-
-        document.getElementById('resetButton').addEventListener('click', resetCat);
-        
-        document.getElementById('clearButton').addEventListener('click', function() {
-            workspace.clear();
-            resetCat();
-            // Agregar bloques de ejemplo nuevamente
-            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(
-                '<xml>' +
-                '<block type="when_flag_clicked" x="20" y="20"></block>' +
-                '<block type="when_key_pressed" x="20" y="120"></block>' +
-                '</xml>'
-            ), workspace);
+            // Ojos
+            spriteData[6*16+7] = '#FFFFFF';
+            spriteData[6*16+8] = '#FFFFFF';
+            spriteData[7*16+7] = '#000000';
+            spriteData[7*16+8] = '#000000';
+            document.querySelectorAll('.pixel').forEach((p, i) => p.style.backgroundColor = spriteData[i]);
+            updatePreview();
         });
 
         // Inicializar
         createPixelGrid();
-        loadDefaultSprite();
-        resetCat();
-        
-        // Hacer que el canvas sea responsivo
+        updatePreview();
+        updateCatDisplay();
+
+        // Hacer que Blockly se redimensione
         window.addEventListener('resize', () => {
             Blockly.svgResize(workspace);
-            updateCatPosition();
         });
 
-        // Asegurar que el emoji se actualice al cargar
-        setTimeout(updateCatPosition, 100);
+        // Eventos de teclado globales
+        window.addEventListener('keydown', (e) => {
+            console.log('Tecla:', e.code);
+        });
+
+        log('Sistema listo');
     </script>
 </body>
 </html>
