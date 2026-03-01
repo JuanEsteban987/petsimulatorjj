@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch 2008 - 250+ Bloques y Editor de Sprites</title>
+    <title>Scratch 2008 - Múltiples scripts con nombre</title>
     <style>
-        /* ===== ESTILO 2008: BORDES BISELADOS, COLORES XP, TEXTURAS ===== */
+        /* ===== ESTILO 2008 ===== */
         * {
             box-sizing: border-box;
             font-family: 'Courier New', 'MS Sans Serif', 'Segoe UI', monospace;
         }
         body {
-            background: #3a6ea5; /* azul XP */
+            background: #3a6ea5;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -21,9 +21,9 @@
             background-image: radial-gradient(circle at 20% 30%, #6bb5f0, #0a2f6c);
         }
         .game-container {
-            width: 1400px;
+            width: 1500px;
             max-width: 100%;
-            background: #d4d0c8; /* grox XP */
+            background: #d4d0c8;
             border-radius: 8px;
             border: 4px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
@@ -135,7 +135,7 @@
             overflow-y: auto;
             font-size: 12px;
         }
-        /* Panel derecho: bloques */
+        /* Panel derecho: scripts y bloques */
         .blocks-panel {
             flex: 3;
             background: #bfbfbf;
@@ -145,6 +145,33 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+        /* Selector de scripts */
+        .script-manager {
+            background: #808080;
+            border: 3px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .script-manager select {
+            flex: 1;
+            background: #fff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 4px;
+            font-weight: bold;
+        }
+        .script-manager button {
+            background: #d4d0c8;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 4px 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
         .categories {
             display: flex;
@@ -176,7 +203,7 @@
             border: 3px solid;
             border-color: #ffffff #404040 #404040 #ffffff;
             padding: 8px;
-            height: 250px;
+            height: 200px;
             overflow-y: auto;
             display: flex;
             flex-wrap: wrap;
@@ -211,7 +238,7 @@
             border: 3px solid;
             border-color: #ffffff #404040 #404040 #ffffff;
             padding: 10px;
-            min-height: 250px;
+            min-height: 220px;
             flex: 1;
             overflow-y: auto;
             display: flex;
@@ -282,8 +309,8 @@
 <body>
 <div class="game-container">
     <div class="header">
-        <h1>🐱 SCRATCH 2008 - 250+ BLOQUES</h1>
-        <button class="run" id="runBtn">▶ EJECUTAR</button>
+        <h1>🐱 SCRATCH 2008 - MÚLTIPLES SCRIPTS</h1>
+        <button class="run" id="runBtn">▶ EJECUTAR TODOS</button>
     </div>
     <div class="main-area">
         <!-- IZQUIERDA: CANVAS + EDITOR DE SPRITES -->
@@ -328,19 +355,28 @@
                     <input type="checkbox" id="visible" checked>
                 </div>
             </div>
-            <div class="log" id="log">> Sistema listo. Arrastra bloques y ejecuta.</div>
+            <div class="log" id="log">> Sistema listo. Crea scripts y arrastra bloques.</div>
         </div>
 
-        <!-- DERECHA: PALETA DE BLOQUES Y SCRIPT -->
+        <!-- DERECHA: GESTIÓN DE SCRIPTS + BLOQUES -->
         <div class="blocks-panel">
+            <!-- Selector y gestión de scripts -->
+            <div class="script-manager">
+                <select id="scriptSelect"></select>
+                <button id="newScriptBtn">➕ Nuevo</button>
+                <button id="renameScriptBtn">✏️ Renombrar</button>
+                <button id="deleteScriptBtn">🗑️ Eliminar</button>
+            </div>
+
+            <!-- Categorías de bloques -->
             <div class="categories" id="categories">
                 <!-- Se genera con JS -->
             </div>
             <div class="palette" id="palette"></div>
             <div class="script-area" id="scriptArea"></div>
             <div class="bottom-buttons">
-                <button id="resetBtn">↺ REINICIAR</button>
-                <button id="clearBtn">🗑️ LIMPIAR</button>
+                <button id="resetBtn">↺ REINICIAR JUEGO</button>
+                <button id="clearBtn">🗑️ LIMPIAR SCRIPT</button>
             </div>
         </div>
     </div>
@@ -365,24 +401,19 @@
     // ---------- MOVIMIENTO (40+) ----------
     function generateMotionBlocks() {
         let blocks = [];
-        // Direcciones básicas
         const directions = ['arriba', 'abajo', 'izquierda', 'derecha', 'arriba-izquierda', 'arriba-derecha', 'abajo-izquierda', 'abajo-derecha'];
         directions.forEach(dir => {
             blocks.push({ name: `mover_${dir}`, text: `mover ${dir}`, params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' });
         });
-        // Pasos predefinidos
         [1,5,10,20,50,100].forEach(pasos => {
             blocks.push({ name: `mover_${pasos}`, text: `mover ${pasos} pasos`, params: ['objeto'], default: ['gato'], color: 'motion' });
         });
-        // Ir a posiciones específicas
         [[0,0], [100,100], [200,150], [300,200], [400,100]].forEach(([x,y]) => {
             blocks.push({ name: `ir_a_${x}_${y}`, text: `ir a (${x},${y})`, params: ['objeto'], default: ['gato'], color: 'motion' });
         });
-        // Deslizar con diferentes tiempos
         [0.5,1,2,3].forEach(seg => {
             blocks.push({ name: `deslizar_${seg}s`, text: `deslizar ${seg}s a X`, params: ['objeto', 'destinoX'], default: ['gato', 200], color: 'motion' });
         });
-        // Rebote, girar, apuntar
         blocks.push({ name: 'rebotar_si_borde', text: 'rebotar si toca borde', params: ['objeto'], default: ['gato'], color: 'motion' });
         [15,30,45,90,180].forEach(grados => {
             blocks.push({ name: `girar_${grados}`, text: `girar ${grados} grados`, params: ['objeto'], default: ['gato'], color: 'motion' });
@@ -544,6 +575,14 @@
     };
 
     // ============================================================
+    // GESTIÓN DE MÚLTIPLES SCRIPTS
+    // ============================================================
+    let scripts = {
+        "Script 1": { blocks: [] }
+    };
+    let currentScriptName = "Script 1";
+
+    // ============================================================
     // ESTADO DEL JUEGO
     // ============================================================
     let gameObjects = {
@@ -551,7 +590,6 @@
         enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, size: 100 }
     };
     let variables = { puntaje: 0, vida: 100, energía: 50, tiempo: 60, nivel: 1, monedas: 0 };
-    let scriptBlocks = [];
 
     // ============================================================
     // FUNCIONES DE INTERFAZ (SCRATCH 2008)
@@ -605,13 +643,14 @@
             params: blockData.default.slice(),
             paramNames: blockData.params
         };
-        scriptBlocks.push(newBlock);
+        scripts[currentScriptName].blocks.push(newBlock);
         renderScript();
     }
 
     function renderScript() {
         scriptArea.innerHTML = '';
-        scriptBlocks.forEach((block, index) => {
+        const blocks = scripts[currentScriptName].blocks || [];
+        blocks.forEach((block, index) => {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'script-block';
             const original = allBlocks.find(b => b.name === block.name) || { color: 'motion' };
@@ -645,12 +684,85 @@
             const del = document.createElement('span');
             del.className = 'delete';
             del.textContent = '✖';
-            del.onclick = () => { scriptBlocks.splice(index, 1); renderScript(); };
+            del.onclick = () => {
+                scripts[currentScriptName].blocks.splice(index, 1);
+                renderScript();
+            };
             blockDiv.appendChild(del);
 
             scriptArea.appendChild(blockDiv);
         });
     }
+
+    // Gestión de scripts
+    function refreshScriptSelect() {
+        const select = document.getElementById('scriptSelect');
+        select.innerHTML = '';
+        for (let name in scripts) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            if (name === currentScriptName) option.selected = true;
+            select.appendChild(option);
+        }
+    }
+
+    function switchScript(name) {
+        if (scripts[name]) {
+            currentScriptName = name;
+            renderScript();
+            refreshScriptSelect();
+        }
+    }
+
+    document.getElementById('scriptSelect').addEventListener('change', (e) => {
+        switchScript(e.target.value);
+    });
+
+    document.getElementById('newScriptBtn').addEventListener('click', () => {
+        let newName = prompt('Nombre del nuevo script:', 'Script ' + (Object.keys(scripts).length + 1));
+        if (newName && !scripts[newName]) {
+            scripts[newName] = { blocks: [] };
+            currentScriptName = newName;
+            renderScript();
+            refreshScriptSelect();
+        } else if (scripts[newName]) {
+            alert('Ya existe un script con ese nombre.');
+        }
+    });
+
+    document.getElementById('renameScriptBtn').addEventListener('click', () => {
+        let newName = prompt('Nuevo nombre para el script:', currentScriptName);
+        if (newName && newName !== currentScriptName && !scripts[newName]) {
+            scripts[newName] = scripts[currentScriptName];
+            delete scripts[currentScriptName];
+            currentScriptName = newName;
+            renderScript();
+            refreshScriptSelect();
+        } else if (scripts[newName]) {
+            alert('Ya existe un script con ese nombre.');
+        }
+    });
+
+    document.getElementById('deleteScriptBtn').addEventListener('click', () => {
+        if (Object.keys(scripts).length <= 1) {
+            alert('No puedes eliminar el único script.');
+            return;
+        }
+        if (confirm(`¿Eliminar el script "${currentScriptName}"?`)) {
+            delete scripts[currentScriptName];
+            // Seleccionar el primer script disponible
+            currentScriptName = Object.keys(scripts)[0];
+            renderScript();
+            refreshScriptSelect();
+        }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        scripts[currentScriptName].blocks = [];
+        renderScript();
+        addLog('Script limpiado');
+    });
 
     // ============================================================
     // EDITOR DE SPRITES
@@ -813,10 +925,14 @@
         updateSpriteEditor();
     }
 
-    function ejecutarTodo() {
-        addLog('--- INICIO EJECUCIÓN (2008) ---');
-        for (let block of scriptBlocks) {
-            ejecutarBloque(block);
+    function ejecutarTodosLosScripts() {
+        addLog('--- INICIO EJECUCIÓN (TODOS LOS SCRIPTS) ---');
+        for (let scriptName in scripts) {
+            addLog(`> Ejecutando script: ${scriptName}`);
+            const blocks = scripts[scriptName].blocks;
+            for (let block of blocks) {
+                ejecutarBloque(block);
+            }
         }
         addLog('--- FIN EJECUCIÓN ---');
     }
@@ -858,16 +974,13 @@
         });
         document.querySelector('.cat-btn').classList.add('active');
         renderPalette();
+        refreshScriptSelect();
+        renderScript();
         drawGame();
         updateSpriteEditor();
 
-        document.getElementById('runBtn').addEventListener('click', ejecutarTodo);
+        document.getElementById('runBtn').addEventListener('click', ejecutarTodosLosScripts);
         document.getElementById('resetBtn').addEventListener('click', resetGame);
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            scriptBlocks = [];
-            renderScript();
-            addLog('Script limpiado');
-        });
     };
 </script>
 </body>
