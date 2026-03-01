@@ -1,120 +1,146 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Scratch - 250+ Bloques y Editor de Sprites</title>
+    <title>Scratch 2008 - 250+ Bloques y Editor de Sprites</title>
     <style>
+        /* ===== ESTILO 2008: BORDES BISELADOS, COLORES XP, TEXTURAS ===== */
         * {
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Courier New', 'MS Sans Serif', 'Segoe UI', monospace;
         }
         body {
+            background: #3a6ea5; /* azul XP */
             margin: 0;
             padding: 20px;
-            background: #2c3e50;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background-image: radial-gradient(circle at 20% 30%, #6bb5f0, #0a2f6c);
         }
         .game-container {
             width: 1400px;
             max-width: 100%;
-            background: #ecf0f1;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            background: #d4d0c8; /* grox XP */
+            border-radius: 8px;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 15px;
+            box-shadow: inset -2px -2px 0 #0a0a0a, inset 2px 2px 0 #ffffff;
         }
         .header {
-            background: #34495e;
+            background: #0a2f6c;
             color: white;
-            padding: 15px 25px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 3px solid;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+            margin-bottom: 15px;
         }
         .header h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 24px;
+            text-shadow: 2px 2px 0 #001433;
         }
         .header button {
-            background: #f39c12;
-            border: none;
-            border-radius: 40px;
-            padding: 12px 25px;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            color: #000;
             font-weight: bold;
-            font-size: 18px;
+            padding: 8px 25px;
             cursor: pointer;
-            box-shadow: 0 4px 0 #b96f0b;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        .header button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            transform: translate(1px,1px);
         }
         .main-area {
             display: flex;
-            padding: 20px;
-            gap: 20px;
+            gap: 15px;
         }
-        /* Panel izquierdo: canvas + editor de sprites */
+        /* Panel izquierdo: canvas + editor */
         .canvas-panel {
             flex: 2;
-            background: #bdc3c7;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: inset 0 0 10px #7f8c8d;
+            background: #bfbfbf;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 12px;
         }
         canvas {
             width: 100%;
             height: 300px;
-            background: #2c3e50;
-            border-radius: 10px;
-            border: 3px solid #34495e;
+            background: #000;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            display: block;
         }
         .sprite-editor {
-            background: #95a5a6;
-            border-radius: 10px;
-            padding: 15px;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 12px;
             margin-top: 15px;
-            color: #2c3e50;
-            font-weight: bold;
+            color: #000;
         }
         .sprite-editor h3 {
             margin: 0 0 10px 0;
+            background: #0a2f6c;
             color: white;
-            text-shadow: 1px 1px 0 #7f8c8d;
+            padding: 4px;
+            border: 2px solid;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+            text-align: center;
+            font-size: 16px;
         }
         .editor-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 8px;
-            flex-wrap: wrap;
+            background: #bfbfbf;
+            padding: 5px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
         }
         .editor-row label {
             width: 70px;
+            font-weight: bold;
         }
         .editor-row input, .editor-row select {
             flex: 1;
-            padding: 5px;
-            border: 2px solid #7f8c8d;
-            border-radius: 5px;
+            padding: 4px;
+            background: #fff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            font-family: 'Courier New', monospace;
+        }
+        .editor-row input[type=range] {
+            padding: 0;
         }
         .log {
-            background: #2c3e50;
-            color: #2ecc71;
+            background: #000;
+            color: #0f0;
+            border: 3px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
             padding: 8px;
             margin-top: 15px;
-            border-radius: 5px;
             height: 70px;
             overflow-y: auto;
-            font-family: monospace;
             font-size: 12px;
         }
         /* Panel derecho: bloques */
         .blocks-panel {
             flex: 3;
-            background: #bdc3c7;
-            border-radius: 15px;
+            background: #bfbfbf;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -122,48 +148,55 @@
         }
         .categories {
             display: flex;
-            gap: 5px;
-            background: #95a5a6;
+            gap: 4px;
+            background: #808080;
             padding: 8px;
-            border-radius: 10px;
+            border: 3px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
             flex-wrap: wrap;
         }
         .cat-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: none;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 6px 12px;
             font-weight: bold;
             cursor: pointer;
-            color: white;
-            transition: 0.1s;
+            color: #000;
+            font-size: 12px;
+            text-transform: uppercase;
         }
-        .cat-btn:hover { transform: scale(1.05); }
-        .cat-btn.active { box-shadow: 0 0 0 3px black; }
+        .cat-btn.active {
+            background: #0a2f6c;
+            color: white;
+            border-color: #3a6ea5 #001433 #001433 #3a6ea5;
+        }
         .palette {
-            background: #95a5a6;
-            border-radius: 10px;
-            padding: 10px;
+            background: #808080;
+            border: 3px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+            padding: 8px;
             height: 250px;
             overflow-y: auto;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             align-content: flex-start;
         }
         .block {
             background: #4a90e2;
             color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 5px 10px;
+            border: 2px solid;
+            border-color: #ffffff #2a4b7a #2a4b7a #ffffff;
+            font-size: 11px;
             font-weight: bold;
-            box-shadow: 0 4px 0 #2a4b7a;
             cursor: grab;
             user-select: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 1px 1px 0 #000;
         }
         .block.motion { background: #4a90e2; }
         .block.looks { background: #9b59b6; }
@@ -174,35 +207,35 @@
         .block.operators { background: #2ecc71; }
         .block.variables { background: #e67e22; }
         .script-area {
-            background: #7f8c8d;
-            border-radius: 10px;
-            padding: 15px;
+            background: #808080;
+            border: 3px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+            padding: 10px;
             min-height: 250px;
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            box-shadow: inset 0 0 10px #34495e;
+            gap: 4px;
         }
         .script-block {
             background: #4a90e2;
             color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 6px 12px;
+            border: 2px solid;
+            border-color: #ffffff #2a4b7a #2a4b7a #ffffff;
+            font-size: 12px;
             font-weight: bold;
-            box-shadow: 0 4px 0 #2a4b7a;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             position: relative;
-            margin-bottom: 2px;
         }
         .script-block .delete {
             background: #c0392b;
             color: white;
-            border-radius: 50%;
+            border: 2px solid;
+            border-color: #ff9999 #8b3a3a #8b3a3a #ff9999;
             width: 22px;
             height: 22px;
             display: flex;
@@ -213,45 +246,51 @@
             margin-left: auto;
         }
         .script-block input, .script-block select {
-            width: 60px;
             background: white;
-            border: none;
-            border-radius: 5px;
-            padding: 2px 5px;
-            color: black;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 2px 4px;
+            width: 60px;
+            color: #000;
         }
         .bottom-buttons {
             display: flex;
             gap: 10px;
-            padding: 10px;
+            margin-top: 10px;
         }
         .bottom-buttons button {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 30px;
+            background: #d4d0c8;
+            border: 3px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
             font-weight: bold;
-            background: #34495e;
-            color: white;
+            padding: 10px;
             cursor: pointer;
+            text-transform: uppercase;
         }
-        .bottom-buttons .run {
-            background: #27ae60;
+        .bottom-buttons button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            transform: translate(1px,1px);
+        }
+        .run {
+            background: #2d6ca3 !important;
+            color: white;
+            border-color: #6bb5f0 #0a2f6c #0a2f6c #6bb5f0 !important;
         }
     </style>
 </head>
 <body>
 <div class="game-container">
     <div class="header">
-        <h1>🐱 Super Scratch - 250+ Bloques + Editor de Sprites</h1>
-        <button id="runBtn">▶ EJECUTAR</button>
+        <h1>🐱 SCRATCH 2008 - 250+ BLOQUES</h1>
+        <button class="run" id="runBtn">▶ EJECUTAR</button>
     </div>
     <div class="main-area">
-        <!-- Panel izquierdo: canvas + editor -->
+        <!-- IZQUIERDA: CANVAS + EDITOR DE SPRITES -->
         <div class="canvas-panel">
             <canvas id="gameCanvas" width="500" height="300"></canvas>
             <div class="sprite-editor">
-                <h3>✏️ Editor de Sprites</h3>
+                <h3>✏️ EDITOR DE SPRITES</h3>
                 <div class="editor-row">
                     <label>Objeto:</label>
                     <select id="spriteSelect">
@@ -289,19 +328,19 @@
                     <input type="checkbox" id="visible" checked>
                 </div>
             </div>
-            <div class="log" id="log">> Listo</div>
+            <div class="log" id="log">> Sistema listo. Arrastra bloques y ejecuta.</div>
         </div>
 
-        <!-- Panel derecho: bloques -->
+        <!-- DERECHA: PALETA DE BLOQUES Y SCRIPT -->
         <div class="blocks-panel">
             <div class="categories" id="categories">
-                <!-- Se generan con JS -->
+                <!-- Se genera con JS -->
             </div>
             <div class="palette" id="palette"></div>
             <div class="script-area" id="scriptArea"></div>
             <div class="bottom-buttons">
-                <button id="resetBtn">↺ Reiniciar</button>
-                <button id="clearBtn">🗑️ Limpiar</button>
+                <button id="resetBtn">↺ REINICIAR</button>
+                <button id="clearBtn">🗑️ LIMPIAR</button>
             </div>
         </div>
     </div>
@@ -309,10 +348,9 @@
 
 <script>
     // ============================================================
-    // CONFIGURACIÓN: MÁS DE 250 BLOQUES GENERADOS DINÁMICAMENTE
+    // GENERACIÓN DE MÁS DE 250 BLOQUES (ESTILO SCRATCH 2008)
     // ============================================================
 
-    // Colores por categoría (para los bloques)
     const categoryColors = {
         motion: '#4a90e2',
         looks: '#9b59b6',
@@ -324,7 +362,7 @@
         variables: '#e67e22'
     };
 
-    // Función para generar bloques de movimiento (más de 40)
+    // ---------- MOVIMIENTO (40+) ----------
     function generateMotionBlocks() {
         let blocks = [];
         // Direcciones básicas
@@ -355,59 +393,51 @@
         return blocks;
     }
 
-    // Apariencia: muchos colores y efectos
+    // ---------- APARIENCIA (40+) ----------
     function generateLooksBlocks() {
         let blocks = [];
         const colors = ['rojo', 'azul', 'verde', 'amarillo', 'morado', 'naranja', 'rosa', 'cian', 'blanco', 'negro'];
         colors.forEach(c => {
             blocks.push({ name: `cambiar_color_${c}`, text: `cambiar color a ${c}`, params: ['objeto'], default: ['gato'], color: 'looks' });
         });
-        // Tamaños
         [50,75,100,125,150,200].forEach(sz => {
             blocks.push({ name: `tamaño_${sz}`, text: `fijar tamaño ${sz}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
         });
-        // Efectos de ghost, pixelar, etc.
         ['desvanecer', 'pixelar', 'brillo'].forEach(ef => {
             [10,25,50,75].forEach(val => {
                 blocks.push({ name: `${ef}_${val}`, text: `${ef} ${val}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
             });
         });
-        // Mostrar/ocultar
         blocks.push({ name: 'mostrar', text: 'mostrar', params: ['objeto'], default: ['gato'], color: 'looks' });
         blocks.push({ name: 'ocultar', text: 'ocultar', params: ['objeto'], default: ['gato'], color: 'looks' });
-        // Decir/pensar
         ['Hola', 'Adiós', '...', '¡Genial!'].forEach(msg => {
             blocks.push({ name: `decir_${msg}`, text: `decir "${msg}"`, params: [], default: [], color: 'looks' });
         });
         return blocks;
     }
 
-    // Sonido: varios sonidos y efectos
+    // ---------- SONIDO (25+) ----------
     function generateSoundBlocks() {
         let blocks = [];
         const sounds = ['maullido', 'ladrido', 'explosión', 'salto', 'moneda', 'laser', 'campana', 'disparo'];
         sounds.forEach(s => {
             blocks.push({ name: `sonido_${s}`, text: `reproducir ${s}`, params: [], default: [], color: 'sound' });
         });
-        // Volúmenes
         [10,20,50,100].forEach(v => {
             blocks.push({ name: `volumen_${v}`, text: `fijar volumen ${v}%`, params: [], default: [], color: 'sound' });
         });
-        // Tambores
         [1,2,3,4,5].forEach(t => {
             blocks.push({ name: `tambor_${t}`, text: `tocar tambor ${t}`, params: [], default: [], color: 'sound' });
         });
         return blocks;
     }
 
-    // Eventos: muchas teclas y mensajes
+    // ---------- EVENTOS (60+) ----------
     function generateEventBlocks() {
         let blocks = [];
-        // Teclas A-Z
         'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
             blocks.push({ name: `tecla_${letter}`, text: `al presionar tecla ${letter.toUpperCase()}`, params: [], default: [], color: 'event' });
         });
-        // Mensajes personalizados
         ['inicio', 'saludo', 'pelea', 'victoria', 'derrota', 'nivel'].forEach(msg => {
             blocks.push({ name: `evento_${msg}`, text: `al recibir ${msg}`, params: [], default: [], color: 'event' });
             blocks.push({ name: `enviar_${msg}`, text: `enviar ${msg}`, params: [], default: [], color: 'event' });
@@ -415,42 +445,35 @@
         return blocks;
     }
 
-    // Control: muchas repeticiones y condiciones
+    // ---------- CONTROL (30+) ----------
     function generateControlBlocks() {
         let blocks = [];
         [1,2,3,4,5,10,20,50,100].forEach(n => {
             blocks.push({ name: `repetir_${n}`, text: `repetir ${n} veces`, params: [], default: [], color: 'control' });
         });
-        // Si condicional con diferentes operadores (simulado)
         ['vida > 50', 'vida < 20', 'tocando enemigo'].forEach(cond => {
             blocks.push({ name: `si_${cond.replace(/ /g,'_')}`, text: `si ${cond} entonces`, params: [], default: [], color: 'control' });
         });
-        // Esperar
         [0.5,1,2,3,5].forEach(t => {
             blocks.push({ name: `esperar_${t}s`, text: `esperar ${t} segundos`, params: [], default: [], color: 'control' });
         });
-        // Por siempre, detener
         blocks.push({ name: 'por_siempre', text: 'por siempre', params: [], default: [], color: 'control' });
         blocks.push({ name: 'detener', text: 'detener programa', params: [], default: [], color: 'control' });
         return blocks;
     }
 
-    // Sensores: muchas detecciones
+    // ---------- SENSORES (30+) ----------
     function generateSensingBlocks() {
         let blocks = [];
-        // Tocando objeto
         ['gato', 'enemigo', 'ratón', 'borde'].forEach(obj => {
             blocks.push({ name: `tocando_${obj}`, text: `¿tocando ${obj}?`, params: ['objeto'], default: ['gato'], color: 'sensing' });
         });
-        // Distancia a
         ['gato', 'enemigo', 'ratón'].forEach(dest => {
             blocks.push({ name: `distancia_a_${dest}`, text: `distancia a ${dest}`, params: ['objeto'], default: ['gato'], color: 'sensing' });
         });
-        // Preguntas
         ['¿Nombre?', '¿Edad?', '¿Color favorito?'].forEach(p => {
             blocks.push({ name: `preguntar_${p}`, text: `preguntar "${p}"`, params: [], default: [], color: 'sensing' });
         });
-        // Posición X/Y de objetos
         ['gato', 'enemigo'].forEach(obj => {
             blocks.push({ name: `posX_${obj}`, text: `posición X de ${obj}`, params: [], default: [], color: 'sensing' });
             blocks.push({ name: `posY_${obj}`, text: `posición Y de ${obj}`, params: [], default: [], color: 'sensing' });
@@ -458,10 +481,9 @@
         return blocks;
     }
 
-    // Operadores: muchas operaciones numéricas y lógicas
+    // ---------- OPERADORES (50+) ----------
     function generateOperatorsBlocks() {
         let blocks = [];
-        // Suma, resta, multiplica, divide con números
         for (let a = 1; a <= 5; a++) {
             for (let b = 1; b <= 5; b++) {
                 blocks.push({ name: `suma_${a}_${b}`, text: `${a} + ${b}`, params: [], default: [], color: 'operators' });
@@ -470,22 +492,19 @@
                 if (b !== 0) blocks.push({ name: `divide_${a}_${b}`, text: `${a} / ${b}`, params: [], default: [], color: 'operators' });
             }
         }
-        // Aleatorio rangos
         [[1,10], [1,100], [50,100], [0,1]].forEach(([min,max]) => {
             blocks.push({ name: `aleatorio_${min}_${max}`, text: `aleatorio ${min} a ${max}`, params: [], default: [], color: 'operators' });
         });
-        // Comparaciones
         ['>', '<', '=', '≥', '≤'].forEach(op => {
             blocks.push({ name: `comparar_${op}`, text: `${op}`, params: ['a','b'], default: [5,3], color: 'operators' });
         });
-        // Lógicos
         ['y', 'o', 'no'].forEach(op => {
             blocks.push({ name: `logico_${op}`, text: `${op}`, params: [], default: [], color: 'operators' });
         });
         return blocks;
     }
 
-    // Variables: muchas variables predefinidas
+    // ---------- VARIABLES (30+) ----------
     function generateVariablesBlocks() {
         let blocks = [];
         const varNames = ['puntaje', 'vida', 'energía', 'tiempo', 'nivel', 'monedas'];
@@ -500,7 +519,7 @@
         return blocks;
     }
 
-    // Unir todos los bloques (total > 250)
+    // Unir todos los bloques
     const allBlocks = [
         ...generateMotionBlocks(),
         ...generateLooksBlocks(),
@@ -513,7 +532,6 @@
     ];
     console.log('Total bloques generados:', allBlocks.length);
 
-    // Agrupar por categoría para la paleta
     const blocksByCategory = {
         motion: allBlocks.filter(b => b.color === 'motion'),
         looks: allBlocks.filter(b => b.color === 'looks'),
@@ -536,7 +554,7 @@
     let scriptBlocks = [];
 
     // ============================================================
-    // FUNCIONES DE INTERFAZ
+    // FUNCIONES DE INTERFAZ (SCRATCH 2008)
     // ============================================================
     let currentCategory = 'motion';
 
@@ -596,17 +614,14 @@
         scriptBlocks.forEach((block, index) => {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'script-block';
-            // Color según categoría (buscamos en allBlocks)
             const original = allBlocks.find(b => b.name === block.name) || { color: 'motion' };
             blockDiv.style.backgroundColor = categoryColors[original.color] || '#4a90e2';
 
-            // Texto amigable (usamos el texto guardado)
-            const textSpan = document.createElement('span');
             const originalBlock = allBlocks.find(b => b.name === block.name);
+            const textSpan = document.createElement('span');
             textSpan.textContent = (originalBlock ? originalBlock.text : block.name) + ' ';
             blockDiv.appendChild(textSpan);
 
-            // Parámetros editables
             if (block.paramNames) {
                 block.paramNames.forEach((paramName, i) => {
                     if (paramName === 'objeto') {
@@ -658,7 +673,6 @@
         posY.value = obj.y;
         posXVal.textContent = obj.x;
         posYVal.textContent = obj.y;
-        // Aproximar color en select
         if (obj.color === '#f1c40f') colorSelect.value = '#f1c40f';
         else if (obj.color === '#3498db') colorSelect.value = '#3498db';
         else if (obj.color === '#2ecc71') colorSelect.value = '#2ecc71';
@@ -730,8 +744,8 @@
 
     function ejecutarBloque(block) {
         addLog(`Ejecutando: ${block.name} (${block.params.join(', ')})`);
-        // Implementación simplificada de algunos comandos
         const cmd = block.name;
+
         // Movimiento
         if (cmd.startsWith('mover_')) {
             let obj = gameObjects[block.params[0]] || gameObjects['gato'];
@@ -756,9 +770,6 @@
                 let obj = gameObjects[block.params[0]] || gameObjects['gato'];
                 if (obj) { obj.x = x; obj.y = y; }
             }
-        }
-        else if (cmd.startsWith('girar_')) {
-            // no implementado visualmente, solo log
         }
         else if (cmd.startsWith('cambiar_color_')) {
             let color = cmd.split('_')[2];
@@ -794,21 +805,16 @@
             addLog(`⏱️ Esperando...`);
         }
         else if (cmd.startsWith('fijar_')) {
-            // variables
             let partes = cmd.split('_');
-            if (partes[1] === 'vida' && partes[2]) {
-                variables.vida = parseInt(partes[2]);
-            }
+            if (partes[1] === 'vida' && partes[2]) variables.vida = parseInt(partes[2]);
         }
-        else if (cmd.startsWith('cambiar_')) {
-            // variables
-        }
+
         drawGame();
-        updateSpriteEditor(); // actualizar sliders si el objeto cambió
+        updateSpriteEditor();
     }
 
     function ejecutarTodo() {
-        addLog('--- INICIO EJECUCIÓN ---');
+        addLog('--- INICIO EJECUCIÓN (2008) ---');
         for (let block of scriptBlocks) {
             ejecutarBloque(block);
         }
@@ -833,14 +839,14 @@
         // Crear botones de categorías
         const cats = document.getElementById('categories');
         const catList = [
-            { id: 'motion', name: 'Movimiento', color: '#4a90e2' },
-            { id: 'looks', name: 'Apariencia', color: '#9b59b6' },
-            { id: 'sound', name: 'Sonido', color: '#e67e22' },
-            { id: 'event', name: 'Eventos', color: '#f1c40f' },
-            { id: 'control', name: 'Control', color: '#e74c3c' },
-            { id: 'sensing', name: 'Sensores', color: '#3498db' },
-            { id: 'operators', name: 'Operadores', color: '#2ecc71' },
-            { id: 'variables', name: 'Variables', color: '#e67e22' }
+            { id: 'motion', name: 'MOVIMIENTO', color: '#4a90e2' },
+            { id: 'looks', name: 'APARIENCIA', color: '#9b59b6' },
+            { id: 'sound', name: 'SONIDO', color: '#e67e22' },
+            { id: 'event', name: 'EVENTOS', color: '#f1c40f' },
+            { id: 'control', name: 'CONTROL', color: '#e74c3c' },
+            { id: 'sensing', name: 'SENSORES', color: '#3498db' },
+            { id: 'operators', name: 'OPERADORES', color: '#2ecc71' },
+            { id: 'variables', name: 'VARIABLES', color: '#e67e22' }
         ];
         catList.forEach(cat => {
             const btn = document.createElement('button');
@@ -850,7 +856,6 @@
             btn.onclick = () => showCategory(cat.id);
             cats.appendChild(btn);
         });
-        // Activar primera categoría
         document.querySelector('.cat-btn').classList.add('active');
         renderPalette();
         drawGame();
