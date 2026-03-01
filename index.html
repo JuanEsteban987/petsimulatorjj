@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Programación - Sistema de Inputs Mejorado</title>
+    <title>Juego de Programación - Sistema de Inputs</title>
     <style>
         * {
             box-sizing: border-box;
@@ -101,7 +101,6 @@
             transition: all 0.1s;
             font-family: 'Courier New', monospace;
             min-width: 100px;
-            position: relative;
         }
         
         button:hover {
@@ -126,66 +125,6 @@
         
         button.reset:hover {
             background: #e06f6f;
-        }
-        
-        /* Botón de última tecla */
-        .last-key-button {
-            background: #ffb86b;
-            border-bottom-color: #c2803a;
-            color: #1a1e2a;
-            position: relative;
-            overflow: visible;
-            min-width: 120px;
-        }
-        
-        .last-key-button:hover {
-            background: #ffca8c;
-        }
-        
-        .key-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #4fa3e3;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 4px 0 #2d6ca3;
-            margin-bottom: 10px;
-            display: none;
-            z-index: 1000;
-            animation: fadeIn 0.2s;
-            border: 2px solid white;
-        }
-        
-        .key-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -8px;
-            border-width: 8px;
-            border-style: solid;
-            border-color: #4fa3e3 transparent transparent transparent;
-        }
-        
-        .last-key-button:hover .key-tooltip {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
         }
         
         .manual {
@@ -340,17 +279,14 @@
             margin-top: 15px;
         }
         
-        .syntax-highlight {
-            color: #ffb86b;
-        }
-        
-        .input-indicator {
+        .key-hint {
             background: #2d3445;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
             color: #b4e1fd;
-            margin-left: 8px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -359,6 +295,9 @@
         <!-- Área del juego -->
         <div class="game-area">
             <canvas id="gameCanvas" width="700" height="400"></canvas>
+            <div class="key-hint">
+                ⌨️ Teclas activas: A, B, C, D (cuando el juego está inicializado)
+            </div>
         </div>
         
         <!-- Panel de código -->
@@ -407,10 +346,6 @@ posset:"enemigo":"400":"200"</textarea>
                 <button class="execute" onclick="executeCode()">▶ EJECUTAR TODO</button>
                 <button class="reset" onclick="resetGame()">↺ REINICIAR</button>
                 <button onclick="addExample()">📋 EJEMPLO</button>
-                <button class="last-key-button" id="lastKeyButton">
-                    ⌨️ ÚLTIMA TECLA
-                    <span class="key-tooltip" id="lastKeyTooltip">—</span>
-                </button>
             </div>
             
             <div id="errorDisplay" class="error-message"></div>
@@ -501,10 +436,6 @@ posset:"enemigo":"400":"200"</textarea>
         let gameVariables = {};
         let nextPosition = 50;
         let gameInitialized = false;
-        let lastKey = '—';
-        
-        // Referencia al tooltip
-        const lastKeyTooltip = document.getElementById('lastKeyTooltip');
         
         // Input handlers
         let inputHandlers = {
@@ -542,7 +473,7 @@ posset:"enemigo":"400":"200"</textarea>
                 ctx.stroke();
             }
             
-            // Dibujar ejes de coordenadas
+            // Dibujar ejes de referencia
             ctx.strokeStyle = '#4fa3e3';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
@@ -980,8 +911,6 @@ posset:"enemigo":"400":"200"</textarea>
             gameVariables = {};
             nextPosition = 50;
             gameInitialized = false;
-            lastKey = '—';
-            lastKeyTooltip.textContent = lastKey;
             
             for (let key in inputHandlers) {
                 inputHandlers[key] = [];
@@ -1018,19 +947,25 @@ posset:"enemigo":"400":"200"</textarea>
                 }
             }
             
-            // Actualizar última tecla
-            lastKey = tecla.toUpperCase();
-            lastKeyTooltip.textContent = lastKey;
-            
             drawGame();
             updateLists();
         }
         
-        // Detectar teclas
+        // Detectar teclas - CORREGIDO: ahora solo previene cuando el juego está inicializado
+        // y NO estamos escribiendo en el textarea
         document.addEventListener('keydown', function(e) {
             const key = e.key.toLowerCase();
+            const activeElement = document.activeElement;
+            const isTextArea = activeElement && activeElement.tagName === 'TEXTAREA';
             
-            if (key.match(/[a-z]/)) {
+            // Solo procesar teclas de la A a la Z
+            if (key.match(/^[a-z]$/)) {
+                // Si estamos en el textarea, no prevenir y no ejecutar el juego
+                if (isTextArea) {
+                    return; // Dejar que el texto se escriba normalmente
+                }
+                
+                // Si no estamos en textarea, ejecutar el input del juego
                 e.preventDefault();
                 executeInput(key);
             }
@@ -1039,7 +974,7 @@ posset:"enemigo":"400":"200"</textarea>
         // Añadir ejemplo completo
         function addExample() {
             document.getElementById('codeEditor').value = 
-                '// 🎮 SISTEMA DE INPUTS MEJORADO\n' +
+                '// 🎮 SISTEMA DE INPUTS\n' +
                 '// ----------------------------------------\n\n' +
                 '// DEFINICIÓN DE INPUTS\n' +
                 'input:"A"\n' +
