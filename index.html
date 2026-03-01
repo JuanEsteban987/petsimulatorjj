@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch Blocks - Juego de Programación</title>
+    <title>Super Scratch - 250+ Bloques y Editor de Sprites</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,74 +12,100 @@
         body {
             margin: 0;
             padding: 20px;
-            background: #4a6b8f;
+            background: #2c3e50;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
         .game-container {
-            width: 1300px;
+            width: 1400px;
             max-width: 100%;
-            background: #f0f0f0;
+            background: #ecf0f1;
             border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-        /* Cabecera */
         .header {
-            background: #3a5e8c;
+            background: #34495e;
             color: white;
-            padding: 10px 20px;
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
         }
         .header button {
-            background: #ffcc00;
+            background: #f39c12;
             border: none;
-            border-radius: 30px;
-            padding: 10px 20px;
+            border-radius: 40px;
+            padding: 12px 25px;
             font-weight: bold;
+            font-size: 18px;
             cursor: pointer;
-            font-size: 16px;
+            box-shadow: 0 4px 0 #b96f0b;
         }
-        /* Área principal: canvas y bloques */
         .main-area {
             display: flex;
             padding: 20px;
             gap: 20px;
-            background: #f0f0f0;
         }
-        /* Panel izquierdo: canvas del juego */
+        /* Panel izquierdo: canvas + editor de sprites */
         .canvas-panel {
             flex: 2;
-            background: #d9e3f0;
+            background: #bdc3c7;
             border-radius: 15px;
             padding: 15px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 10px #7f8c8d;
         }
         canvas {
             width: 100%;
             height: 300px;
-            background: #1e2a3a;
+            background: #2c3e50;
             border-radius: 10px;
-            display: block;
-            border: 3px solid #2c3e50;
+            border: 3px solid #34495e;
+        }
+        .sprite-editor {
+            background: #95a5a6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .sprite-editor h3 {
+            margin: 0 0 10px 0;
+            color: white;
+            text-shadow: 1px 1px 0 #7f8c8d;
+        }
+        .editor-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .editor-row label {
+            width: 70px;
+        }
+        .editor-row input, .editor-row select {
+            flex: 1;
+            padding: 5px;
+            border: 2px solid #7f8c8d;
+            border-radius: 5px;
         }
         .log {
-            background: #1e2a3a;
-            color: #0f0;
+            background: #2c3e50;
+            color: #2ecc71;
             padding: 8px;
-            margin-top: 10px;
+            margin-top: 15px;
             border-radius: 5px;
-            height: 80px;
+            height: 70px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 12px;
@@ -87,18 +113,17 @@
         /* Panel derecho: bloques */
         .blocks-panel {
             flex: 3;
-            background: #e5e5e5;
+            background: #bdc3c7;
             border-radius: 15px;
             padding: 10px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        /* Categorías */
         .categories {
             display: flex;
             gap: 5px;
-            background: #ccc;
+            background: #95a5a6;
             padding: 8px;
             border-radius: 10px;
             flex-wrap: wrap;
@@ -110,43 +135,35 @@
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: transform 0.1s;
+            transition: 0.1s;
         }
         .cat-btn:hover { transform: scale(1.05); }
         .cat-btn.active { box-shadow: 0 0 0 3px black; }
-        /* Paleta de bloques */
         .palette {
-            background: #d5d5d5;
+            background: #95a5a6;
             border-radius: 10px;
             padding: 10px;
-            height: 220px;
+            height: 250px;
             overflow-y: auto;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             align-content: flex-start;
         }
-        /* Bloques individuales (en paleta y en script) */
         .block {
             background: #4a90e2;
             color: white;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             box-shadow: 0 4px 0 #2a4b7a;
             cursor: grab;
             user-select: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             border: 1px solid rgba(255,255,255,0.3);
-            transition: box-shadow 0.1s;
-        }
-        .block:active {
-            cursor: grabbing;
-            box-shadow: 0 2px 0 #2a4b7a;
-            transform: translateY(2px);
         }
         .block.motion { background: #4a90e2; }
         .block.looks { background: #9b59b6; }
@@ -156,9 +173,8 @@
         .block.sensing { background: #3498db; }
         .block.operators { background: #2ecc71; }
         .block.variables { background: #e67e22; }
-        /* Área de script (bloques encajados) */
         .script-area {
-            background: #b5b5b5;
+            background: #7f8c8d;
             border-radius: 10px;
             padding: 15px;
             min-height: 250px;
@@ -167,14 +183,14 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: inset 0 0 10px #34495e;
         }
         .script-block {
             background: #4a90e2;
             color: white;
             padding: 8px 15px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             box-shadow: 0 4px 0 #2a4b7a;
             display: flex;
@@ -182,14 +198,13 @@
             gap: 10px;
             position: relative;
             margin-bottom: 2px;
-            border: 1px solid rgba(255,255,255,0.3);
         }
         .script-block .delete {
             background: #c0392b;
             color: white;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -197,19 +212,13 @@
             cursor: pointer;
             margin-left: auto;
         }
-        .script-block input {
-            width: 50px;
+        .script-block input, .script-block select {
+            width: 60px;
             background: white;
             border: none;
             border-radius: 5px;
             padding: 2px 5px;
             color: black;
-        }
-        .script-block select {
-            background: white;
-            border: none;
-            border-radius: 5px;
-            padding: 2px 5px;
         }
         .bottom-buttons {
             display: flex;
@@ -222,7 +231,7 @@
             border: none;
             border-radius: 30px;
             font-weight: bold;
-            background: #2c3e50;
+            background: #34495e;
             color: white;
             cursor: pointer;
         }
@@ -234,33 +243,62 @@
 <body>
 <div class="game-container">
     <div class="header">
-        <h1>🐱 Scratch Blocks - Juego de Programación</h1>
+        <h1>🐱 Super Scratch - 250+ Bloques + Editor de Sprites</h1>
         <button id="runBtn">▶ EJECUTAR</button>
     </div>
     <div class="main-area">
-        <!-- Panel izquierdo: canvas y log -->
+        <!-- Panel izquierdo: canvas + editor -->
         <div class="canvas-panel">
             <canvas id="gameCanvas" width="500" height="300"></canvas>
+            <div class="sprite-editor">
+                <h3>✏️ Editor de Sprites</h3>
+                <div class="editor-row">
+                    <label>Objeto:</label>
+                    <select id="spriteSelect">
+                        <option value="gato">Gato</option>
+                        <option value="enemigo">Enemigo</option>
+                    </select>
+                </div>
+                <div class="editor-row">
+                    <label>Pos X:</label>
+                    <input type="range" id="posX" min="20" max="480" value="100">
+                    <span id="posXVal">100</span>
+                </div>
+                <div class="editor-row">
+                    <label>Pos Y:</label>
+                    <input type="range" id="posY" min="20" max="280" value="150">
+                    <span id="posYVal">150</span>
+                </div>
+                <div class="editor-row">
+                    <label>Color:</label>
+                    <select id="colorSelect">
+                        <option value="#f1c40f">Amarillo</option>
+                        <option value="#3498db">Azul</option>
+                        <option value="#2ecc71">Verde</option>
+                        <option value="#e74c3c">Rojo</option>
+                        <option value="#9b59b6">Morado</option>
+                    </select>
+                </div>
+                <div class="editor-row">
+                    <label>Tamaño %:</label>
+                    <input type="range" id="size" min="10" max="200" value="100">
+                    <span id="sizeVal">100</span>
+                </div>
+                <div class="editor-row">
+                    <label>Visible:</label>
+                    <input type="checkbox" id="visible" checked>
+                </div>
+            </div>
             <div class="log" id="log">> Listo</div>
         </div>
+
         <!-- Panel derecho: bloques -->
         <div class="blocks-panel">
-            <!-- Categorías -->
             <div class="categories" id="categories">
-                <button class="cat-btn" style="background:#4a90e2;" onclick="showCategory('motion')">Movimiento</button>
-                <button class="cat-btn" style="background:#9b59b6;" onclick="showCategory('looks')">Apariencia</button>
-                <button class="cat-btn" style="background:#e67e22;" onclick="showCategory('sound')">Sonido</button>
-                <button class="cat-btn" style="background:#f1c40f; color:black;" onclick="showCategory('event')">Eventos</button>
-                <button class="cat-btn" style="background:#e74c3c;" onclick="showCategory('control')">Control</button>
-                <button class="cat-btn" style="background:#3498db;" onclick="showCategory('sensing')">Sensores</button>
-                <button class="cat-btn" style="background:#2ecc71;" onclick="showCategory('operators')">Operadores</button>
-                <button class="cat-btn" style="background:#e67e22;" onclick="showCategory('variables')">Variables</button>
+                <!-- Se generan con JS -->
             </div>
-            <!-- Paleta de bloques (se llena con JS) -->
             <div class="palette" id="palette"></div>
-            <!-- Área de script (bloques encajados) -->
             <div class="script-area" id="scriptArea"></div>
-            <!-- Botones inferiores -->
             <div class="bottom-buttons">
                 <button id="resetBtn">↺ Reiniciar</button>
                 <button id="clearBtn">🗑️ Limpiar</button>
@@ -271,92 +309,231 @@
 
 <script>
     // ============================================================
-    // CONFIGURACIÓN DE BLOQUES (más de 50)
+    // CONFIGURACIÓN: MÁS DE 250 BLOQUES GENERADOS DINÁMICAMENTE
     // ============================================================
-    const blocksData = {
-        motion: [
-            { name: 'mover_x', text: 'mover en X', params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' },
-            { name: 'mover_y', text: 'mover en Y', params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' },
-            { name: 'ir_a', text: 'ir a posición', params: ['objeto', 'x', 'y'], default: ['gato', 100, 100], color: 'motion' },
-            { name: 'movimiento_aleatorio', text: 'ir a posición aleatoria', params: ['objeto'], default: ['gato'], color: 'motion' },
-            { name: 'deslizar', text: 'deslizar en X', params: ['objeto', 'seg', 'pasos'], default: ['gato', 1, 50], color: 'motion' },
-            { name: 'rebotar', text: 'rebotar si toca borde', params: ['objeto'], default: ['gato'], color: 'motion' },
-            { name: 'girar', text: 'girar grados', params: ['objeto', 'grados'], default: ['gato', 15], color: 'motion' },
-            { name: 'apuntar', text: 'apuntar hacia', params: ['objeto', 'direccion'], default: ['gato', 'enemigo'], color: 'motion' }
-        ],
-        looks: [
-            { name: 'decir', text: 'decir', params: ['mensaje'], default: ['Hola!'], color: 'looks' },
-            { name: 'pensar', text: 'pensar', params: ['mensaje'], default: ['...'], color: 'looks' },
-            { name: 'cambiar_color', text: 'cambiar color', params: ['objeto', 'color'], default: ['gato', 'rojo'], color: 'looks' },
-            { name: 'color_aleatorio', text: 'color aleatorio', params: ['objeto'], default: ['gato'], color: 'looks' },
-            { name: 'cambiar_tamaño', text: 'cambiar tamaño', params: ['objeto', 'porcentaje'], default: ['gato', 10], color: 'looks' },
-            { name: 'fijar_tamaño', text: 'fijar tamaño %', params: ['objeto', 'porcentaje'], default: ['gato', 100], color: 'looks' },
-            { name: 'mostrar', text: 'mostrar', params: ['objeto'], default: ['gato'], color: 'looks' },
-            { name: 'ocultar', text: 'ocultar', params: ['objeto'], default: ['gato'], color: 'looks' }
-        ],
-        sound: [
-            { name: 'reproducir_sonido', text: 'reproducir sonido', params: ['sonido'], default: ['maullido'], color: 'sound' },
-            { name: 'tocar_tambor', text: 'tocar tambor', params: ['ritmo'], default: ['1'], color: 'sound' },
-            { name: 'subir_volumen', text: 'subir volumen', params: ['valor'], default: [10], color: 'sound' },
-            { name: 'bajar_volumen', text: 'bajar volumen', params: ['valor'], default: [10], color: 'sound' },
-            { name: 'silenciar', text: 'silenciar', params: [], default: [], color: 'sound' }
-        ],
-        event: [
-            { name: 'al_presionar_tecla', text: 'al presionar tecla', params: ['tecla'], default: ['espacio'], color: 'event' },
-            { name: 'al_hacer_click', text: 'al hacer click en objeto', params: ['objeto'], default: ['gato'], color: 'event' },
-            { name: 'al_iniciar', text: 'al iniciar', params: [], default: [], color: 'event' },
-            { name: 'enviar_mensaje', text: 'enviar mensaje', params: ['mensaje'], default: ['evento1'], color: 'event' },
-            { name: 'cuando_reciba', text: 'cuando reciba mensaje', params: ['mensaje'], default: ['evento1'], color: 'event' }
-        ],
-        control: [
-            { name: 'esperar', text: 'esperar segundos', params: ['seg'], default: [1], color: 'control' },
-            { name: 'repetir', text: 'repetir veces', params: ['veces', 'bloque'], default: [10, 'movimiento'], color: 'control' },
-            { name: 'por_siempre', text: 'por siempre', params: [], default: [], color: 'control' },
-            { name: 'si_entonces', text: 'si ... entonces', params: ['condicion', 'bloque'], default: ['true', 'movimiento'], color: 'control' },
-            { name: 'si_sino', text: 'si ... sino', params: ['condicion', 'bloque1', 'bloque2'], default: ['true', 'movimiento', 'esperar'], color: 'control' },
-            { name: 'detener_programa', text: 'detener programa', params: [], default: [], color: 'control' }
-        ],
-        sensing: [
-            { name: 'tocando_objeto', text: '¿tocando objeto?', params: ['objeto1', 'objeto2'], default: ['gato', 'enemigo'], color: 'sensing' },
-            { name: 'distancia_a', text: 'distancia a', params: ['objeto1', 'objeto2'], default: ['gato', 'enemigo'], color: 'sensing' },
-            { name: 'preguntar', text: 'preguntar y esperar', params: ['pregunta'], default: ['¿Cómo te llamas?'], color: 'sensing' },
-            { name: 'respuesta', text: 'respuesta', params: [], default: [], color: 'sensing' },
-            { name: 'posicion_x', text: 'posición X de', params: ['objeto'], default: ['gato'], color: 'sensing' },
-            { name: 'posicion_y', text: 'posición Y de', params: ['objeto'], default: ['gato'], color: 'sensing' }
-        ],
-        operators: [
-            { name: 'suma', text: 'suma', params: ['a', 'b'], default: [1, 2], color: 'operators' },
-            { name: 'resta', text: 'resta', params: ['a', 'b'], default: [5, 3], color: 'operators' },
-            { name: 'multiplica', text: 'multiplica', params: ['a', 'b'], default: [2, 3], color: 'operators' },
-            { name: 'divide', text: 'divide', params: ['a', 'b'], default: [10, 2], color: 'operators' },
-            { name: 'aleatorio', text: 'número aleatorio', params: ['min', 'max'], default: [1, 10], color: 'operators' },
-            { name: 'mayor_que', text: 'mayor que', params: ['a', 'b'], default: [5, 3], color: 'operators' },
-            { name: 'menor_que', text: 'menor que', params: ['a', 'b'], default: [3, 5], color: 'operators' },
-            { name: 'igual', text: 'igual', params: ['a', 'b'], default: [5, 5], color: 'operators' },
-            { name: 'y', text: 'y', params: ['cond1', 'cond2'], default: [true, false], color: 'operators' },
-            { name: 'o', text: 'o', params: ['cond1', 'cond2'], default: [true, false], color: 'operators' },
-            { name: 'no', text: 'no', params: ['cond'], default: [false], color: 'operators' }
-        ],
-        variables: [
-            { name: 'crear_variable', text: 'crear variable', params: ['nombre', 'valor'], default: ['puntaje', 0], color: 'variables' },
-            { name: 'cambiar_variable', text: 'cambiar variable', params: ['nombre', 'valor'], default: ['puntaje', 1], color: 'variables' },
-            { name: 'fijar_variable', text: 'fijar variable', params: ['nombre', 'valor'], default: ['puntaje', 10], color: 'variables' },
-            { name: 'mostrar_variable', text: 'mostrar variable', params: ['nombre'], default: ['puntaje'], color: 'variables' },
-            { name: 'ocultar_variable', text: 'ocultar variable', params: ['nombre'], default: ['puntaje'], color: 'variables' },
-            { name: 'incrementar', text: 'incrementar', params: ['nombre'], default: ['puntaje'], color: 'variables' },
-            { name: 'decrementar', text: 'decrementar', params: ['nombre'], default: ['puntaje'], color: 'variables' }
-        ]
+
+    // Colores por categoría (para los bloques)
+    const categoryColors = {
+        motion: '#4a90e2',
+        looks: '#9b59b6',
+        sound: '#e67e22',
+        event: '#f1c40f',
+        control: '#e74c3c',
+        sensing: '#3498db',
+        operators: '#2ecc71',
+        variables: '#e67e22'
+    };
+
+    // Función para generar bloques de movimiento (más de 40)
+    function generateMotionBlocks() {
+        let blocks = [];
+        // Direcciones básicas
+        const directions = ['arriba', 'abajo', 'izquierda', 'derecha', 'arriba-izquierda', 'arriba-derecha', 'abajo-izquierda', 'abajo-derecha'];
+        directions.forEach(dir => {
+            blocks.push({ name: `mover_${dir}`, text: `mover ${dir}`, params: ['objeto', 'pasos'], default: ['gato', 10], color: 'motion' });
+        });
+        // Pasos predefinidos
+        [1,5,10,20,50,100].forEach(pasos => {
+            blocks.push({ name: `mover_${pasos}`, text: `mover ${pasos} pasos`, params: ['objeto'], default: ['gato'], color: 'motion' });
+        });
+        // Ir a posiciones específicas
+        [[0,0], [100,100], [200,150], [300,200], [400,100]].forEach(([x,y]) => {
+            blocks.push({ name: `ir_a_${x}_${y}`, text: `ir a (${x},${y})`, params: ['objeto'], default: ['gato'], color: 'motion' });
+        });
+        // Deslizar con diferentes tiempos
+        [0.5,1,2,3].forEach(seg => {
+            blocks.push({ name: `deslizar_${seg}s`, text: `deslizar ${seg}s a X`, params: ['objeto', 'destinoX'], default: ['gato', 200], color: 'motion' });
+        });
+        // Rebote, girar, apuntar
+        blocks.push({ name: 'rebotar_si_borde', text: 'rebotar si toca borde', params: ['objeto'], default: ['gato'], color: 'motion' });
+        [15,30,45,90,180].forEach(grados => {
+            blocks.push({ name: `girar_${grados}`, text: `girar ${grados} grados`, params: ['objeto'], default: ['gato'], color: 'motion' });
+        });
+        ['ratón', 'centro', 'enemigo'].forEach(dest => {
+            blocks.push({ name: `apuntar_hacia_${dest}`, text: `apuntar hacia ${dest}`, params: ['objeto'], default: ['gato'], color: 'motion' });
+        });
+        return blocks;
+    }
+
+    // Apariencia: muchos colores y efectos
+    function generateLooksBlocks() {
+        let blocks = [];
+        const colors = ['rojo', 'azul', 'verde', 'amarillo', 'morado', 'naranja', 'rosa', 'cian', 'blanco', 'negro'];
+        colors.forEach(c => {
+            blocks.push({ name: `cambiar_color_${c}`, text: `cambiar color a ${c}`, params: ['objeto'], default: ['gato'], color: 'looks' });
+        });
+        // Tamaños
+        [50,75,100,125,150,200].forEach(sz => {
+            blocks.push({ name: `tamaño_${sz}`, text: `fijar tamaño ${sz}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
+        });
+        // Efectos de ghost, pixelar, etc.
+        ['desvanecer', 'pixelar', 'brillo'].forEach(ef => {
+            [10,25,50,75].forEach(val => {
+                blocks.push({ name: `${ef}_${val}`, text: `${ef} ${val}%`, params: ['objeto'], default: ['gato'], color: 'looks' });
+            });
+        });
+        // Mostrar/ocultar
+        blocks.push({ name: 'mostrar', text: 'mostrar', params: ['objeto'], default: ['gato'], color: 'looks' });
+        blocks.push({ name: 'ocultar', text: 'ocultar', params: ['objeto'], default: ['gato'], color: 'looks' });
+        // Decir/pensar
+        ['Hola', 'Adiós', '...', '¡Genial!'].forEach(msg => {
+            blocks.push({ name: `decir_${msg}`, text: `decir "${msg}"`, params: [], default: [], color: 'looks' });
+        });
+        return blocks;
+    }
+
+    // Sonido: varios sonidos y efectos
+    function generateSoundBlocks() {
+        let blocks = [];
+        const sounds = ['maullido', 'ladrido', 'explosión', 'salto', 'moneda', 'laser', 'campana', 'disparo'];
+        sounds.forEach(s => {
+            blocks.push({ name: `sonido_${s}`, text: `reproducir ${s}`, params: [], default: [], color: 'sound' });
+        });
+        // Volúmenes
+        [10,20,50,100].forEach(v => {
+            blocks.push({ name: `volumen_${v}`, text: `fijar volumen ${v}%`, params: [], default: [], color: 'sound' });
+        });
+        // Tambores
+        [1,2,3,4,5].forEach(t => {
+            blocks.push({ name: `tambor_${t}`, text: `tocar tambor ${t}`, params: [], default: [], color: 'sound' });
+        });
+        return blocks;
+    }
+
+    // Eventos: muchas teclas y mensajes
+    function generateEventBlocks() {
+        let blocks = [];
+        // Teclas A-Z
+        'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
+            blocks.push({ name: `tecla_${letter}`, text: `al presionar tecla ${letter.toUpperCase()}`, params: [], default: [], color: 'event' });
+        });
+        // Mensajes personalizados
+        ['inicio', 'saludo', 'pelea', 'victoria', 'derrota', 'nivel'].forEach(msg => {
+            blocks.push({ name: `evento_${msg}`, text: `al recibir ${msg}`, params: [], default: [], color: 'event' });
+            blocks.push({ name: `enviar_${msg}`, text: `enviar ${msg}`, params: [], default: [], color: 'event' });
+        });
+        return blocks;
+    }
+
+    // Control: muchas repeticiones y condiciones
+    function generateControlBlocks() {
+        let blocks = [];
+        [1,2,3,4,5,10,20,50,100].forEach(n => {
+            blocks.push({ name: `repetir_${n}`, text: `repetir ${n} veces`, params: [], default: [], color: 'control' });
+        });
+        // Si condicional con diferentes operadores (simulado)
+        ['vida > 50', 'vida < 20', 'tocando enemigo'].forEach(cond => {
+            blocks.push({ name: `si_${cond.replace(/ /g,'_')}`, text: `si ${cond} entonces`, params: [], default: [], color: 'control' });
+        });
+        // Esperar
+        [0.5,1,2,3,5].forEach(t => {
+            blocks.push({ name: `esperar_${t}s`, text: `esperar ${t} segundos`, params: [], default: [], color: 'control' });
+        });
+        // Por siempre, detener
+        blocks.push({ name: 'por_siempre', text: 'por siempre', params: [], default: [], color: 'control' });
+        blocks.push({ name: 'detener', text: 'detener programa', params: [], default: [], color: 'control' });
+        return blocks;
+    }
+
+    // Sensores: muchas detecciones
+    function generateSensingBlocks() {
+        let blocks = [];
+        // Tocando objeto
+        ['gato', 'enemigo', 'ratón', 'borde'].forEach(obj => {
+            blocks.push({ name: `tocando_${obj}`, text: `¿tocando ${obj}?`, params: ['objeto'], default: ['gato'], color: 'sensing' });
+        });
+        // Distancia a
+        ['gato', 'enemigo', 'ratón'].forEach(dest => {
+            blocks.push({ name: `distancia_a_${dest}`, text: `distancia a ${dest}`, params: ['objeto'], default: ['gato'], color: 'sensing' });
+        });
+        // Preguntas
+        ['¿Nombre?', '¿Edad?', '¿Color favorito?'].forEach(p => {
+            blocks.push({ name: `preguntar_${p}`, text: `preguntar "${p}"`, params: [], default: [], color: 'sensing' });
+        });
+        // Posición X/Y de objetos
+        ['gato', 'enemigo'].forEach(obj => {
+            blocks.push({ name: `posX_${obj}`, text: `posición X de ${obj}`, params: [], default: [], color: 'sensing' });
+            blocks.push({ name: `posY_${obj}`, text: `posición Y de ${obj}`, params: [], default: [], color: 'sensing' });
+        });
+        return blocks;
+    }
+
+    // Operadores: muchas operaciones numéricas y lógicas
+    function generateOperatorsBlocks() {
+        let blocks = [];
+        // Suma, resta, multiplica, divide con números
+        for (let a = 1; a <= 5; a++) {
+            for (let b = 1; b <= 5; b++) {
+                blocks.push({ name: `suma_${a}_${b}`, text: `${a} + ${b}`, params: [], default: [], color: 'operators' });
+                blocks.push({ name: `resta_${a}_${b}`, text: `${a} - ${b}`, params: [], default: [], color: 'operators' });
+                blocks.push({ name: `multiplica_${a}_${b}`, text: `${a} * ${b}`, params: [], default: [], color: 'operators' });
+                if (b !== 0) blocks.push({ name: `divide_${a}_${b}`, text: `${a} / ${b}`, params: [], default: [], color: 'operators' });
+            }
+        }
+        // Aleatorio rangos
+        [[1,10], [1,100], [50,100], [0,1]].forEach(([min,max]) => {
+            blocks.push({ name: `aleatorio_${min}_${max}`, text: `aleatorio ${min} a ${max}`, params: [], default: [], color: 'operators' });
+        });
+        // Comparaciones
+        ['>', '<', '=', '≥', '≤'].forEach(op => {
+            blocks.push({ name: `comparar_${op}`, text: `${op}`, params: ['a','b'], default: [5,3], color: 'operators' });
+        });
+        // Lógicos
+        ['y', 'o', 'no'].forEach(op => {
+            blocks.push({ name: `logico_${op}`, text: `${op}`, params: [], default: [], color: 'operators' });
+        });
+        return blocks;
+    }
+
+    // Variables: muchas variables predefinidas
+    function generateVariablesBlocks() {
+        let blocks = [];
+        const varNames = ['puntaje', 'vida', 'energía', 'tiempo', 'nivel', 'monedas'];
+        varNames.forEach(v => {
+            blocks.push({ name: `crear_${v}`, text: `crear variable ${v}`, params: [], default: [], color: 'variables' });
+            blocks.push({ name: `cambiar_${v}_1`, text: `cambiar ${v} por 1`, params: [], default: [], color: 'variables' });
+            blocks.push({ name: `fijar_${v}_0`, text: `fijar ${v} a 0`, params: [], default: [], color: 'variables' });
+            [5,10,20,50,100].forEach(val => {
+                blocks.push({ name: `fijar_${v}_${val}`, text: `fijar ${v} a ${val}`, params: [], default: [], color: 'variables' });
+            });
+        });
+        return blocks;
+    }
+
+    // Unir todos los bloques (total > 250)
+    const allBlocks = [
+        ...generateMotionBlocks(),
+        ...generateLooksBlocks(),
+        ...generateSoundBlocks(),
+        ...generateEventBlocks(),
+        ...generateControlBlocks(),
+        ...generateSensingBlocks(),
+        ...generateOperatorsBlocks(),
+        ...generateVariablesBlocks()
+    ];
+    console.log('Total bloques generados:', allBlocks.length);
+
+    // Agrupar por categoría para la paleta
+    const blocksByCategory = {
+        motion: allBlocks.filter(b => b.color === 'motion'),
+        looks: allBlocks.filter(b => b.color === 'looks'),
+        sound: allBlocks.filter(b => b.color === 'sound'),
+        event: allBlocks.filter(b => b.color === 'event'),
+        control: allBlocks.filter(b => b.color === 'control'),
+        sensing: allBlocks.filter(b => b.color === 'sensing'),
+        operators: allBlocks.filter(b => b.color === 'operators'),
+        variables: allBlocks.filter(b => b.color === 'variables')
     };
 
     // ============================================================
     // ESTADO DEL JUEGO
     // ============================================================
     let gameObjects = {
-        gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, tamaño: 100 },
-        enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, tamaño: 100 }
+        gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, size: 100 },
+        enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, size: 100 }
     };
-    let variables = { puntaje: 0 };
-    let scriptBlocks = []; // bloques en el área de script
+    let variables = { puntaje: 0, vida: 100, energía: 50, tiempo: 60, nivel: 1, monedas: 0 };
+    let scriptBlocks = [];
 
     // ============================================================
     // FUNCIONES DE INTERFAZ
@@ -372,7 +549,7 @@
 
     function renderPalette() {
         const palette = document.getElementById('palette');
-        const blocks = blocksData[currentCategory] || [];
+        const blocks = blocksByCategory[currentCategory] || [];
         palette.innerHTML = '';
         blocks.forEach(block => {
             const div = document.createElement('div');
@@ -380,14 +557,13 @@
             div.setAttribute('draggable', 'true');
             div.textContent = block.text;
             div.dataset.name = block.name;
-            div.dataset.params = JSON.stringify(block.params);
-            div.dataset.default = JSON.stringify(block.default);
+            div.dataset.params = JSON.stringify(block.params || []);
+            div.dataset.default = JSON.stringify(block.default || []);
             div.addEventListener('dragstart', handleDragStart);
             palette.appendChild(div);
         });
     }
 
-    // Arrastrar bloques desde la paleta
     function handleDragStart(e) {
         e.dataTransfer.setData('text/plain', JSON.stringify({
             name: e.target.dataset.name,
@@ -397,7 +573,6 @@
         e.dataTransfer.effectAllowed = 'copy';
     }
 
-    // Área de script: permitir soltar
     const scriptArea = document.getElementById('scriptArea');
     scriptArea.addEventListener('dragover', e => e.preventDefault());
     scriptArea.addEventListener('drop', e => {
@@ -421,44 +596,37 @@
         scriptBlocks.forEach((block, index) => {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'script-block';
-            // Buscar el color del bloque en blocksData
-            let colorClass = 'motion';
-            for (let cat in blocksData) {
-                const found = blocksData[cat].find(b => b.name === block.name);
-                if (found) { colorClass = found.color; break; }
-            }
-            blockDiv.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--${colorClass}`) || '#4a90e2';
+            // Color según categoría (buscamos en allBlocks)
+            const original = allBlocks.find(b => b.name === block.name) || { color: 'motion' };
+            blockDiv.style.backgroundColor = categoryColors[original.color] || '#4a90e2';
 
-            // Texto del bloque
+            // Texto amigable (usamos el texto guardado)
             const textSpan = document.createElement('span');
-            textSpan.textContent = block.name.replace(/_/g,' ') + ' ';
+            const originalBlock = allBlocks.find(b => b.name === block.name);
+            textSpan.textContent = (originalBlock ? originalBlock.text : block.name) + ' ';
             blockDiv.appendChild(textSpan);
 
             // Parámetros editables
-            block.paramNames.forEach((paramName, i) => {
-                if (paramName === 'objeto') {
-                    const select = document.createElement('select');
-                    select.innerHTML = `<option>gato</option><option>enemigo</option>`;
-                    select.value = block.params[i];
-                    select.onchange = (e) => { block.params[i] = e.target.value; };
-                    blockDiv.appendChild(select);
-                } else if (paramName === 'color') {
-                    const select = document.createElement('select');
-                    select.innerHTML = `<option>rojo</option><option>azul</option><option>verde</option><option>amarillo</option>`;
-                    select.value = block.params[i];
-                    select.onchange = (e) => { block.params[i] = e.target.value; };
-                    blockDiv.appendChild(select);
-                } else {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = block.params[i];
-                    input.onchange = (e) => { block.params[i] = e.target.value; };
-                    blockDiv.appendChild(input);
-                }
-                if (i < block.paramNames.length - 1) blockDiv.appendChild(document.createTextNode(' '));
-            });
+            if (block.paramNames) {
+                block.paramNames.forEach((paramName, i) => {
+                    if (paramName === 'objeto') {
+                        const select = document.createElement('select');
+                        select.innerHTML = `<option>gato</option><option>enemigo</option>`;
+                        select.value = block.params[i];
+                        select.onchange = (e) => { block.params[i] = e.target.value; };
+                        blockDiv.appendChild(select);
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = block.params[i];
+                        input.style.width = '50px';
+                        input.onchange = (e) => { block.params[i] = e.target.value; };
+                        blockDiv.appendChild(input);
+                    }
+                    if (i < block.paramNames.length - 1) blockDiv.appendChild(document.createTextNode(' '));
+                });
+            }
 
-            // Botón eliminar
             const del = document.createElement('span');
             del.className = 'delete';
             del.textContent = '✖';
@@ -470,7 +638,64 @@
     }
 
     // ============================================================
-    // EJECUCIÓN DE BLOQUES (simulada)
+    // EDITOR DE SPRITES
+    // ============================================================
+    const spriteSelect = document.getElementById('spriteSelect');
+    const posX = document.getElementById('posX');
+    const posY = document.getElementById('posY');
+    const posXVal = document.getElementById('posXVal');
+    const posYVal = document.getElementById('posYVal');
+    const colorSelect = document.getElementById('colorSelect');
+    const sizeSlider = document.getElementById('size');
+    const sizeVal = document.getElementById('sizeVal');
+    const visibleCheck = document.getElementById('visible');
+
+    function updateSpriteEditor() {
+        const objName = spriteSelect.value;
+        const obj = gameObjects[objName];
+        if (!obj) return;
+        posX.value = obj.x;
+        posY.value = obj.y;
+        posXVal.textContent = obj.x;
+        posYVal.textContent = obj.y;
+        // Aproximar color en select
+        if (obj.color === '#f1c40f') colorSelect.value = '#f1c40f';
+        else if (obj.color === '#3498db') colorSelect.value = '#3498db';
+        else if (obj.color === '#2ecc71') colorSelect.value = '#2ecc71';
+        else if (obj.color === '#e74c3c') colorSelect.value = '#e74c3c';
+        else if (obj.color === '#9b59b6') colorSelect.value = '#9b59b6';
+        sizeSlider.value = obj.size;
+        sizeVal.textContent = obj.size;
+        visibleCheck.checked = obj.visible;
+    }
+
+    spriteSelect.addEventListener('change', updateSpriteEditor);
+    posX.addEventListener('input', () => {
+        posXVal.textContent = posX.value;
+        gameObjects[spriteSelect.value].x = parseInt(posX.value);
+        drawGame();
+    });
+    posY.addEventListener('input', () => {
+        posYVal.textContent = posY.value;
+        gameObjects[spriteSelect.value].y = parseInt(posY.value);
+        drawGame();
+    });
+    colorSelect.addEventListener('change', () => {
+        gameObjects[spriteSelect.value].color = colorSelect.value;
+        drawGame();
+    });
+    sizeSlider.addEventListener('input', () => {
+        sizeVal.textContent = sizeSlider.value;
+        gameObjects[spriteSelect.value].size = parseInt(sizeSlider.value);
+        drawGame();
+    });
+    visibleCheck.addEventListener('change', () => {
+        gameObjects[spriteSelect.value].visible = visibleCheck.checked;
+        drawGame();
+    });
+
+    // ============================================================
+    // DIBUJO Y EJECUCIÓN
     // ============================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -482,7 +707,7 @@
     }
 
     function drawGame() {
-        ctx.fillStyle = '#1e2a3a';
+        ctx.fillStyle = '#2c3e50';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         for (let name in gameObjects) {
             let obj = gameObjects[name];
@@ -491,7 +716,7 @@
             ctx.translate(obj.x, obj.y);
             ctx.fillStyle = obj.color;
             ctx.beginPath();
-            ctx.arc(0, 0, 15 * (obj.tamaño/100), 0, 2*Math.PI);
+            ctx.arc(0, 0, 15 * (obj.size/100), 0, 2*Math.PI);
             ctx.fill();
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
@@ -504,46 +729,82 @@
     }
 
     function ejecutarBloque(block) {
-        // Simulación de comandos (solo algunos ejemplos)
-        addLog(`Ejecutando: ${block.name} con parámetros ${block.params.join(', ')}`);
-        switch (block.name) {
-            case 'mover_x':
-                let objX = gameObjects[block.params[0]];
-                if (objX) objX.x += Number(block.params[1]);
-                break;
-            case 'mover_y':
-                let objY = gameObjects[block.params[0]];
-                if (objY) objY.y += Number(block.params[1]);
-                break;
-            case 'ir_a':
-                let objA = gameObjects[block.params[0]];
-                if (objA) {
-                    objA.x = Number(block.params[1]);
-                    objA.y = Number(block.params[2]);
-                }
-                break;
-            case 'cambiar_color':
-                let objC = gameObjects[block.params[0]];
-                if (objC) {
-                    let col = block.params[1];
-                    if (col === 'rojo') objC.color = '#e74c3c';
-                    else if (col === 'azul') objC.color = '#3498db';
-                    else if (col === 'verde') objC.color = '#2ecc71';
-                    else if (col === 'amarillo') objC.color = '#f1c40f';
-                }
-                break;
-            case 'decir':
-                addLog(`🗣️ ${block.params[0]}`);
-                break;
-            case 'esperar':
-                // Simulamos espera con un mensaje
-                addLog(`⏱️ Esperando ${block.params[0]} segundos`);
-                break;
-            default:
-                // Otros comandos se ignoran por simplicidad
-                break;
+        addLog(`Ejecutando: ${block.name} (${block.params.join(', ')})`);
+        // Implementación simplificada de algunos comandos
+        const cmd = block.name;
+        // Movimiento
+        if (cmd.startsWith('mover_')) {
+            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+            if (!obj) return;
+            let pasos = block.params[1] ? Number(block.params[1]) : 10;
+            if (cmd.includes('derecha')) obj.x += pasos;
+            else if (cmd.includes('izquierda')) obj.x -= pasos;
+            else if (cmd.includes('abajo')) obj.y += pasos;
+            else if (cmd.includes('arriba')) obj.y -= pasos;
+            else if (cmd.includes('arriba-izquierda')) { obj.x -= pasos; obj.y -= pasos; }
+            else if (cmd.includes('arriba-derecha')) { obj.x += pasos; obj.y -= pasos; }
+            else if (cmd.includes('abajo-izquierda')) { obj.x -= pasos; obj.y += pasos; }
+            else if (cmd.includes('abajo-derecha')) { obj.x += pasos; obj.y += pasos; }
+            else { // mover_X pasos
+                obj.x += pasos;
+            }
+        }
+        else if (cmd.startsWith('ir_a_')) {
+            let partes = cmd.split('_');
+            if (partes.length >= 4) {
+                let x = parseInt(partes[2]), y = parseInt(partes[3]);
+                let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+                if (obj) { obj.x = x; obj.y = y; }
+            }
+        }
+        else if (cmd.startsWith('girar_')) {
+            // no implementado visualmente, solo log
+        }
+        else if (cmd.startsWith('cambiar_color_')) {
+            let color = cmd.split('_')[2];
+            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+            if (obj) {
+                if (color === 'rojo') obj.color = '#e74c3c';
+                else if (color === 'azul') obj.color = '#3498db';
+                else if (color === 'verde') obj.color = '#2ecc71';
+                else if (color === 'amarillo') obj.color = '#f1c40f';
+                else if (color === 'morado') obj.color = '#9b59b6';
+            }
+        }
+        else if (cmd.startsWith('tamaño_')) {
+            let sz = parseInt(cmd.split('_')[1]);
+            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+            if (obj) obj.size = sz;
+        }
+        else if (cmd === 'mostrar') {
+            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+            if (obj) obj.visible = true;
+        }
+        else if (cmd === 'ocultar') {
+            let obj = gameObjects[block.params[0]] || gameObjects['gato'];
+            if (obj) obj.visible = false;
+        }
+        else if (cmd.startsWith('decir_')) {
+            addLog(`🗣️ ${cmd.split('_')[1]}`);
+        }
+        else if (cmd.startsWith('sonido_')) {
+            addLog(`🔊 Sonido: ${cmd.split('_')[1]}`);
+        }
+        else if (cmd.startsWith('esperar_')) {
+            addLog(`⏱️ Esperando...`);
+        }
+        else if (cmd.startsWith('fijar_')) {
+            // variables
+            let partes = cmd.split('_');
+            if (partes[1] === 'vida' && partes[2]) {
+                variables.vida = parseInt(partes[2]);
+            }
+        }
+        else if (cmd.startsWith('cambiar_')) {
+            // variables
         }
         drawGame();
+        updateSpriteEditor(); // actualizar sliders si el objeto cambió
     }
 
     function ejecutarTodo() {
@@ -556,11 +817,12 @@
 
     function resetGame() {
         gameObjects = {
-            gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, tamaño: 100 },
-            enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, tamaño: 100 }
+            gato: { name: 'gato', x: 100, y: 150, color: '#f1c40f', visible: true, size: 100 },
+            enemigo: { name: 'enemigo', x: 300, y: 150, color: '#e74c3c', visible: true, size: 100 }
         };
-        variables = { puntaje: 0 };
+        variables = { puntaje: 0, vida: 100, energía: 50, tiempo: 60, nivel: 1, monedas: 0 };
         drawGame();
+        updateSpriteEditor();
         addLog('Juego reiniciado');
     }
 
@@ -568,8 +830,32 @@
     // INICIALIZACIÓN
     // ============================================================
     window.onload = () => {
+        // Crear botones de categorías
+        const cats = document.getElementById('categories');
+        const catList = [
+            { id: 'motion', name: 'Movimiento', color: '#4a90e2' },
+            { id: 'looks', name: 'Apariencia', color: '#9b59b6' },
+            { id: 'sound', name: 'Sonido', color: '#e67e22' },
+            { id: 'event', name: 'Eventos', color: '#f1c40f' },
+            { id: 'control', name: 'Control', color: '#e74c3c' },
+            { id: 'sensing', name: 'Sensores', color: '#3498db' },
+            { id: 'operators', name: 'Operadores', color: '#2ecc71' },
+            { id: 'variables', name: 'Variables', color: '#e67e22' }
+        ];
+        catList.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.style.backgroundColor = cat.color;
+            btn.textContent = cat.name;
+            btn.onclick = () => showCategory(cat.id);
+            cats.appendChild(btn);
+        });
+        // Activar primera categoría
+        document.querySelector('.cat-btn').classList.add('active');
         renderPalette();
         drawGame();
+        updateSpriteEditor();
+
         document.getElementById('runBtn').addEventListener('click', ejecutarTodo);
         document.getElementById('resetBtn').addEventListener('click', resetGame);
         document.getElementById('clearBtn').addEventListener('click', () => {
@@ -578,9 +864,6 @@
             addLog('Script limpiado');
         });
     };
-
-    // Exponer funciones globales
-    window.showCategory = showCategory;
 </script>
 </body>
 </html>
